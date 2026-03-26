@@ -1,0 +1,88 @@
+:root {
+    --bg-main: #0e1422;
+    --bg-elev: #141d2f;
+    --bg-elev-2: #1a263d;
+    --text-main: #e6edf7;
+    --text-soft: #94a3ba;
+    --accent: #57d0ff;
+    --accent-2: #3da6d9;
+    --border-soft: rgba(135, 167, 210, 0.16);
+    --shadow-inset: inset 6px 6px 16px rgba(7, 12, 25, 0.65), inset -6px -6px 16px rgba(40, 56, 88, 0.35);
+    --shadow-outer: 0 18px 40px rgba(4, 9, 20, 0.5);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    color: var(--text-main);
+    background: radial-gradient(circle at 8% 12%, #253456 0%, #161f33 34%, #0e1422 72%, #0b1020 100%);
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+}
+
+.deep-bg {
+    position: relative;
+    isolation: isolate;
+}
+
+.bg-orb {
+    position: fixed;
+    pointer-events: none;
+    filter: blur(20px);
+    border-radius: 999px;
+    opacity: 0.35;
+    z-index: -1;
+}
+
+.orb-one {
+    width: 280px;
+    height: 280px;
+    background: #2db6f4;
+    top: -80px;
+    right: 5%;
+}
+
+.orb-two {
+    width: 340px;
+    height: 340px;
+    background: #2a5d9f;
+    left: -120px;
+    bottom: -80px;
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border: 0;
+    color: #07111d;
+    font-weight: 700;
+    box-shadow: 0 8px 25px rgba(58, 187, 242, 0.35);
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+    color: #041019;
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #79ddff, #50b7e7);
+}
+
+.glass-nav {
+    border: 1px solid var(--border-soft);
+    background: rgba(16, 24, 40, 0.75);
+    backdrop-filter: blur(8px);
+}
+
+@media (max-width: 767.98px) {
+    .orb-one,
+    .orb-two {
+        opacity: 0.22;
+        filter: blur(24px);
+    }
+}

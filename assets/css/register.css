@@ -1,0 +1,74 @@
+.register-page {
+    overflow-x: hidden;
+}
+
+.register-card {
+    max-width: 640px;
+    border-radius: 22px;
+    border: 1px solid rgba(128, 170, 216, 0.26);
+    background: linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
+    box-shadow: var(--shadow-outer);
+}
+
+.register-card .tracking {
+    letter-spacing: 0.16em;
+    color: #8eb8de;
+}
+
+.form-label {
+    color: #c4d7eb;
+}
+
+.form-control {
+    background: #111b2c;
+    color: #e8f0fb;
+    border: 1px solid rgba(130, 174, 219, 0.25);
+    border-radius: 12px;
+    padding: 0.78rem 0.95rem;
+}
+
+.form-control:focus {
+    background: #101a2a;
+    color: #f0f5fb;
+    border-color: rgba(123, 205, 255, 0.7);
+    box-shadow: 0 0 0 0.2rem rgba(80, 182, 241, 0.25);
+}
+
+.btn-gender {
+    border: 1px solid rgba(130, 174, 219, 0.32);
+    color: #d8e8f7;
+    background: rgba(17, 27, 44, 0.8);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+}
+
+.btn-check:checked + .btn-gender,
+.btn-gender:hover {
+    background: rgba(87, 208, 255, 0.16);
+    border-color: rgba(127, 216, 255, 0.78);
+    color: #eaf6ff;
+}
+
+.forgot-link {
+    color: #8fcbef;
+    text-decoration: none;
+}
+
+.forgot-link:hover {
+    color: #cbefff;
+    text-decoration: underline;
+}
+
+.alert ul {
+    margin: 0;
+}
+
+@media (max-width: 575.98px) {
+    .register-card {
+        border-radius: 18px;
+    }
+
+    .gender-group .btn-gender {
+        width: 100%;
+    }
+}

@@ -1,0 +1,98 @@
+.settings-page {
+    overflow-x: hidden;
+}
+
+.settings-card {
+    max-width: 760px;
+    border-radius: 22px;
+    border: 1px solid rgba(128, 170, 216, 0.26);
+    background: linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
+    box-shadow: var(--shadow-outer);
+}
+
+.settings-card .tracking {
+    letter-spacing: 0.16em;
+    color: #8eb8de;
+}
+
+.soft-text {
+    color: #9ab3cc;
+}
+
+.setting-action {
+    text-decoration: none;
+    border-radius: 16px;
+    border: 1px solid rgba(130, 174, 219, 0.32);
+    background: linear-gradient(180deg, rgba(20, 30, 48, 0.95), rgba(14, 21, 34, 0.95));
+    padding: 1.5rem;
+    color: #e7f3ff;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.setting-action:hover,
+.setting-action:focus {
+    color: #ffffff;
+    transform: translateY(-2px);
+    border-color: rgba(157, 205, 246, 0.65);
+    box-shadow: 0 0 0 3px rgba(90, 175, 236, 0.14);
+    text-decoration: none;
+}
+
+.setting-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: inline-grid;
+    place-items: center;
+    margin-bottom: 0.75rem;
+    background: rgba(87, 208, 255, 0.16);
+    border: 1px solid rgba(131, 217, 255, 0.42);
+    color: #bfe8ff;
+    font-size: 1.3rem;
+}
+
+.setting-action h3 {
+    font-size: 1.1rem;
+    margin: 0 0 0.4rem;
+    font-weight: 600;
+}
+
+.setting-action p {
+    margin: 0;
+    color: #9ab3cc;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.setting-danger {
+    border-color: rgba(215, 126, 126, 0.35);
+    background: linear-gradient(180deg, rgba(61, 28, 35, 0.86), rgba(39, 19, 25, 0.9));
+}
+
+.setting-danger .setting-icon {
+    background: rgba(234, 124, 124, 0.18);
+    border-color: rgba(239, 153, 153, 0.5);
+    color: #ffd8d8;
+}
+
+.setting-danger p {
+    color: #f0c3c3;
+}
+
+.setting-danger:hover,
+.setting-danger:focus {
+    border-color: rgba(237, 151, 151, 0.65);
+    box-shadow: 0 0 0 3px rgba(220, 96, 96, 0.14);
+}
+
+@media (max-width: 575.98px) {
+    .settings-card {
+        border-radius: 18px;
+    }
+
+    .setting-action {
+        padding: 1.25rem;
+    }
+}
