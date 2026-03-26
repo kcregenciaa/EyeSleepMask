@@ -15,6 +15,10 @@
     color: #8eb8de;
 }
 
+.register-card .text-muted {
+    color: #9fb8d3 !important;
+}
+
 .form-label {
     color: #c4d7eb;
 }
@@ -32,6 +36,17 @@
     color: #f0f5fb;
     border-color: rgba(123, 205, 255, 0.7);
     box-shadow: 0 0 0 0.2rem rgba(80, 182, 241, 0.25);
+}
+
+.form-control[type="date"] {
+    color: #e8f0fb;
+    color-scheme: dark;
+}
+
+.form-control[type="date"]::-webkit-calendar-picker-indicator {
+    filter: brightness(0) invert(1) contrast(1.35);
+    opacity: 1;
+    cursor: pointer;
 }
 
 .btn-gender {

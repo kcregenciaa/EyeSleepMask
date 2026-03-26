@@ -38,7 +38,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     <div class="sidebar-panel h-100">
                         <div class="brand-line d-flex align-items-center gap-2 mb-4">
                             <span class="avatar-dot"><i class="bi bi-person"></i></span>
-                            <strong>DeepSleepers</strong>
+                            <a href="index.php" class="brand-link"><strong>DeepSleepers</strong></a>
                         </div>
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a>
@@ -51,7 +51,13 @@ include __DIR__ . '/includes/bootstrap-head.php';
                 <section class="col-12 col-lg-9 col-xl-10">
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
                         <h1 class="h3 mb-0 text-light">Hi, <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
+                        <div class="top-actions d-flex align-items-center gap-2">
+                            <a href="#" class="notif-btn" aria-label="Notifications">
+                                <i class="bi bi-bell"></i>
+                                <span class="notif-count">3</span>
+                            </a>
+                            <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
+                        </div>
                     </div>
 
                     <div class="row g-3 g-lg-4">
@@ -82,7 +88,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <div class="col-12 col-xl-6">
                             <article class="panel-card p-3 p-lg-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h2 class="h5 mb-0">ACCELEROMETERS</h2>
+                                    <h2 class="h5 mb-0">ACCELEROMETER</h2>
                                     <span class="chip">Active</span>
                                 </div>
                                 <canvas id="accelChart" height="170"></canvas>

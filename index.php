@@ -58,7 +58,14 @@ include __DIR__ . '/includes/bootstrap-head.php';
 				<div class="col-lg-6 order-1 order-lg-2">
 					<div class="hero-visual">
 						<div class="mask-shell">
-							<div class="mask-core"></div>
+							<div class="mask-core">
+								<div class="mini-mask" aria-hidden="true">
+									<span class="mini-mask-strap"></span>
+									<span class="mini-mask-eye mini-mask-eye-left"></span>
+									<span class="mini-mask-eye mini-mask-eye-right"></span>
+									<span class="mini-mask-glow"></span>
+								</div>
+							</div>
 							<div class="mask-highlight"></div>
 						</div>
 						<div class="floating-chip chip-left">
@@ -128,6 +135,81 @@ include __DIR__ . '/includes/bootstrap-head.php';
 								allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
 								allowfullscreen
 								loading="lazy"></iframe>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="deepsleepers-app" class="container pb-5">
+			<div class="deepsleepers-app-panel p-4 p-lg-5">
+				<h2 class="deepsleepers-app-title text-center">Great Sleep Begins With the Deep Sleepers App</h2>
+				<div class="row g-4 g-xl-5 align-items-center mt-1">
+					<div class="col-12 col-lg-6">
+						<div class="app-ring-content">
+							<div class="store-chip-row mb-3">
+								<span class="store-chip"><i class="bi bi-google-play"></i></span>
+								<span class="store-chip"><i class="bi bi-apple"></i></span>
+							</div>
+							<p class="mb-3">Choose your program, wear the mask, and leave the rest to Deep Sleepers.</p>
+							<div class="ring-stage-row">
+								<div class="sleep-ring-wrap">
+									<div class="sleep-ring"></div>
+									<div class="sleep-ring-inner">
+										<strong>10:30</strong>
+										<span>to</span>
+										<strong>07:00</strong>
+									</div>
+								</div>
+								<ul class="sleep-stage-list mb-0">
+									<li>Falling asleep</li>
+									<li>Light Sleep</li>
+									<li>Deep Sleep</li>
+									<li>REM Sleep</li>
+									<li class="active">Waking up</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-12 col-lg-6">
+						<div class="app-visual-right">
+							<article class="app-photo-card">
+								<div class="app-photo-art" aria-hidden="true"></div>
+								<div class="app-side-controls">
+									<div class="app-toggle-row">
+										<span>Neural Music</span>
+										<span class="toggle-dot active"></span>
+									</div>
+									<div class="app-toggle-row">
+										<span>Sunrise Lights</span>
+										<span class="toggle-dot active"></span>
+									</div>
+								</div>
+							</article>
+
+							<article class="sleep-phone-card">
+								<span class="phone-side-btn phone-side-btn-left-1" aria-hidden="true"></span>
+								<span class="phone-side-btn phone-side-btn-left-2" aria-hidden="true"></span>
+								<span class="phone-side-btn phone-side-btn-right" aria-hidden="true"></span>
+								<div class="sleep-phone-notch"></div>
+								<div class="sleep-phone-screen">
+									<span class="sleep-phone-close" aria-hidden="true">×</span>
+									<p class="sleep-app-label mb-2">Deep Sleepers</p>
+									<div class="sleep-mask-pill">Battery level: 80%</div>
+									<div class="sleep-time-panel mt-3">
+										<span>Sleep</span>
+										<strong>8:15 AM</strong>
+										<button type="button">Start</button>
+									</div>
+									<ul class="sleep-list mt-3 mb-0">
+										<li><i class="bi bi-moon-stars"></i> Sleep</li>
+										<li><i class="bi bi-cup-hot"></i> Nap</li>
+										<li><i class="bi bi-wind"></i> Meditate</li>
+										<li><i class="bi bi-alarm"></i> Time shift</li>
+									</ul>
+								</div>
+							</article>
 						</div>
 					</div>
 				</div>
