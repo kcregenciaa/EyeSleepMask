@@ -74,7 +74,17 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     <p class="movement-muted mb-1">Selected sleep date</p>
                                     <input type="date" class="movement-date-input" id="movementDateInput">
                                 </div>
-                                <span class="movement-type-chip" id="movementSleeperType">Still sleeper</span>
+                                <div class="movement-type-block">
+                                    <span class="movement-type-chip" id="movementSleeperType">Still sleeper</span>
+                                    <div class="movement-type-rail" aria-hidden="true">
+                                        <span id="movementTypeNeedle"></span>
+                                    </div>
+                                    <div class="movement-type-legend" aria-hidden="true">
+                                        <span id="movementLegendStill">Still</span>
+                                        <span id="movementLegendBalanced">Balanced</span>
+                                        <span id="movementLegendMischievous">Mischievous</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="movement-hero-metrics">
                                 <div class="movement-metric-box">

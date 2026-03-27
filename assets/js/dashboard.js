@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-<<<<<<< Updated upstream
-=======
     const sleepDial = document.querySelector('.sleep-dial');
 
     const toMinutes = function (value) {
@@ -971,6 +969,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (movementTrackerRoot) {
         const movementDateInput = document.getElementById('movementDateInput');
         const movementSleeperType = document.getElementById('movementSleeperType');
+        const movementTypeNeedle = document.getElementById('movementTypeNeedle');
+        const movementLegendStill = document.getElementById('movementLegendStill');
+        const movementLegendBalanced = document.getElementById('movementLegendBalanced');
+        const movementLegendMischievous = document.getElementById('movementLegendMischievous');
         const movementScore = document.getElementById('movementScore');
         const movementTurns = document.getElementById('movementTurns');
         const movementStillPeriod = document.getElementById('movementStillPeriod');
@@ -1024,23 +1026,35 @@ document.addEventListener('DOMContentLoaded', function () {
             const turns = points.filter(function (p) { return p >= 66; }).length;
             const stillWindows = points.filter(function (p) { return p <= 30; }).length;
             const longestStill = stillWindows * 15;
+            const peak = Math.max.apply(null, points);
+            const trough = Math.min.apply(null, points);
+            const volatility = peak - trough;
 
             let type = 'Balanced sleeper';
             let insight = 'Your movement pattern is moderate and fairly stable through the night.';
+            let level = 1;
+            let needlePos = '50%';
 
             if (avg <= 34 && turns <= 4) {
                 type = 'Still sleeper';
                 insight = 'You remained mostly calm and still, which often aligns with deeper uninterrupted sleep.';
+                level = 0;
+                needlePos = '14%';
             } else if (avg >= 57 || turns >= 10) {
                 type = 'Mischievous sleeper';
                 insight = 'Frequent movements were detected. Consider adjusting pillow support and room comfort.';
+                level = 2;
+                needlePos = '86%';
             }
 
             return {
                 type: type,
+                level: level,
                 avg: Math.round(avg),
                 turns: turns,
                 longestStill: longestStill,
+                volatility: volatility,
+                needlePos: needlePos,
                 stillPercent: Math.round((points.filter(function (p) { return p <= 40; }).length / points.length) * 100),
                 activePercent: Math.round((points.filter(function (p) { return p > 40; }).length / points.length) * 100),
                 insight: insight
@@ -1057,6 +1071,15 @@ document.addEventListener('DOMContentLoaded', function () {
             points.forEach(function (value) {
                 const cell = document.createElement('span');
                 cell.className = 'movement-heat-cell';
+
+                if (value <= 33) {
+                    cell.classList.add('is-calm');
+                } else if (value >= 67) {
+                    cell.classList.add('is-restless');
+                } else {
+                    cell.classList.add('is-active');
+                }
+
                 cell.style.height = (18 + Math.round((value / 100) * 72)) + 'px';
                 cell.style.opacity = String(0.42 + (value / 170));
                 movementHeatStrip.appendChild(cell);
@@ -1069,6 +1092,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (movementSleeperType) {
                 movementSleeperType.textContent = profile.type;
+                movementSleeperType.classList.remove('is-still', 'is-balanced', 'is-mischievous');
+                if (profile.level === 0) {
+                    movementSleeperType.classList.add('is-still');
+                } else if (profile.level === 2) {
+                    movementSleeperType.classList.add('is-mischievous');
+                } else {
+                    movementSleeperType.classList.add('is-balanced');
+                }
+            }
+
+            if (movementTypeNeedle) {
+                movementTypeNeedle.style.setProperty('--needle-pos', profile.needlePos);
+            }
+
+            [movementLegendStill, movementLegendBalanced, movementLegendMischievous].forEach(function (node) {
+                if (node) {
+                    node.classList.remove('active');
+                }
+            });
+
+            if (profile.level === 0 && movementLegendStill) {
+                movementLegendStill.classList.add('active');
+            }
+
+            if (profile.level === 1 && movementLegendBalanced) {
+                movementLegendBalanced.classList.add('active');
+            }
+
+            if (profile.level === 2 && movementLegendMischievous) {
+                movementLegendMischievous.classList.add('active');
             }
 
             if (movementScore) {
@@ -1084,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (movementInsight) {
-                movementInsight.textContent = profile.insight;
+                movementInsight.textContent = profile.insight + ' Volatility index: ' + profile.volatility + '.';
             }
 
             renderHeatStrip(movement.points);
@@ -1169,7 +1222,6 @@ document.addEventListener('DOMContentLoaded', function () {
         renderMovement(dateForInput);
     }
 
->>>>>>> Stashed changes
     const chartDefaults = {
         color: '#99afc8',
         borderColor: 'rgba(121, 167, 217, 0.18)',
