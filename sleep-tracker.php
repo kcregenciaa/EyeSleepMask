@@ -21,6 +21,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 }
 
 $userName = trim($_SESSION['user_name'] ?? '');
+$isLoggedIn = $userName !== '';
 if ($userName === '') {
     $userName = 'Sleeper';
 }
@@ -59,7 +60,9 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 <i class="bi bi-bell"></i>
                                 <span class="notif-count">3</span>
                             </a>
+                            <?php if (!$isLoggedIn): ?>
                             <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -79,8 +82,8 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     <div class="sleep-dial-arc" aria-hidden="true"></div>
                                     <div class="sleep-dial-core" aria-hidden="true"></div>
 
-                                    <span class="sleep-marker sleep-marker-start" aria-hidden="true"><i class="bi bi-moon-stars-fill"></i></span>
-                                    <span class="sleep-marker sleep-marker-end" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
+                                    <button type="button" class="sleep-marker sleep-marker-start" data-marker="bedtime" aria-label="Edit bedtime"><i class="bi bi-moon-stars-fill"></i></button>
+                                    <button type="button" class="sleep-marker sleep-marker-end" data-marker="alarm" aria-label="Edit alarm"><i class="bi bi-sun-fill"></i></button>
 
                                     <span class="sleep-dial-label label-12am">12 AM</span>
                                     <span class="sleep-dial-label label-6am">6 AM</span>

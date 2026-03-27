@@ -21,6 +21,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 }
 
 $userName = trim($_SESSION['user_name'] ?? '');
+$isLoggedIn = $userName !== '';
 if ($userName === '') {
     $userName = 'Sleeper';
 }
@@ -59,7 +60,9 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 <i class="bi bi-bell"></i>
                                 <span class="notif-count">3</span>
                             </a>
+                            <?php if (!$isLoggedIn): ?>
                             <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
+                            <?php endif; ?>
                         </div>
                     </div>
 

@@ -168,26 +168,37 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 30px;
-    height: 30px;
+    width: clamp(30px, 6.5vw, 40px);
+    height: clamp(30px, 6.5vw, 40px);
     border-radius: 50%;
-    display: inline-grid;
+    display: grid;
     place-items: center;
+    padding: 0;
+    cursor: pointer;
+    touch-action: none;
     transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc((var(--dial-size) / -2) + (var(--ring-width) / 2)));
     color: #ffe48f;
     background: linear-gradient(145deg, #6b3fc0, #9056f5);
     border: 1px solid rgba(229, 202, 255, 0.6);
     box-shadow: 0 8px 18px rgba(9, 14, 30, 0.45);
     z-index: 5;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sleep-marker i {
-    font-size: 0.88rem;
+    font-size: clamp(0.82rem, 2.6vw, 1rem);
+    pointer-events: none;
 }
 
 .sleep-marker-end {
     background: linear-gradient(145deg, #7658ff, #9164ff);
     color: #ffd775;
+}
+
+.sleep-marker:hover,
+.sleep-marker:focus-visible {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc((var(--dial-size) / -2) + (var(--ring-width) / 2))) scale(1.06);
+    box-shadow: 0 0 0 3px rgba(186, 144, 255, 0.24), 0 10px 22px rgba(9, 14, 30, 0.52);
 }
 
 .sleep-dial-label {
