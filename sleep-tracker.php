@@ -41,7 +41,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a href="index.php" class="brand-link"><strong>DeepSleepers</strong></a>
                         </div>
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
-                            <a class="nav-link" href="dashboard.php"><i class="bi bi-grid"></i> Dashboard</a>
                             <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
                             <a class="nav-link active" href="#"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
