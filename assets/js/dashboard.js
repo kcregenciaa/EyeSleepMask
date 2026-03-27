@@ -43,14 +43,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const startDeg = (bedtime / 1440) * 360;
-        let endDeg = (alarmEnd / 1440) * 360;
-
-        if (endDeg <= startDeg) {
-            endDeg += 360;
-        }
+        const endDeg = (alarmEnd / 1440) * 360;
+        const spanMinutesRaw = (alarmEnd - bedtime + 1440) % 1440;
+        const spanMinutes = spanMinutesRaw === 0 ? 1440 : spanMinutesRaw;
+        const spanDeg = (spanMinutes / 1440) * 360;
 
         sleepDial.style.setProperty('--sleep-start', startDeg + 'deg');
-        sleepDial.style.setProperty('--sleep-end', endDeg + 'deg');
+        sleepDial.style.setProperty('--sleep-span', spanDeg + 'deg');
 
         const startMarker = sleepDial.querySelector('.sleep-marker-start');
         const endMarker = sleepDial.querySelector('.sleep-marker-end');
@@ -75,13 +74,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const bedtimeDisplay = document.querySelector('[data-display="bedtime"]');
         const alarmDisplay = document.querySelector('[data-display="alarm"]');
+        const totalSleepDisplay = document.querySelector('[data-display="total-sleep"]');
+        const sleepHoursNumberDisplay = document.querySelector('[data-display="sleep-hours-number"]');
+        const sleepMinutesNumberDisplay = document.querySelector('[data-display="sleep-minutes-number"]');
         const bedtimeInput = document.getElementById('bedtimeInput');
         const alarmStartInput = document.getElementById('alarmStartInput');
         const alarmEndInput = document.getElementById('alarmEndInput');
+        const sleepArc = sleepDial.querySelector('.sleep-dial-arc');
         const markerButtons = sleepDial.querySelectorAll('[data-marker]');
         const sleepWindowStorageKey = 'sleepTrackerWindow';
         const dialStepMinutes = 5;
-        const minSleepWindowMinutes = 5 * 60;
+        const minSleepWindowMinutes = 6 * 60;
+        const maxSleepWindowMinutes = 20 * 60;
         let suppressMarkerClick = false;
 
         const sleepWindowMinutes = function (startMinutes, endMinutes) {
@@ -103,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
             }
 
-            return duration >= minSleepWindowMinutes;
+            return duration >= minSleepWindowMinutes && duration <= maxSleepWindowMinutes;
         };
 
         const minutesToTimeValue = function (minutesValue) {
@@ -111,6 +115,27 @@ document.addEventListener('DOMContentLoaded', function () {
             const hours = Math.floor(normalized / 60);
             const minutes = normalized % 60;
             return String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+        };
+
+        const formatSleepDuration = function (totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+
+            if (minutes === 0) {
+                return hours + ' h';
+            }
+
+            return hours + ' h ' + String(minutes).padStart(2, '0') + ' m';
+        };
+
+        const formatSleepHoursNumber = function (totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            return String(hours).padStart(2, '0');
+        };
+
+        const formatSleepMinutesNumber = function (totalMinutes) {
+            const minutes = totalMinutes % 60;
+            return String(minutes).padStart(2, '0') + ' min';
         };
 
         const syncSleepFields = function () {
@@ -134,6 +159,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (alarmDisplay && sleepDial.dataset.alarmStart && sleepDial.dataset.alarmEnd) {
                 alarmDisplay.textContent = formatTime(sleepDial.dataset.alarmStart) + '-' + formatTime(sleepDial.dataset.alarmEnd);
+            }
+
+            const totalSleepMinutes = sleepWindowMinutes(toMinutes(sleepDial.dataset.bedtime), toMinutes(sleepDial.dataset.alarmEnd));
+            if (totalSleepDisplay && totalSleepMinutes !== null) {
+                totalSleepDisplay.textContent = formatSleepDuration(totalSleepMinutes);
+            }
+
+            if (sleepHoursNumberDisplay && totalSleepMinutes !== null) {
+                sleepHoursNumberDisplay.textContent = formatSleepHoursNumber(totalSleepMinutes);
+            }
+
+            if (sleepMinutesNumberDisplay && totalSleepMinutes !== null) {
+                sleepMinutesNumberDisplay.textContent = formatSleepMinutesNumber(totalSleepMinutes);
             }
         };
 
@@ -202,7 +240,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                setBedtimeFromMinutes(current + stepMinutes, true);
+                const moved = setBedtimeFromMinutes(current + stepMinutes, false);
+                if (!moved) {
+                    shiftSleepWindowByMinutes(stepMinutes, true);
+                    return;
+                }
+
+                persistSleepWindow();
             }
 
             if (key === 'alarm') {
@@ -211,8 +255,56 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                setAlarmEndFromMinutes(current + stepMinutes, true);
+                const moved = setAlarmEndFromMinutes(current + stepMinutes, false);
+                if (!moved) {
+                    shiftSleepWindowByMinutes(stepMinutes, true);
+                    return;
+                }
+
+                persistSleepWindow();
             }
+        };
+
+        const shiftSleepWindowByMinutes = function (deltaMinutes, shouldPersist) {
+            if (!Number.isFinite(deltaMinutes) || deltaMinutes === 0) {
+                return false;
+            }
+
+            const currentBedtime = toMinutes(sleepDial.dataset.bedtime);
+            const currentAlarmStart = toMinutes(sleepDial.dataset.alarmStart);
+            const currentAlarmEnd = toMinutes(sleepDial.dataset.alarmEnd);
+
+            if (currentBedtime === null || currentAlarmEnd === null) {
+                return false;
+            }
+
+            const duration = sleepWindowMinutes(currentBedtime, currentAlarmEnd);
+            if (duration === null) {
+                return false;
+            }
+
+            const normalizedBedtime = ((currentBedtime + deltaMinutes) % 1440 + 1440) % 1440;
+            const normalizedAlarmEnd = ((currentAlarmEnd + deltaMinutes) % 1440 + 1440) % 1440;
+
+            if (!isAllowedWindow(normalizedBedtime, normalizedAlarmEnd)) {
+                return false;
+            }
+
+            sleepDial.dataset.bedtime = minutesToTimeValue(normalizedBedtime);
+            sleepDial.dataset.alarmEnd = minutesToTimeValue(normalizedAlarmEnd);
+
+            if (currentAlarmStart !== null) {
+                const normalizedAlarmStart = ((currentAlarmStart + deltaMinutes) % 1440 + 1440) % 1440;
+                sleepDial.dataset.alarmStart = minutesToTimeValue(normalizedAlarmStart);
+            }
+
+            syncSleepFields();
+
+            if (shouldPersist) {
+                persistSleepWindow();
+            }
+
+            return true;
         };
 
         const minutesFromPointer = function (clientX, clientY) {
@@ -230,6 +322,31 @@ document.addEventListener('DOMContentLoaded', function () {
             const rawMinutes = (angle / 360) * 1440;
             const snapped = Math.round(rawMinutes / dialStepMinutes) * dialStepMinutes;
             return snapped % 1440;
+        };
+
+        const nearestWrappedMinutes = function (targetMinutes, referenceMinutes) {
+            if (targetMinutes === null || referenceMinutes === null) {
+                return targetMinutes;
+            }
+
+            const options = [
+                targetMinutes,
+                targetMinutes + 1440,
+                targetMinutes - 1440
+            ];
+
+            let best = options[0];
+            let bestDistance = Math.abs(options[0] - referenceMinutes);
+
+            options.forEach(function (value) {
+                const distance = Math.abs(value - referenceMinutes);
+                if (distance < bestDistance) {
+                    best = value;
+                    bestDistance = distance;
+                }
+            });
+
+            return best;
         };
 
         const persistSleepWindow = function () {
@@ -379,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let dragging = false;
                 const startX = event.clientX;
                 const startY = event.clientY;
+                sleepDial.classList.add('sleep-dial-dragging');
                 button.setPointerCapture(event.pointerId);
 
                 const updateFromPointer = function (pointerEvent, shouldPersist) {
@@ -388,11 +506,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (key === 'bedtime') {
-                        setBedtimeFromMinutes(draggedMinutes, shouldPersist);
+                        const currentBedtime = toMinutes(sleepDial.dataset.bedtime);
+                        const smoothBedtime = nearestWrappedMinutes(draggedMinutes, currentBedtime);
+                        const delta = smoothBedtime - currentBedtime;
+                        const moved = setBedtimeFromMinutes(smoothBedtime, false);
+                        if (!moved && delta !== 0) {
+                            shiftSleepWindowByMinutes(delta, false);
+                        }
                     }
 
                     if (key === 'alarm') {
-                        setAlarmEndFromMinutes(draggedMinutes, shouldPersist);
+                        const currentAlarmEnd = toMinutes(sleepDial.dataset.alarmEnd);
+                        const smoothAlarmEnd = nearestWrappedMinutes(draggedMinutes, currentAlarmEnd);
+                        const delta = smoothAlarmEnd - currentAlarmEnd;
+                        const moved = setAlarmEndFromMinutes(smoothAlarmEnd, false);
+                        if (!moved && delta !== 0) {
+                            shiftSleepWindowByMinutes(delta, false);
+                        }
                     }
                 };
 
@@ -415,6 +545,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     button.removeEventListener('pointermove', handlePointerMove);
                     button.removeEventListener('pointerup', handlePointerUp);
                     button.removeEventListener('pointercancel', handlePointerCancel);
+                    sleepDial.classList.remove('sleep-dial-dragging');
                 };
 
                 const handlePointerUp = function () {
@@ -443,6 +574,90 @@ document.addEventListener('DOMContentLoaded', function () {
                 button.addEventListener('pointercancel', handlePointerCancel);
             });
         });
+
+        if (sleepArc) {
+            sleepArc.addEventListener('pointerdown', function (event) {
+                if (event.pointerType === 'mouse' && event.button !== 0) {
+                    return;
+                }
+
+                const currentBedtime = toMinutes(sleepDial.dataset.bedtime);
+                const currentAlarmEnd = toMinutes(sleepDial.dataset.alarmEnd);
+                if (!isAllowedWindow(currentBedtime, currentAlarmEnd)) {
+                    return;
+                }
+
+                let dragging = false;
+                const startX = event.clientX;
+                const startY = event.clientY;
+                let previousPointerMinutes = minutesFromPointer(event.clientX, event.clientY);
+                sleepDial.classList.add('sleep-dial-dragging');
+                sleepArc.setPointerCapture(event.pointerId);
+
+                const handlePointerMove = function (moveEvent) {
+                    const movedX = Math.abs(moveEvent.clientX - startX);
+                    const movedY = Math.abs(moveEvent.clientY - startY);
+                    if (!dragging && (movedX > 3 || movedY > 3)) {
+                        dragging = true;
+                    }
+
+                    if (!dragging) {
+                        return;
+                    }
+
+                    const pointerMinutes = minutesFromPointer(moveEvent.clientX, moveEvent.clientY);
+                    if (pointerMinutes === null) {
+                        return;
+                    }
+
+                    if (previousPointerMinutes === null) {
+                        previousPointerMinutes = pointerMinutes;
+                        return;
+                    }
+
+                    const smoothPointerMinutes = nearestWrappedMinutes(pointerMinutes, previousPointerMinutes);
+                    const deltaMinutes = smoothPointerMinutes - previousPointerMinutes;
+                    if (deltaMinutes === 0) {
+                        return;
+                    }
+
+                    moveEvent.preventDefault();
+                    shiftSleepWindowByMinutes(deltaMinutes, false);
+                    previousPointerMinutes = smoothPointerMinutes;
+                };
+
+                const cleanupPointerEvents = function () {
+                    sleepArc.removeEventListener('pointermove', handlePointerMove);
+                    sleepArc.removeEventListener('pointerup', handlePointerUp);
+                    sleepArc.removeEventListener('pointercancel', handlePointerCancel);
+                    sleepDial.classList.remove('sleep-dial-dragging');
+                };
+
+                const handlePointerUp = function () {
+                    if (sleepArc.hasPointerCapture(event.pointerId)) {
+                        sleepArc.releasePointerCapture(event.pointerId);
+                    }
+
+                    if (dragging) {
+                        persistSleepWindow();
+                    }
+
+                    cleanupPointerEvents();
+                };
+
+                const handlePointerCancel = function () {
+                    if (sleepArc.hasPointerCapture(event.pointerId)) {
+                        sleepArc.releasePointerCapture(event.pointerId);
+                    }
+
+                    cleanupPointerEvents();
+                };
+
+                sleepArc.addEventListener('pointermove', handlePointerMove);
+                sleepArc.addEventListener('pointerup', handlePointerUp);
+                sleepArc.addEventListener('pointercancel', handlePointerCancel);
+            });
+        }
 
         document.querySelectorAll('.sleep-edit-cancel').forEach(function (btn) {
             btn.addEventListener('click', function () {

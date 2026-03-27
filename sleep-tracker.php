@@ -74,7 +74,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         <h2 class="h4 mb-1">Sleep Tracker</h2>
                                         <p class="sleep-tracker-subtitle mb-0">Leap Fitness</p>
                                     </div>
-                                    <span class="sale-badge" aria-hidden="true"><i class="bi bi-stars"></i> Sale</span>
                                 </div>
 
                                 <div class="sleep-dial" data-bedtime="00:20" data-alarm-start="04:50" data-alarm-end="05:20">
@@ -89,7 +88,13 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     <span class="sleep-dial-label label-6am">6 AM</span>
                                     <span class="sleep-dial-label label-12pm">12 PM</span>
                                     <span class="sleep-dial-label label-6pm">6 PM</span>
+                                    <span class="sleep-dial-total" aria-live="polite">
+                                        <span class="sleep-dial-total-top"><strong data-display="sleep-hours-number">05</strong><span class="sleep-dial-total-unit">hr</span></span>
+                                        <span class="sleep-dial-total-minutes" data-display="sleep-minutes-number">30 min</span>
+                                    </span>
                                 </div>
+
+                                <p class="sleep-total-hours mt-3 mb-0">Total sleep: <strong data-display="total-sleep">5 h</strong></p>
 
                                 <div class="sleep-times mt-3 mt-lg-4">
                                     <div class="sleep-time-row">

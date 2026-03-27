@@ -92,8 +92,6 @@
     color: #e9f2ff;
 }
 
-<<<<<<< Updated upstream
-=======
 .sleep-tracker-card {
     background:
         radial-gradient(120% 90% at 18% 12%, rgba(24, 66, 124, 0.28), transparent 60%),
@@ -125,12 +123,34 @@
     --ring-width: 28px;
     --ring-inset: 26px;
     --sleep-start: 4deg;
-    --sleep-end: 80deg;
+    --sleep-span: 76deg;
     width: var(--dial-size);
     aspect-ratio: 1;
     margin: 0 auto;
     border-radius: 50%;
     position: relative;
+    box-shadow: inset 0 0 0 1px rgba(184, 210, 242, 0.16), 0 18px 38px rgba(4, 8, 20, 0.45);
+}
+
+.sleep-dial::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle at 30% 20%, rgba(199, 225, 255, 0.16), transparent 48%);
+}
+
+.sleep-total-hours {
+    text-align: center;
+    color: #c8d9ee;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.sleep-total-hours strong {
+    color: #f7fbff;
+    font-size: 1.05rem;
 }
 
 .sleep-dial-track,
@@ -142,25 +162,57 @@
 
 .sleep-dial-track {
     inset: 0;
-    background: radial-gradient(closest-side, transparent calc(100% - var(--ring-width)), rgba(91, 110, 153, 0.3) 0 99%, transparent 100%);
+    background:
+        radial-gradient(closest-side, transparent calc(100% - var(--ring-width) + 1px), rgba(177, 201, 239, 0.2) calc(100% - var(--ring-width) + 1px) calc(100% - var(--ring-width) + 3px), transparent calc(100% - var(--ring-width) + 3px)),
+        radial-gradient(closest-side, transparent calc(100% - var(--ring-width)), rgba(84, 103, 145, 0.44) calc(100% - var(--ring-width)) 99%, transparent 100%),
+        radial-gradient(circle at 30% 18%, rgba(201, 226, 255, 0.13), transparent 48%);
 }
 
 .sleep-dial-arc {
     inset: 0;
-    background: conic-gradient(from 0deg, rgba(145, 94, 255, 0) 0deg var(--sleep-start), #9a5cff var(--sleep-start) var(--sleep-end), rgba(145, 94, 255, 0) var(--sleep-end) 360deg);
+    background: conic-gradient(from var(--sleep-start), #b275ff 0deg var(--sleep-span), rgba(145, 94, 255, 0) var(--sleep-span) 360deg);
     mask: radial-gradient(closest-side, transparent calc(100% - var(--ring-width)), #000 0);
     -webkit-mask: radial-gradient(closest-side, transparent calc(100% - var(--ring-width)), #000 0);
-    filter: drop-shadow(0 0 20px rgba(153, 91, 255, 0.45));
+    filter: drop-shadow(0 0 16px rgba(179, 109, 255, 0.52));
+    cursor: grab;
+    touch-action: none;
+}
+
+.sleep-dial.sleep-dial-dragging .sleep-dial-arc {
+    cursor: grabbing;
 }
 
 .sleep-dial-core {
     inset: var(--ring-inset);
-    border: 1px solid rgba(122, 156, 212, 0.2);
+    border: 1px solid rgba(148, 184, 230, 0.34);
     background:
-        radial-gradient(100% 100% at 20% 10%, rgba(28, 62, 112, 0.2), transparent 60%),
-        radial-gradient(100% 100% at 80% 90%, rgba(90, 50, 122, 0.18), transparent 58%),
-        repeating-conic-gradient(from 0deg, rgba(226, 239, 255, 0.44) 0deg 0.34deg, rgba(226, 239, 255, 0) 0.34deg 3deg),
-        linear-gradient(180deg, rgba(17, 31, 57, 0.95), rgba(14, 20, 43, 0.95));
+        radial-gradient(95% 95% at 28% 18%, rgba(176, 211, 252, 0.14), transparent 54%),
+        radial-gradient(100% 100% at 78% 82%, rgba(78, 111, 156, 0.2), transparent 58%),
+        linear-gradient(180deg, rgba(25, 40, 71, 0.96), rgba(14, 23, 43, 0.98));
+    box-shadow: inset 0 0 0 1px rgba(118, 155, 202, 0.16), inset 0 18px 32px rgba(3, 9, 22, 0.4);
+}
+
+.sleep-dial-core::before,
+.sleep-dial-core::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.sleep-dial-core::before {
+    background: repeating-conic-gradient(from -90deg, rgba(219, 235, 255, 0.52) 0deg 0.38deg, rgba(219, 235, 255, 0) 0.38deg 6deg);
+    mask: radial-gradient(closest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
+    -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
+    opacity: 0.82;
+}
+
+.sleep-dial-core::after {
+    background: repeating-conic-gradient(from -90deg, rgba(248, 252, 255, 0.88) 0deg 1.15deg, rgba(248, 252, 255, 0) 1.15deg 30deg);
+    mask: radial-gradient(closest-side, transparent calc(100% - 15px), #000 calc(100% - 15px));
+    -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 15px), #000 calc(100% - 15px));
+    opacity: 0.9;
 }
 
 .sleep-marker {
@@ -182,7 +234,8 @@
     border: 1px solid rgba(229, 202, 255, 0.6);
     box-shadow: 0 8px 18px rgba(9, 14, 30, 0.45);
     z-index: 5;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    will-change: transform;
+    transition: box-shadow 0.2s ease;
 }
 
 .sleep-marker i {
@@ -195,42 +248,90 @@
     color: #ffd775;
 }
 
-.sleep-marker:hover,
-.sleep-marker:focus-visible {
+.sleep-dial:not(.sleep-dial-dragging) .sleep-marker:hover,
+.sleep-dial:not(.sleep-dial-dragging) .sleep-marker:focus-visible {
     transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc((var(--dial-size) / -2) + (var(--ring-width) / 2))) scale(1.06);
     box-shadow: 0 0 0 3px rgba(186, 144, 255, 0.24), 0 10px 22px rgba(9, 14, 30, 0.52);
 }
 
+.sleep-dial.sleep-dial-dragging .sleep-marker {
+    box-shadow: 0 0 0 2px rgba(186, 144, 255, 0.22), 0 8px 18px rgba(9, 14, 30, 0.45);
+}
+
 .sleep-dial-label {
     position: absolute;
-    color: #eef4ff;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-shadow: 0 8px 18px rgba(6, 10, 23, 0.45);
+    color: #f6fbff;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    font-size: clamp(0.84rem, 1.6vw, 1rem);
+    text-shadow: 0 3px 8px rgba(5, 11, 24, 0.65);
+    z-index: 3;
 }
 
 .label-12am {
-    top: 17%;
+    top: 13%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .label-6am {
     top: 50%;
-    right: 12%;
+    right: 8%;
     transform: translateY(-50%);
 }
 
 .label-12pm {
-    bottom: 17%;
+    bottom: 13%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 .label-6pm {
     top: 50%;
-    left: 12%;
+    left: 8%;
     transform: translateY(-50%);
+}
+
+.sleep-dial-total {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 0.2rem;
+    z-index: 4;
+    pointer-events: none;
+}
+
+.sleep-dial-total-top {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.14rem;
+    line-height: 1;
+}
+
+.sleep-dial-total-top strong {
+    color: #ffffff;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-shadow: 0 5px 12px rgba(9, 14, 30, 0.38);
+}
+
+.sleep-dial-total-unit {
+    color: #ffffff;
+    font-size: clamp(1.2rem, 3vw, 1.9rem);
+    font-weight: 800;
+    text-shadow: 0 4px 10px rgba(9, 14, 30, 0.32);
+}
+
+.sleep-dial-total-minutes {
+    color: #ffffff;
+    font-size: clamp(1rem, 2.1vw, 1.3rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 .sleep-times {
