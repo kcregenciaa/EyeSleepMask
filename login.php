@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$username = trim($_POST['username'] ?? '');
 	if ($username !== '') {
 		$_SESSION['user_name'] = $username;
-		header('Location: dashboard.php');
+		header('Location: discover.php');
 		exit;
 	}
 }

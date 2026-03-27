@@ -9,9 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 2100);
 
     if (loginForm) {
-        loginForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            window.location.href = 'dashboard.php';
+        loginForm.addEventListener('submit', function () {
+            // Allow normal form submit so PHP can set session and redirect.
         });
     }
 });

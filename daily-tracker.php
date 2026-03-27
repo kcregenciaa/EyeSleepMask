@@ -26,7 +26,7 @@ if ($userName === '') {
 }
 
 $pageTitle = 'DeepSleepers | Daily Tracker';
-$pageStyles = ['assets/css/dashboard.css'];
+$pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
