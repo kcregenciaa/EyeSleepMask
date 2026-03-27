@@ -42,6 +42,13 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         </div>
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link active" href="#"><i class="bi bi-grid"></i> Dashboard</a>
+<<<<<<< Updated upstream
+=======
+                            <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
+                            <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
+                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
+                            <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
+>>>>>>> Stashed changes
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
                         <a href="?action=logout" class="nav-link logout-btn mt-auto d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
