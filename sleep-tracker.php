@@ -72,11 +72,10 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 <div class="sleep-tracker-head d-flex justify-content-between align-items-start mb-3">
                                     <div>
                                         <h2 class="h4 mb-1">Sleep Tracker</h2>
-                                        <p class="sleep-tracker-subtitle mb-0">Leap Fitness</p>
                                     </div>
                                 </div>
 
-                                <div class="sleep-dial" data-bedtime="00:20" data-alarm-start="04:50" data-alarm-end="05:20">
+                                <div class="sleep-dial" data-bedtime="00:20" data-alarm-end="05:20">
                                     <div class="sleep-dial-track" aria-hidden="true"></div>
                                     <div class="sleep-dial-arc" aria-hidden="true"></div>
                                     <div class="sleep-dial-core" aria-hidden="true"></div>
@@ -105,8 +104,26 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         </button>
                                     </div>
                                     <form class="sleep-edit-panel" data-panel="bedtime" hidden>
-                                        <label for="bedtimeInput" class="sleep-edit-label">Bedtime</label>
-                                        <input id="bedtimeInput" name="bedtime" class="sleep-time-input" type="time" value="00:20">
+                                        <label class="sleep-edit-label">Bedtime</label>
+                                        <div class="sleep-wheel-picker" data-picker="bedtime">
+                                            <div class="sleep-wheel-column" data-column="hours">
+                                                <div class="sleep-wheel-item" data-slot="prev">11</div>
+                                                <div class="sleep-wheel-item sleep-wheel-selected" data-slot="current">12</div>
+                                                <div class="sleep-wheel-item" data-slot="next">1</div>
+                                            </div>
+                                            <div class="sleep-wheel-column" data-column="divider">:</div>
+                                            <div class="sleep-wheel-column" data-column="minutes">
+                                                <div class="sleep-wheel-item" data-slot="prev">19</div>
+                                                <div class="sleep-wheel-item sleep-wheel-selected" data-slot="current">20</div>
+                                                <div class="sleep-wheel-item" data-slot="next">21</div>
+                                            </div>
+                                            <div class="sleep-wheel-column" data-column="period">
+                                                <div class="sleep-wheel-item" data-slot="prev"></div>
+                                                <div class="sleep-wheel-item sleep-wheel-selected" data-slot="current">AM</div>
+                                                <div class="sleep-wheel-item" data-slot="next">PM</div>
+                                            </div>
+                                        </div>
+                                        <input id="bedtimeInput" name="bedtime" class="sleep-time-input-hidden" type="time" value="00:20">
                                         <div class="sleep-edit-actions">
                                             <button type="button" class="sleep-edit-cancel" data-cancel="bedtime">Cancel</button>
                                             <button type="submit" class="sleep-edit-save">Save</button>
@@ -115,18 +132,91 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
                                     <div class="sleep-time-row">
                                         <span class="sleep-time-name">Alarm</span>
-                                        <span class="sleep-time-value"><span class="sleep-time-text" data-display="alarm">04:50 AM-05:20 AM</span></span>
-                                        <button type="button" class="sleep-edit-btn" data-edit="alarm" aria-label="Edit alarm range">
+                                        <span class="sleep-time-value"><span class="sleep-time-text" data-display="alarm">05:20 AM</span></span>
+                                        <button type="button" class="sleep-edit-btn" data-edit="alarm" aria-label="Edit alarm">
                                             <i class="bi bi-pencil-fill"></i>
                                         </button>
                                     </div>
                                     <form class="sleep-edit-panel" data-panel="alarm" hidden>
-                                        <label for="alarmStartInput" class="sleep-edit-label">Alarm range</label>
-                                        <div class="sleep-range-inputs">
-                                            <input id="alarmStartInput" name="alarmStart" class="sleep-time-input" type="time" value="04:50">
-                                            <span class="sleep-range-separator">to</span>
-                                            <input id="alarmEndInput" name="alarmEnd" class="sleep-time-input" type="time" value="05:20">
+                                        <label class="sleep-edit-label">Alarm</label>
+                                        <div class="sleep-wheel-picker" data-picker="alarm-end">
+                                            <div class="sleep-wheel-column" data-column="hours">
+                                                <div class="sleep-wheel-item" data-slot="prev">4</div>
+                                                <div class="sleep-wheel-item sleep-wheel-selected" data-slot="current">5</div>
+                                                <div class="sleep-wheel-item" data-slot="next">6</div>
+                                            </div>
+                                            <div class="sleep-wheel-column" data-column="divider">:</div>
+                                            <div class="sleep-wheel-column" data-column="minutes">
+                                                <div class="sleep-wheel-item" data-slot="prev">19</div>
+                                                <div class="sleep-wheel-item sleep-wheel-selected" data-slot="current">20</div>
+                                                <div class="sleep-wheel-item" data-slot="next">21</div>
+                                            </div>
+                                            <div class="sleep-wheel-column" data-column="period">
+                                                <div class="sleep-wheel-item" data-slot="prev"></div>
+                                                <div class="sleep-wheel-item sleep-wheel-selected" data-slot="current">AM</div>
+                                                <div class="sleep-wheel-item" data-slot="next">PM</div>
+                                            </div>
                                         </div>
+                                        <input id="alarmEndInput" name="alarmEnd" class="sleep-time-input-hidden" type="time" value="05:20">
+
+                                        <div class="sleep-settings-section">
+                                            <div class="sleep-setting-row">
+                                                <div class="sleep-setting-label">
+                                                    <span class="sleep-setting-name">Alarm</span>
+                                                </div>
+                                                <label class="sleep-toggle">
+                                                    <input type="checkbox" id="alarmToggle" checked>
+                                                    <span class="sleep-toggle-slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="sleep-setting-row">
+                                                <span class="sleep-setting-name">Alarm ringtone</span>
+                                                <a href="#" class="sleep-setting-link">Sunbreak <i class="bi bi-chevron-right"></i></a>
+                                            </div>
+
+                                            <div class="sleep-setting-row">
+                                                <div>
+                                                    <span class="sleep-setting-name">Vibration</span>
+                                                </div>
+                                                <label class="sleep-toggle">
+                                                    <input type="checkbox">
+                                                    <span class="sleep-toggle-slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="sleep-setting-row">
+                                                <div>
+                                                    <span class="sleep-setting-name">Smart alarm</span>
+                                                    <i class="bi bi-info-circle sleep-info-icon" title="Smart alarm will wake you at the best time"></i>
+                                                </div>
+                                                <label class="sleep-toggle">
+                                                    <input type="checkbox" checked>
+                                                    <span class="sleep-toggle-slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="sleep-setting-row">
+                                                <span class="sleep-setting-name">Wake up period</span>
+                                                <a href="#" class="sleep-setting-link">30 min <i class="bi bi-chevron-right"></i></a>
+                                            </div>
+
+                                            <div class="sleep-setting-row">
+                                                <span class="sleep-setting-name">Snooze</span>
+                                                <a href="#" class="sleep-setting-link">10 min <i class="bi bi-chevron-right"></i></a>
+                                            </div>
+
+                                            <div class="sleep-setting-row">
+                                                <div>
+                                                    <span class="sleep-setting-name">Remind me to sleep</span>
+                                                </div>
+                                                <label class="sleep-toggle">
+                                                    <input type="checkbox" id="sleepReminderToggle" checked>
+                                                    <span class="sleep-toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+
                                         <div class="sleep-edit-actions">
                                             <button type="button" class="sleep-edit-cancel" data-cancel="alarm">Cancel</button>
                                             <button type="submit" class="sleep-edit-save">Save</button>
