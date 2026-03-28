@@ -276,7 +276,7 @@
 
 .label-6am {
     top: 50%;
-    right: 8%;
+    right: 12%;
     transform: translateY(-50%);
 }
 
@@ -288,7 +288,7 @@
 
 .label-6pm {
     top: 50%;
-    left: 8%;
+    left: 12%;
     transform: translateY(-50%);
 }
 
@@ -1889,7 +1889,6 @@ body.sleep-flow-active {
     font-weight: 600;
 }
 
->>>>>>> Stashed changes
 .home-btn {
     display: inline-flex;
     align-items: center;
@@ -2064,8 +2063,6 @@ body.sleep-flow-active {
         padding: 0.65rem 0.85rem;
         font-size: 0.85rem;
     }
-<<<<<<< Updated upstream
-=======
 
     .sleep-dial {
         --dial-size: min(400px, 88vw);
@@ -2132,7 +2129,6 @@ body.sleep-flow-active {
         align-items: flex-start;
         min-width: 0;
     }
->>>>>>> Stashed changes
 }
 
 @media (max-width: 575.98px) {
@@ -2145,8 +2141,6 @@ body.sleep-flow-active {
     .top-actions {
         align-self: flex-end;
     }
-<<<<<<< Updated upstream
-=======
 
     .sleep-dial {
         --dial-size: min(330px, 92vw);
@@ -2160,11 +2154,36 @@ body.sleep-flow-active {
 
     .sleep-time-row {
         flex-wrap: wrap;
+        align-items: flex-start;
     }
 
     .sleep-time-row .sleep-time-value {
         order: 3;
         width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        padding-top: 0.2rem;
+    }
+
+    .sleep-time-row .sleep-edit-btn {
+        margin-left: auto;
+    }
+
+    .sleep-edit-panel {
+        padding: 0.75rem;
+    }
+
+    .sleep-edit-actions {
+        justify-content: stretch;
+    }
+
+    .sleep-edit-actions button {
+        flex: 1 1 0;
+    }
+
+    .sleep-now-btn {
+        font-size: 1rem;
+        padding: 0.78rem 0.9rem;
     }
 
     .sleep-range-inputs {
@@ -2474,5 +2493,4 @@ body.sleep-flow-active {
         font-size: 0.92rem;
         padding: 0.62rem 0.9rem;
     }
->>>>>>> Stashed changes
 }
