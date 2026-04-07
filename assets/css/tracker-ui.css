@@ -764,6 +764,11 @@ body.sleep-repeat-open {
     font-size: 0.82rem;
 }
 
+.sleep-reminder-hint {
+    margin-top: 0.25rem;
+    color: #ffcf87;
+}
+
 .sleep-repeat-modal {
     position: fixed;
     inset: 0;

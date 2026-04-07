@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const snoozeWheel = document.querySelector('[data-snooze-wheel]');
         const snoozeItems = snoozeWheel ? Array.from(snoozeWheel.querySelectorAll('[data-snooze-minute]')) : [];
         const snoozeDisplay = document.querySelector('[data-display="snooze-minutes"]');
+        const sleepReminderToggle = document.getElementById('sleepReminderToggle');
+        const sleepReminderHint = document.querySelector('[data-sleep-reminder-hint]');
         const wakeupOpenButton = document.querySelector('[data-wakeup-open]');
         const wakeupModal = document.getElementById('wakeupModal');
         const wakeupCloseButtons = wakeupModal ? wakeupModal.querySelectorAll('[data-wakeup-close]') : [];
@@ -117,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const maxSleepWindowMinutes = 20 * 60;
         let suppressMarkerClick = false;
         let modalScrollY = 0;
+        let sleepReminderTimer = null;
+        let lastReminderBedtime = '';
+        const sleepReminderEnabledKey = 'sleepReminderEnabled';
 
         const openSleepModal = function (modal) {
             if (!modal) {
@@ -190,6 +195,88 @@ document.addEventListener('DOMContentLoaded', function () {
             return String(minutes).padStart(2, '0') + ' min';
         };
 
+        const clearSleepReminderTimer = function () {
+            if (sleepReminderTimer) {
+                clearTimeout(sleepReminderTimer);
+                sleepReminderTimer = null;
+            }
+        };
+
+        const requestSleepNotificationPermission = function () {
+            if (!('Notification' in window)) {
+                return Promise.resolve('unsupported');
+            }
+
+            if (Notification.permission === 'granted') {
+                return Promise.resolve('granted');
+            }
+
+            return Notification.requestPermission();
+        };
+
+        const getNextBedtimeDate = function (bedtimeValue) {
+            const minutes = toMinutes(bedtimeValue);
+            if (minutes === null) {
+                return null;
+            }
+
+            const now = new Date();
+            const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+            target.setMinutes(minutes);
+
+            if (target.getTime() <= now.getTime()) {
+                target.setDate(target.getDate() + 1);
+            }
+
+            return target;
+        };
+
+        const scheduleSleepReminder = function (forceReschedule) {
+            if (!sleepReminderToggle || !sleepReminderToggle.checked) {
+                clearSleepReminderTimer();
+                return;
+            }
+
+            if (!('Notification' in window) || Notification.permission !== 'granted') {
+                clearSleepReminderTimer();
+                if (sleepReminderHint) {
+                    sleepReminderHint.hidden = false;
+                }
+                return;
+            }
+
+            if (sleepReminderHint) {
+                sleepReminderHint.hidden = true;
+            }
+
+            const bedtimeValue = sleepDial.dataset.bedtime || (bedtimeInput ? bedtimeInput.value : '');
+            if (!bedtimeValue) {
+                return;
+            }
+
+            if (!forceReschedule && lastReminderBedtime === bedtimeValue && sleepReminderTimer) {
+                return;
+            }
+
+            lastReminderBedtime = bedtimeValue;
+            clearSleepReminderTimer();
+
+            const nextBedtime = getNextBedtimeDate(bedtimeValue);
+            if (!nextBedtime) {
+                return;
+            }
+
+            const delayMs = Math.max(nextBedtime.getTime() - Date.now(), 0);
+            sleepReminderTimer = setTimeout(function () {
+                if (Notification.permission === 'granted') {
+                    new Notification('Time to sleep', {
+                        body: 'Bedtime is now. Ready to wind down?'
+                    });
+                }
+                scheduleSleepReminder(true);
+            }, delayMs);
+        };
+
         const syncSleepFields = function () {
             updateSleepDial();
 
@@ -225,6 +312,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (sleepMinutesNumberDisplay && totalSleepMinutes !== null) {
                 sleepMinutesNumberDisplay.textContent = formatSleepMinutesNumber(totalSleepMinutes);
             }
+
+            scheduleSleepReminder(false);
         };
 
         const setBedtimeFromMinutes = function (minutesValue, shouldPersist) {
@@ -1368,6 +1457,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 toggle.disabled = !alarmToggle.checked;
             });
             updateAlarmRepeatDisplay();
+            syncSmartAlarmState();
             syncSleepFields();
         };
 
@@ -1385,6 +1475,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (smartAlarmToggle) {
             smartAlarmToggle.addEventListener('change', syncSmartAlarmState);
+            smartAlarmToggle.addEventListener('input', syncSmartAlarmState);
+            smartAlarmToggle.addEventListener('click', syncSmartAlarmState);
         }
 
         if (alarmDayToggles.length) {
@@ -1394,6 +1486,65 @@ document.addEventListener('DOMContentLoaded', function () {
                     persistSleepWindow();
                 });
             });
+        }
+
+        if (sleepReminderToggle) {
+            try {
+                const storedReminderEnabled = localStorage.getItem(sleepReminderEnabledKey);
+                if (storedReminderEnabled !== null) {
+                    sleepReminderToggle.checked = storedReminderEnabled === 'true';
+                }
+            } catch (error) {
+                // Ignore storage failures.
+            }
+
+            sleepReminderToggle.addEventListener('change', function () {
+                if (!sleepReminderToggle.checked) {
+                    try {
+                        localStorage.setItem(sleepReminderEnabledKey, 'false');
+                    } catch (error) {
+                        // Ignore storage failures.
+                    }
+                    clearSleepReminderTimer();
+                    return;
+                }
+
+                requestSleepNotificationPermission().then(function (status) {
+                    if (status !== 'granted') {
+                        sleepReminderToggle.checked = false;
+                        if (sleepReminderHint) {
+                            sleepReminderHint.hidden = false;
+                        }
+                        try {
+                            localStorage.setItem(sleepReminderEnabledKey, 'false');
+                        } catch (error) {
+                            // Ignore storage failures.
+                        }
+                        clearSleepReminderTimer();
+                        return;
+                    }
+
+                    try {
+                        localStorage.setItem(sleepReminderEnabledKey, 'true');
+                    } catch (error) {
+                        // Ignore storage failures.
+                    }
+
+                    if (sleepReminderHint) {
+                        sleepReminderHint.hidden = true;
+                    }
+                    scheduleSleepReminder(true);
+                });
+            });
+
+            if (sleepReminderToggle.checked && Notification.permission === 'granted') {
+                if (sleepReminderHint) {
+                    sleepReminderHint.hidden = true;
+                }
+                scheduleSleepReminder(true);
+            } else if (sleepReminderToggle.checked && sleepReminderHint) {
+                sleepReminderHint.hidden = false;
+            }
         }
 
         if (repeatOpenButton) {

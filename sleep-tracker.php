@@ -219,6 +219,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                             <div class="sleep-setting-row">
                                                 <div>
                                                     <span class="sleep-setting-name">Remind me to sleep</span>
+                                                    <span class="sleep-setting-sub sleep-reminder-hint" data-sleep-reminder-hint hidden>Enable browser notifications to get reminders.</span>
                                                 </div>
                                                 <label class="sleep-toggle">
                                                     <input type="checkbox" id="sleepReminderToggle" checked>
