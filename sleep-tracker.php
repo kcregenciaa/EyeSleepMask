@@ -91,6 +91,10 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         <span class="sleep-dial-total-top"><strong data-display="sleep-hours-number">05</strong><span class="sleep-dial-total-unit">hr</span></span>
                                         <span class="sleep-dial-total-minutes" data-display="sleep-minutes-number">30 min</span>
                                     </span>
+                                    <span class="sleep-dial-no-alarm" aria-live="polite">
+                                        <strong>No alarm</strong>
+                                        <span>Just track my sleep</span>
+                                    </span>
                                 </div>
 
                                 <p class="sleep-total-hours mt-3 mb-0">Total sleep: <strong data-display="total-sleep">5 h</strong></p>

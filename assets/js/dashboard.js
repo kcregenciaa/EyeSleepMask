@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const sleepDial = document.querySelector('.sleep-dial');
+    const alarmToggle = document.getElementById('alarmToggle');
 
     const toMinutes = function (value) {
         if (!value || !value.includes(':')) {
@@ -30,10 +31,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(hour12).padStart(2, '0') + ':' + String(minute).padStart(2, '0') + ' ' + period;
     };
 
+    const isAlarmEnabled = function () {
+        return !alarmToggle || alarmToggle.checked;
+    };
+
     const updateSleepDial = function () {
         if (!sleepDial) {
             return;
         }
+
+        sleepDial.classList.toggle('alarm-off', !isAlarmEnabled());
 
         const bedtime = toMinutes(sleepDial.dataset.bedtime);
         const alarmEnd = toMinutes(sleepDial.dataset.alarmEnd);
@@ -155,8 +162,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 bedtimeDisplay.textContent = formatTime(sleepDial.dataset.bedtime);
             }
 
-            if (alarmDisplay && sleepDial.dataset.alarmEnd) {
-                alarmDisplay.textContent = formatTime(sleepDial.dataset.alarmEnd);
+            if (alarmDisplay) {
+                if (!isAlarmEnabled()) {
+                    alarmDisplay.textContent = 'Off';
+                } else if (sleepDial.dataset.alarmEnd) {
+                    alarmDisplay.textContent = formatTime(sleepDial.dataset.alarmEnd);
+                }
             }
 
             const totalSleepMinutes = sleepWindowMinutes(toMinutes(sleepDial.dataset.bedtime), toMinutes(sleepDial.dataset.alarmEnd));
@@ -467,6 +478,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (key === 'alarm' && alarmEndInput) {
+                if (!isAlarmEnabled()) {
+                    return;
+                }
                 alarmEndInput.focus();
             }
 
@@ -485,12 +499,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
+                if (key === 'alarm' && !isAlarmEnabled()) {
+                    return;
+                }
+
                 openSleepPanel(key);
             });
 
             button.addEventListener('wheel', function (event) {
                 const key = button.dataset.marker;
                 if (!key) {
+                    return;
+                }
+
+                if (key === 'alarm' && !isAlarmEnabled()) {
                     return;
                 }
 
@@ -502,6 +524,10 @@ document.addEventListener('DOMContentLoaded', function () {
             button.addEventListener('keydown', function (event) {
                 const key = button.dataset.marker;
                 if (!key) {
+                    return;
+                }
+
+                if (key === 'alarm' && !isAlarmEnabled()) {
                     return;
                 }
 
@@ -531,6 +557,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const key = button.dataset.marker;
                 if (!key) {
+                    return;
+                }
+
+                if (key === 'alarm' && !isAlarmEnabled()) {
                     return;
                 }
 
@@ -619,6 +649,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sleepArc) {
             sleepArc.addEventListener('pointerdown', function (event) {
                 if (event.pointerType === 'mouse' && event.button !== 0) {
+                    return;
+                }
+
+                if (!isAlarmEnabled()) {
                     return;
                 }
 
@@ -976,6 +1010,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const alarmPanel = document.querySelector('[data-panel="alarm"]');
+        const syncAlarmPanelState = function () {
+            if (!alarmPanel || !alarmToggle) {
+                return;
+            }
+
+            alarmPanel.classList.toggle('alarm-disabled', !alarmToggle.checked);
+            syncSleepFields();
+        };
+
+        if (alarmToggle) {
+            alarmToggle.addEventListener('change', syncAlarmPanelState);
+        }
+
+        syncAlarmPanelState();
+
         if (alarmPanel) {
             alarmPanel.addEventListener('submit', function (event) {
                 event.preventDefault();
