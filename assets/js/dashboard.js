@@ -1262,14 +1262,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let minute = currentMinutes % 60;
 
                 if (columnType === 'hours') {
-                    let hour12 = (hour24 % 12) || 12;
-                    hour12 = mod((hour12 - 1) + direction, 12) + 1;
-                    const isPm = hour24 >= 12;
-                    if (hour12 === 12) {
-                        hour24 = isPm ? 12 : 0;
-                    } else {
-                        hour24 = (isPm ? 12 : 0) + hour12;
-                    }
+                    hour24 = mod(hour24 + direction, 24);
                 }
 
                 if (columnType === 'minutes') {
@@ -1310,10 +1303,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const columnType = column.getAttribute('data-column');
+                let wheelSteps = 0;
+                let wheelFrame = null;
+
+                const flushWheel = function () {
+                    if (!wheelSteps) {
+                        wheelFrame = null;
+                        return;
+                    }
+
+                    stepColumn(columnType, wheelSteps > 0 ? 1 : -1);
+                    wheelSteps += wheelSteps > 0 ? -1 : 1;
+                    wheelFrame = requestAnimationFrame(flushWheel);
+                };
 
                 column.addEventListener('wheel', function (event) {
                     event.preventDefault();
-                    stepColumn(columnType, event.deltaY > 0 ? 1 : -1);
+                    const direction = event.deltaY > 0 ? 1 : -1;
+                    const steps = Math.min(6, Math.ceil(Math.abs(event.deltaY) / 40));
+                    wheelSteps += direction * steps;
+                    if (!wheelFrame) {
+                        wheelFrame = requestAnimationFrame(flushWheel);
+                    }
                 }, { passive: false });
 
                 let dragging = false;
@@ -1777,7 +1788,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const dailyCalendarDays = document.getElementById('dailyCalendarDays');
-    if (dailyCalendarDays) {
+    const sleepFlowLayer = document.getElementById('sleepFlowLayer');
+    if (dailyCalendarDays || sleepFlowLayer) {
         const dailySelectedDate = document.getElementById('dailySelectedDate');
         const dailyCalendarRange = document.getElementById('dailyCalendarRange');
         const dailyPrevWeek = document.getElementById('dailyPrevWeek');
@@ -1794,10 +1806,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const dailyNoise = document.getElementById('dailyNoise');
         const dailyPerformanceSummary = document.getElementById('dailyPerformanceSummary');
         const dailyNoteInput = document.getElementById('dailyNoteInput');
-        const dailyTrackNowBtn = document.getElementById('dailyTrackNowBtn');
-        const dailySleepNowBtn = document.getElementById('dailySleepNowBtn');
-
-        const sleepFlowLayer = document.getElementById('sleepFlowLayer');
+        const sleepNowBtn = document.getElementById('sleepNowBtn');
         const sleepPopupCharge = document.getElementById('sleepPopupCharge');
         const sleepPopupAudio = document.getElementById('sleepPopupAudio');
         const sleepIntroScreen = document.getElementById('sleepIntroScreen');
@@ -2294,6 +2303,10 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const renderWeek = function () {
+            if (!dailyCalendarDays) {
+                return;
+            }
+
             const weekStart = addDays(weekStartMonday(today), weekOffset * -7);
             const weekEnd = addDays(weekStart, 6);
 
@@ -2375,14 +2388,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        if (dailyTrackNowBtn) {
-            dailyTrackNowBtn.addEventListener('click', function () {
-                openSleepNowFlow();
-            });
-        }
-
-        if (dailySleepNowBtn) {
-            dailySleepNowBtn.addEventListener('click', function () {
+        if (sleepNowBtn) {
+            sleepNowBtn.addEventListener('click', function () {
                 openSleepNowFlow();
             });
         }

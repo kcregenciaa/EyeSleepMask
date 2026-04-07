@@ -388,13 +388,65 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     </form>
                                 </div>
 
-                                <button type="button" class="sleep-now-btn mt-4">Sleep Now</button>
+                                <button type="button" class="sleep-now-btn mt-4" id="sleepNowBtn">Sleep Now</button>
                             </article>
                         </div>
                     </div>
                 </section>
             </div>
         </div>
+    </div>
+
+    <div class="sleep-flow-layer" id="sleepFlowLayer" hidden>
+        <article class="sleep-popup-card sleep-popup-charge" id="sleepPopupCharge" hidden>
+            <button type="button" class="sleep-popup-close" data-sleep-close="charge" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+            <div class="sleep-popup-visual sleep-popup-visual-charge" aria-hidden="true"></div>
+            <div class="sleep-popup-copy">
+                <h2>Sweet dreams!</h2>
+                <p>Please keep your phone <strong>charged</strong> and place it as shown in the picture.</p>
+            </div>
+            <button type="button" class="sleep-popup-main-btn" id="sleepPopupDoneBtn">Done</button>
+            <button type="button" class="sleep-popup-link" id="sleepPopupSkipChargeBtn">Don't remind me anymore</button>
+        </article>
+
+        <article class="sleep-popup-card sleep-popup-audio" id="sleepPopupAudio" hidden>
+            <button type="button" class="sleep-popup-close" data-sleep-close="audio" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+            <div class="sleep-popup-visual sleep-popup-visual-audio" aria-hidden="true">
+                <i class="bi bi-mic-fill"></i>
+            </div>
+            <div class="sleep-popup-copy">
+                <h2>Ensure Accuracy</h2>
+                <p>Background audio may interfere with analysis. Please turn it off if running.</p>
+            </div>
+            <button type="button" class="sleep-popup-main-btn" id="sleepPopupGotItBtn">Got it</button>
+            <button type="button" class="sleep-popup-link" id="sleepPopupSkipAudioBtn">Don't remind me anymore</button>
+        </article>
+
+        <article class="sleep-intro-screen" id="sleepIntroScreen" hidden>
+            <div class="sleep-intro-copy">
+                <h2>Sweet dreams!</h2>
+                <p>Start to track your sleep...</p>
+            </div>
+        </article>
+
+        <article class="sleep-session-screen" id="sleepSessionScreen" hidden>
+            <div class="sleep-session-meta-top">
+                <div>
+                    <p class="sleep-session-noise-label mb-0">Ambient Noise</p>
+                    <strong class="sleep-session-noise-value" id="sleepSessionNoise">69 dB</strong>
+                </div>
+            </div>
+            <div class="sleep-session-center">
+                <h2 class="sleep-session-time" id="sleepSessionTime">02:24</h2>
+                <span class="sleep-session-period" id="sleepSessionPeriod">PM</span>
+                <p class="sleep-session-alarm" id="sleepSessionAlarm">04:50 AM-05:20 AM</p>
+                <p class="sleep-session-countdown" id="sleepSessionCountdown">Session ends in 5 h 0 m</p>
+            </div>
+            <div class="sleep-session-actions">
+                <button type="button" class="sleep-wake-btn" id="sleepWakeBtn">Long press to wake up</button>
+                <button type="button" class="sleep-end-now-btn" id="sleepEndNowBtn">I'm awake, end session</button>
+            </div>
+        </article>
     </div>
 
 <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>
