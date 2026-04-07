@@ -190,19 +190,22 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                             </div>
 
                                             <div class="sleep-setting-row">
-                                                <div>
+                                                <div class="sleep-setting-label smart-alarm-label">
                                                     <span class="sleep-setting-name">Smart alarm</span>
-                                                    <i class="bi bi-info-circle sleep-info-icon" title="Smart alarm will wake you at the best time"></i>
+                                                    <i class="bi bi-info-circle sleep-info-icon" title="It's proven that waking up in the lightest sleep will give you an energetic morning.&#10;&#10;Smart alarm will detect this moment and wakes you up within the wake-up period you set."></i>
                                                 </div>
                                                 <label class="sleep-toggle">
-                                                    <input type="checkbox" checked>
+                                                    <input type="checkbox" id="smartAlarmToggle" checked>
                                                     <span class="sleep-toggle-slider"></span>
                                                 </label>
                                             </div>
 
-                                            <div class="sleep-setting-row">
+                                            <div class="sleep-setting-row" data-smart-alarm-row>
                                                 <span class="sleep-setting-name">Wake up period</span>
-                                                <a href="#" class="sleep-setting-link">30 min <i class="bi bi-chevron-right"></i></a>
+                                                <button type="button" class="sleep-repeat-link" data-wakeup-open>
+                                                    <span data-display="wakeup-period">30 min</span>
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </button>
                                             </div>
 
                                             <div class="sleep-setting-row">
@@ -300,6 +303,78 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                                     <button type="button" class="snooze-wheel-item" data-snooze-minute="13">13 min</button>
                                                     <button type="button" class="snooze-wheel-item" data-snooze-minute="14">14 min</button>
                                                     <button type="button" class="snooze-wheel-item" data-snooze-minute="15">15 min</button>
+                                                    <span class="snooze-wheel-fade" aria-hidden="true"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="sleep-repeat-modal" id="wakeupModal" hidden>
+                                            <div class="sleep-repeat-backdrop" data-wakeup-close></div>
+                                            <div class="sleep-repeat-sheet" role="dialog" aria-modal="true" aria-labelledby="wakeupTitle">
+                                                <div class="sleep-repeat-header">
+                                                    <button type="button" class="sleep-repeat-back" data-wakeup-close>
+                                                        <i class="bi bi-chevron-left"></i>
+                                                        Back
+                                                    </button>
+                                                    <h3 id="wakeupTitle">Wake Up Period</h3>
+                                                </div>
+                                                <div class="snooze-wheel" data-wakeup-wheel>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="5">5 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="6">6 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="7">7 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="8">8 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="9">9 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="10">10 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="11">11 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="12">12 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="13">13 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="14">14 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="15">15 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="16">16 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="17">17 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="18">18 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="19">19 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="20">20 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="21">21 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="22">22 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="23">23 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="24">24 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="25">25 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="26">26 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="27">27 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="28">28 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="29">29 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="30">30 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="31">31 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="32">32 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="33">33 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="34">34 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="35">35 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="36">36 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="37">37 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="38">38 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="39">39 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="40">40 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="41">41 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="42">42 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="43">43 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="44">44 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="45">45 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="46">46 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="47">47 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="48">48 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="49">49 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="50">50 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="51">51 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="52">52 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="53">53 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="54">54 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="55">55 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="56">56 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="57">57 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="58">58 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="59">59 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-wakeup-minute="60">60 min</button>
                                                     <span class="snooze-wheel-fade" aria-hidden="true"></span>
                                                 </div>
                                             </div>

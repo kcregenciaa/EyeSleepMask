@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const sleepDial = document.querySelector('.sleep-dial');
     const alarmToggle = document.getElementById('alarmToggle');
+    const smartAlarmToggle = document.getElementById('smartAlarmToggle');
 
     const toMinutes = function (value) {
         if (!value || !value.includes(':')) {
@@ -103,6 +104,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const snoozeWheel = document.querySelector('[data-snooze-wheel]');
         const snoozeItems = snoozeWheel ? Array.from(snoozeWheel.querySelectorAll('[data-snooze-minute]')) : [];
         const snoozeDisplay = document.querySelector('[data-display="snooze-minutes"]');
+        const wakeupOpenButton = document.querySelector('[data-wakeup-open]');
+        const wakeupModal = document.getElementById('wakeupModal');
+        const wakeupCloseButtons = wakeupModal ? wakeupModal.querySelectorAll('[data-wakeup-close]') : [];
+        const wakeupWheel = document.querySelector('[data-wakeup-wheel]');
+        const wakeupItems = wakeupWheel ? Array.from(wakeupWheel.querySelectorAll('[data-wakeup-minute]')) : [];
+        const wakeupDisplay = document.querySelector('[data-display="wakeup-period"]');
+        const wakeupRow = document.querySelector('[data-smart-alarm-row]');
         const alarmRepeatDisplay = document.querySelector('[data-display="alarm-repeat"]');
         const dialStepMinutes = 5;
         const minSleepWindowMinutes = 1 * 60;
@@ -408,6 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 bedtime: sleepDial.dataset.bedtime || '',
                 alarmEnd: sleepDial.dataset.alarmEnd || '',
                 snoozeMinutes: Number(sleepDial.dataset.snoozeMinutes || 15),
+                wakeupMinutes: Number(sleepDial.dataset.wakeupMinutes || 30),
                 alarmDays: Array.from(alarmDayToggles).filter(function (toggle) {
                     return toggle.checked;
                 }).map(function (toggle) {
@@ -454,6 +463,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         const snoozeValue = Math.min(15, Math.max(1, parsedWindow.snoozeMinutes));
                         sleepDial.dataset.snoozeMinutes = String(snoozeValue);
                     }
+
+                    if (Number.isFinite(parsedWindow.wakeupMinutes)) {
+                        const wakeupValue = Math.min(60, Math.max(5, parsedWindow.wakeupMinutes));
+                        sleepDial.dataset.wakeupMinutes = String(wakeupValue);
+                    }
                 }
             }
         } catch (error) {
@@ -462,6 +476,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!sleepDial.dataset.snoozeMinutes) {
             sleepDial.dataset.snoozeMinutes = '15';
+        }
+
+        if (!sleepDial.dataset.wakeupMinutes) {
+            sleepDial.dataset.wakeupMinutes = '30';
         }
 
         const getSelectedAlarmDays = function () {
@@ -530,6 +548,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         updateSnoozeDisplay();
 
+        const updateWakeupDisplay = function () {
+            if (!wakeupDisplay) {
+                return;
+            }
+
+            const wakeupValue = Number(sleepDial.dataset.wakeupMinutes || 30);
+            wakeupDisplay.textContent = wakeupValue + ' min';
+        };
+
+        updateWakeupDisplay();
+
         const syncSnoozeWheelPadding = function () {
             if (!snoozeWheel) {
                 return;
@@ -538,6 +567,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const itemHeight = parseFloat(getComputedStyle(snoozeWheel).getPropertyValue('--snooze-item-height')) || 48;
             const pad = Math.max(0, (snoozeWheel.clientHeight / 2) - (itemHeight / 2));
             snoozeWheel.style.setProperty('--snooze-wheel-pad', pad + 'px');
+        };
+
+        const syncWakeupWheelPadding = function () {
+            if (!wakeupWheel) {
+                return;
+            }
+
+            const itemHeight = parseFloat(getComputedStyle(wakeupWheel).getPropertyValue('--snooze-item-height')) || 48;
+            const pad = Math.max(0, (wakeupWheel.clientHeight / 2) - (itemHeight / 2));
+            wakeupWheel.style.setProperty('--snooze-wheel-pad', pad + 'px');
         };
 
         const setSnoozeActive = function (value, shouldScroll) {
@@ -581,6 +620,91 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             snoozeProgrammaticUntil = Date.now() + 200;
+        };
+
+        let wakeupProgrammaticUntil = 0;
+
+        const setWakeupActive = function (value, shouldScroll) {
+            if (!wakeupItems.length || !wakeupWheel) {
+                return;
+            }
+
+            const clamped = Math.min(60, Math.max(5, value));
+            sleepDial.dataset.wakeupMinutes = String(clamped);
+            updateWakeupDisplay();
+
+            wakeupItems.forEach(function (item) {
+                const itemValue = Number(item.dataset.wakeupMinute);
+                item.classList.toggle('is-active', itemValue === clamped);
+            });
+
+            if (shouldScroll) {
+                scrollWakeupToValue(clamped, true);
+            }
+        };
+
+        const scrollWakeupToValue = function (value, smooth) {
+            if (!wakeupWheel || !wakeupItems.length) {
+                return;
+            }
+
+            const activeItem = wakeupItems.find(function (item) {
+                return Number(item.dataset.wakeupMinute) === value;
+            });
+
+            if (!activeItem) {
+                return;
+            }
+
+            const padValue = parseFloat(getComputedStyle(wakeupWheel).getPropertyValue('--snooze-wheel-pad')) || 0;
+            const targetTop = activeItem.offsetTop - padValue;
+
+            wakeupWheel.scrollTo({
+                top: targetTop,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
+
+            wakeupProgrammaticUntil = Date.now() + 200;
+        };
+
+        const updateWakeupFromScroll = function () {
+            if (!wakeupItems.length || !wakeupWheel) {
+                return;
+            }
+
+            const wheelRect = wakeupWheel.getBoundingClientRect();
+            const wheelCenter = wheelRect.top + (wheelRect.height / 2);
+            let closest = null;
+            let smallest = Number.POSITIVE_INFINITY;
+
+            wakeupItems.forEach(function (item) {
+                const rect = item.getBoundingClientRect();
+                const itemCenter = rect.top + (rect.height / 2);
+                const distance = Math.abs(itemCenter - wheelCenter);
+                if (distance < smallest) {
+                    smallest = distance;
+                    closest = item;
+                }
+            });
+
+            if (closest) {
+                const value = Number(closest.dataset.wakeupMinute);
+                if (String(value) !== sleepDial.dataset.wakeupMinutes) {
+                    setWakeupActive(value, false);
+                }
+            }
+        };
+
+        let wakeupSnapTimer = null;
+        const scheduleWakeupSnap = function () {
+            if (wakeupSnapTimer) {
+                clearTimeout(wakeupSnapTimer);
+            }
+            wakeupSnapTimer = setTimeout(function () {
+                const currentValue = Number(sleepDial.dataset.wakeupMinutes || 30);
+                setWakeupActive(currentValue, true);
+                persistSleepWindow();
+            }, 120);
         };
 
         const updateSnoozeFromScroll = function () {
@@ -1247,8 +1371,20 @@ document.addEventListener('DOMContentLoaded', function () {
             syncSleepFields();
         };
 
+        const syncSmartAlarmState = function () {
+            if (!wakeupRow || !smartAlarmToggle) {
+                return;
+            }
+
+            wakeupRow.hidden = !smartAlarmToggle.checked;
+        };
+
         if (alarmToggle) {
             alarmToggle.addEventListener('change', syncAlarmPanelState);
+        }
+
+        if (smartAlarmToggle) {
+            smartAlarmToggle.addEventListener('change', syncSmartAlarmState);
         }
 
         if (alarmDayToggles.length) {
@@ -1292,6 +1428,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        if (wakeupOpenButton) {
+            wakeupOpenButton.addEventListener('click', function () {
+                openSleepModal(wakeupModal);
+                syncWakeupWheelPadding();
+                const currentValue = Number(sleepDial.dataset.wakeupMinutes || 30);
+                setWakeupActive(currentValue, false);
+                scrollWakeupToValue(currentValue, false);
+            });
+        }
+
         if (snoozeCloseButtons.length) {
             snoozeCloseButtons.forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -1300,10 +1446,26 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        if (wakeupCloseButtons.length) {
+            wakeupCloseButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    closeSleepModal(wakeupModal);
+                });
+            });
+        }
+
         if (snoozeModal) {
             snoozeModal.addEventListener('click', function (event) {
                 if (event.target && event.target.hasAttribute('data-snooze-close')) {
                     closeSleepModal(snoozeModal);
+                }
+            });
+        }
+
+        if (wakeupModal) {
+            wakeupModal.addEventListener('click', function (event) {
+                if (event.target && event.target.hasAttribute('data-wakeup-close')) {
+                    closeSleepModal(wakeupModal);
                 }
             });
         }
@@ -1319,6 +1481,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        if (wakeupItems.length) {
+            wakeupItems.forEach(function (item) {
+                item.addEventListener('click', function () {
+                    const wakeupValue = Number(item.dataset.wakeupMinute || 30);
+                    scrollWakeupToValue(wakeupValue, true);
+                    setWakeupActive(wakeupValue, false);
+                    persistSleepWindow();
+                });
+            });
+        }
+
         if (snoozeWheel) {
             snoozeWheel.addEventListener('scroll', function () {
                 if (Date.now() < snoozeProgrammaticUntil) {
@@ -1329,15 +1502,30 @@ document.addEventListener('DOMContentLoaded', function () {
             }, { passive: true });
         }
 
+        if (wakeupWheel) {
+            wakeupWheel.addEventListener('scroll', function () {
+                if (Date.now() < wakeupProgrammaticUntil) {
+                    return;
+                }
+                updateWakeupFromScroll();
+                scheduleWakeupSnap();
+            }, { passive: true });
+        }
+
         window.addEventListener('resize', function () {
             syncSnoozeWheelPadding();
+            syncWakeupWheelPadding();
         });
+
+        syncSmartAlarmState();
 
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && repeatModal && !repeatModal.hidden) {
                 closeSleepModal(repeatModal);
             } else if (event.key === 'Escape' && snoozeModal && !snoozeModal.hidden) {
                 closeSleepModal(snoozeModal);
+            } else if (event.key === 'Escape' && wakeupModal && !wakeupModal.hidden) {
+                closeSleepModal(wakeupModal);
             }
         });
 

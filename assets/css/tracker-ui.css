@@ -742,6 +742,12 @@ body.sleep-repeat-open {
     flex: 1;
 }
 
+.smart-alarm-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
 .sleep-setting-name {
     color: #eaf3ff;
     font-size: 1rem;
