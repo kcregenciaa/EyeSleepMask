@@ -555,14 +555,32 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (shouldScroll) {
-                const activeItem = snoozeItems.find(function (item) {
-                    return Number(item.dataset.snoozeMinute) === clamped;
-                });
-                if (activeItem) {
-                    const targetTop = activeItem.offsetTop - (snoozeWheel.clientHeight / 2) + (activeItem.offsetHeight / 2);
-                    snoozeWheel.scrollTo({ top: targetTop, behavior: 'smooth' });
-                }
+                scrollSnoozeToValue(clamped, true);
             }
+        };
+
+        const scrollSnoozeToValue = function (value, smooth) {
+            if (!snoozeWheel || !snoozeItems.length) {
+                return;
+            }
+
+            const activeItem = snoozeItems.find(function (item) {
+                return Number(item.dataset.snoozeMinute) === value;
+            });
+
+            if (!activeItem) {
+                return;
+            }
+
+            const padValue = parseFloat(getComputedStyle(snoozeWheel).getPropertyValue('--snooze-wheel-pad')) || 0;
+            const targetTop = activeItem.offsetTop - padValue;
+
+            snoozeWheel.scrollTo({
+                top: targetTop,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
+
+            snoozeProgrammaticUntil = Date.now() + 200;
         };
 
         const updateSnoozeFromScroll = function () {
@@ -594,6 +612,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         let snoozeSnapTimer = null;
+        let snoozeProgrammaticUntil = 0;
         const scheduleSnoozeSnap = function () {
             if (snoozeSnapTimer) {
                 clearTimeout(snoozeSnapTimer);
@@ -1267,7 +1286,9 @@ document.addEventListener('DOMContentLoaded', function () {
             snoozeOpenButton.addEventListener('click', function () {
                 openSleepModal(snoozeModal);
                 syncSnoozeWheelPadding();
-                setSnoozeActive(Number(sleepDial.dataset.snoozeMinutes || 15), true);
+                const currentValue = Number(sleepDial.dataset.snoozeMinutes || 15);
+                setSnoozeActive(currentValue, false);
+                scrollSnoozeToValue(currentValue, false);
             });
         }
 
@@ -1291,7 +1312,8 @@ document.addEventListener('DOMContentLoaded', function () {
             snoozeItems.forEach(function (item) {
                 item.addEventListener('click', function () {
                     const snoozeValue = Number(item.dataset.snoozeMinute || 15);
-                    setSnoozeActive(snoozeValue, true);
+                    scrollSnoozeToValue(snoozeValue, true);
+                    setSnoozeActive(snoozeValue, false);
                     persistSleepWindow();
                 });
             });
@@ -1299,6 +1321,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (snoozeWheel) {
             snoozeWheel.addEventListener('scroll', function () {
+                if (Date.now() < snoozeProgrammaticUntil) {
+                    return;
+                }
                 updateSnoozeFromScroll();
                 scheduleSnoozeSnap();
             }, { passive: true });

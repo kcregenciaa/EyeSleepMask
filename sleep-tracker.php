@@ -300,7 +300,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                                     <button type="button" class="snooze-wheel-item" data-snooze-minute="13">13 min</button>
                                                     <button type="button" class="snooze-wheel-item" data-snooze-minute="14">14 min</button>
                                                     <button type="button" class="snooze-wheel-item" data-snooze-minute="15">15 min</button>
-                                                    <span class="snooze-wheel-highlight" aria-hidden="true"></span>
                                                     <span class="snooze-wheel-fade" aria-hidden="true"></span>
                                                 </div>
                                             </div>
