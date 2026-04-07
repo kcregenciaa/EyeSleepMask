@@ -92,10 +92,45 @@ document.addEventListener('DOMContentLoaded', function () {
         const sleepArc = sleepDial.querySelector('.sleep-dial-arc');
         const markerButtons = sleepDial.querySelectorAll('[data-marker]');
         const sleepWindowStorageKey = 'sleepTrackerWindow';
+        const alarmDayToggles = document.querySelectorAll('[data-alarm-day]');
+        const alarmDayGroup = document.querySelector('[data-repeat-list]');
+        const repeatOpenButton = document.querySelector('[data-repeat-open]');
+        const repeatModal = document.getElementById('repeatModal');
+        const repeatCloseButtons = repeatModal ? repeatModal.querySelectorAll('[data-repeat-close]') : [];
+        const snoozeOpenButton = document.querySelector('[data-snooze-open]');
+        const snoozeModal = document.getElementById('snoozeModal');
+        const snoozeCloseButtons = snoozeModal ? snoozeModal.querySelectorAll('[data-snooze-close]') : [];
+        const snoozeWheel = document.querySelector('[data-snooze-wheel]');
+        const snoozeItems = snoozeWheel ? Array.from(snoozeWheel.querySelectorAll('[data-snooze-minute]')) : [];
+        const snoozeDisplay = document.querySelector('[data-display="snooze-minutes"]');
+        const alarmRepeatDisplay = document.querySelector('[data-display="alarm-repeat"]');
         const dialStepMinutes = 5;
         const minSleepWindowMinutes = 1 * 60;
         const maxSleepWindowMinutes = 20 * 60;
         let suppressMarkerClick = false;
+        let modalScrollY = 0;
+
+        const openSleepModal = function (modal) {
+            if (!modal) {
+                return;
+            }
+
+            modalScrollY = window.scrollY || 0;
+            document.body.style.top = '-' + modalScrollY + 'px';
+            modal.hidden = false;
+            document.body.classList.add('sleep-repeat-open');
+        };
+
+        const closeSleepModal = function (modal) {
+            if (!modal) {
+                return;
+            }
+
+            modal.hidden = true;
+            document.body.classList.remove('sleep-repeat-open');
+            document.body.style.top = '';
+            window.scrollTo(0, modalScrollY);
+        };
 
         const sleepWindowMinutes = function (startMinutes, endMinutes) {
             if (startMinutes === null || endMinutes === null) {
@@ -371,7 +406,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const persistSleepWindow = function () {
             const payload = {
                 bedtime: sleepDial.dataset.bedtime || '',
-                alarmEnd: sleepDial.dataset.alarmEnd || ''
+                alarmEnd: sleepDial.dataset.alarmEnd || '',
+                snoozeMinutes: Number(sleepDial.dataset.snoozeMinutes || 15),
+                alarmDays: Array.from(alarmDayToggles).filter(function (toggle) {
+                    return toggle.checked;
+                }).map(function (toggle) {
+                    return toggle.dataset.alarmDay || '';
+                }).filter(function (value) {
+                    return value !== '';
+                })
             };
 
             try {
@@ -399,11 +442,170 @@ document.addEventListener('DOMContentLoaded', function () {
                             alarmEndInput.value = parsedWindow.alarmEnd;
                         }
                     }
+
+                    if (Array.isArray(parsedWindow.alarmDays) && alarmDayToggles.length) {
+                        alarmDayToggles.forEach(function (toggle) {
+                            const key = toggle.dataset.alarmDay || '';
+                            toggle.checked = parsedWindow.alarmDays.includes(key);
+                        });
+                    }
+
+                    if (Number.isFinite(parsedWindow.snoozeMinutes)) {
+                        const snoozeValue = Math.min(15, Math.max(1, parsedWindow.snoozeMinutes));
+                        sleepDial.dataset.snoozeMinutes = String(snoozeValue);
+                    }
                 }
             }
         } catch (error) {
             // Ignore malformed storage values.
         }
+
+        if (!sleepDial.dataset.snoozeMinutes) {
+            sleepDial.dataset.snoozeMinutes = '15';
+        }
+
+        const getSelectedAlarmDays = function () {
+            return Array.from(alarmDayToggles).filter(function (toggle) {
+                return toggle.checked;
+            }).map(function (toggle) {
+                return toggle.dataset.alarmDay || '';
+            }).filter(function (value) {
+                return value !== '';
+            });
+        };
+
+        const updateAlarmRepeatDisplay = function () {
+            if (!alarmRepeatDisplay) {
+                return;
+            }
+
+            if (alarmToggle && !alarmToggle.checked) {
+                alarmRepeatDisplay.textContent = 'Off';
+                return;
+            }
+
+            const dayOrder = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            const dayLabels = {
+                sun: 'Sunday',
+                mon: 'Monday',
+                tue: 'Tuesday',
+                wed: 'Wednesday',
+                thu: 'Thursday',
+                fri: 'Friday',
+                sat: 'Saturday'
+            };
+
+            const selectedDays = getSelectedAlarmDays();
+            if (!selectedDays.length) {
+                alarmRepeatDisplay.textContent = 'Never';
+                return;
+            }
+
+            if (selectedDays.length === dayOrder.length) {
+                alarmRepeatDisplay.textContent = 'Every day';
+                return;
+            }
+
+            const orderedLabels = dayOrder.filter(function (key) {
+                return selectedDays.includes(key);
+            }).map(function (key) {
+                return dayLabels[key];
+            });
+
+            alarmRepeatDisplay.textContent = orderedLabels.map(function (day) {
+                return 'Every ' + day;
+            }).join(', ');
+        };
+
+        updateAlarmRepeatDisplay();
+
+        const updateSnoozeDisplay = function () {
+            if (!snoozeDisplay) {
+                return;
+            }
+
+            const snoozeValue = Number(sleepDial.dataset.snoozeMinutes || 15);
+            snoozeDisplay.textContent = snoozeValue + ' min';
+        };
+
+        updateSnoozeDisplay();
+
+        const syncSnoozeWheelPadding = function () {
+            if (!snoozeWheel) {
+                return;
+            }
+
+            const itemHeight = parseFloat(getComputedStyle(snoozeWheel).getPropertyValue('--snooze-item-height')) || 48;
+            const pad = Math.max(0, (snoozeWheel.clientHeight / 2) - (itemHeight / 2));
+            snoozeWheel.style.setProperty('--snooze-wheel-pad', pad + 'px');
+        };
+
+        const setSnoozeActive = function (value, shouldScroll) {
+            if (!snoozeItems.length || !snoozeWheel) {
+                return;
+            }
+
+            const clamped = Math.min(15, Math.max(1, value));
+            sleepDial.dataset.snoozeMinutes = String(clamped);
+            updateSnoozeDisplay();
+
+            snoozeItems.forEach(function (item) {
+                const itemValue = Number(item.dataset.snoozeMinute);
+                item.classList.toggle('is-active', itemValue === clamped);
+            });
+
+            if (shouldScroll) {
+                const activeItem = snoozeItems.find(function (item) {
+                    return Number(item.dataset.snoozeMinute) === clamped;
+                });
+                if (activeItem) {
+                    const targetTop = activeItem.offsetTop - (snoozeWheel.clientHeight / 2) + (activeItem.offsetHeight / 2);
+                    snoozeWheel.scrollTo({ top: targetTop, behavior: 'smooth' });
+                }
+            }
+        };
+
+        const updateSnoozeFromScroll = function () {
+            if (!snoozeItems.length || !snoozeWheel) {
+                return;
+            }
+
+            const wheelRect = snoozeWheel.getBoundingClientRect();
+            const wheelCenter = wheelRect.top + (wheelRect.height / 2);
+            let closest = null;
+            let smallest = Number.POSITIVE_INFINITY;
+
+            snoozeItems.forEach(function (item) {
+                const rect = item.getBoundingClientRect();
+                const itemCenter = rect.top + (rect.height / 2);
+                const distance = Math.abs(itemCenter - wheelCenter);
+                if (distance < smallest) {
+                    smallest = distance;
+                    closest = item;
+                }
+            });
+
+            if (closest) {
+                const value = Number(closest.dataset.snoozeMinute);
+                if (String(value) !== sleepDial.dataset.snoozeMinutes) {
+                    setSnoozeActive(value, false);
+                }
+            }
+        };
+
+        let snoozeSnapTimer = null;
+        const scheduleSnoozeSnap = function () {
+            if (snoozeSnapTimer) {
+                clearTimeout(snoozeSnapTimer);
+            }
+            snoozeSnapTimer = setTimeout(function () {
+                const currentValue = Number(sleepDial.dataset.snoozeMinutes || 15);
+                setSnoozeActive(currentValue, true);
+                persistSleepWindow();
+            }, 120);
+        };
+
+
 
         syncSleepFields();
 
@@ -1016,12 +1218,103 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             alarmPanel.classList.toggle('alarm-disabled', !alarmToggle.checked);
+            if (alarmDayGroup) {
+                alarmDayGroup.classList.toggle('is-disabled', !alarmToggle.checked);
+            }
+            alarmDayToggles.forEach(function (toggle) {
+                toggle.disabled = !alarmToggle.checked;
+            });
+            updateAlarmRepeatDisplay();
             syncSleepFields();
         };
 
         if (alarmToggle) {
             alarmToggle.addEventListener('change', syncAlarmPanelState);
         }
+
+        if (alarmDayToggles.length) {
+            alarmDayToggles.forEach(function (toggle) {
+                toggle.addEventListener('change', function () {
+                    updateAlarmRepeatDisplay();
+                    persistSleepWindow();
+                });
+            });
+        }
+
+        if (repeatOpenButton) {
+            repeatOpenButton.addEventListener('click', function () {
+                openSleepModal(repeatModal);
+            });
+        }
+
+        if (repeatCloseButtons.length) {
+            repeatCloseButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    closeSleepModal(repeatModal);
+                });
+            });
+        }
+
+        if (repeatModal) {
+            repeatModal.addEventListener('click', function (event) {
+                if (event.target && event.target.hasAttribute('data-repeat-close')) {
+                    closeSleepModal(repeatModal);
+                }
+            });
+        }
+
+        if (snoozeOpenButton) {
+            snoozeOpenButton.addEventListener('click', function () {
+                openSleepModal(snoozeModal);
+                syncSnoozeWheelPadding();
+                setSnoozeActive(Number(sleepDial.dataset.snoozeMinutes || 15), true);
+            });
+        }
+
+        if (snoozeCloseButtons.length) {
+            snoozeCloseButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    closeSleepModal(snoozeModal);
+                });
+            });
+        }
+
+        if (snoozeModal) {
+            snoozeModal.addEventListener('click', function (event) {
+                if (event.target && event.target.hasAttribute('data-snooze-close')) {
+                    closeSleepModal(snoozeModal);
+                }
+            });
+        }
+
+        if (snoozeItems.length) {
+            snoozeItems.forEach(function (item) {
+                item.addEventListener('click', function () {
+                    const snoozeValue = Number(item.dataset.snoozeMinute || 15);
+                    setSnoozeActive(snoozeValue, true);
+                    persistSleepWindow();
+                });
+            });
+        }
+
+        if (snoozeWheel) {
+            snoozeWheel.addEventListener('scroll', function () {
+                updateSnoozeFromScroll();
+                scheduleSnoozeSnap();
+            }, { passive: true });
+        }
+
+        window.addEventListener('resize', function () {
+            syncSnoozeWheelPadding();
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && repeatModal && !repeatModal.hidden) {
+                closeSleepModal(repeatModal);
+            } else if (event.key === 'Escape' && snoozeModal && !snoozeModal.hidden) {
+                closeSleepModal(snoozeModal);
+            }
+        });
 
         syncAlarmPanelState();
 

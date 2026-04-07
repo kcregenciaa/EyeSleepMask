@@ -174,19 +174,19 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                                 </label>
                                             </div>
 
-                                            <div class="sleep-setting-row">
-                                                <span class="sleep-setting-name">Alarm ringtone</span>
-                                                <a href="#" class="sleep-setting-link">Sunbreak <i class="bi bi-chevron-right"></i></a>
+                                            <div class="sleep-setting-row sleep-days-row">
+                                                <div class="sleep-setting-label">
+                                                    <span class="sleep-setting-name">Repeat</span>
+                                                </div>
+                                                <button type="button" class="sleep-repeat-link" data-repeat-open>
+                                                    <span data-display="alarm-repeat">Every day</span>
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </button>
                                             </div>
 
                                             <div class="sleep-setting-row">
-                                                <div>
-                                                    <span class="sleep-setting-name">Vibration</span>
-                                                </div>
-                                                <label class="sleep-toggle">
-                                                    <input type="checkbox">
-                                                    <span class="sleep-toggle-slider"></span>
-                                                </label>
+                                                <span class="sleep-setting-name">Alarm ringtone</span>
+                                                <a href="#" class="sleep-setting-link">Sunbreak <i class="bi bi-chevron-right"></i></a>
                                             </div>
 
                                             <div class="sleep-setting-row">
@@ -207,7 +207,10 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
                                             <div class="sleep-setting-row">
                                                 <span class="sleep-setting-name">Snooze</span>
-                                                <a href="#" class="sleep-setting-link">10 min <i class="bi bi-chevron-right"></i></a>
+                                                <button type="button" class="sleep-repeat-link" data-snooze-open>
+                                                    <span data-display="snooze-minutes">15 min</span>
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </button>
                                             </div>
 
                                             <div class="sleep-setting-row">
@@ -218,6 +221,88 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                                     <input type="checkbox" id="sleepReminderToggle" checked>
                                                     <span class="sleep-toggle-slider"></span>
                                                 </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="sleep-repeat-modal" id="repeatModal" hidden>
+                                            <div class="sleep-repeat-backdrop" data-repeat-close></div>
+                                            <div class="sleep-repeat-sheet" role="dialog" aria-modal="true" aria-labelledby="repeatTitle">
+                                                <div class="sleep-repeat-header">
+                                                    <button type="button" class="sleep-repeat-back" data-repeat-close>
+                                                        <i class="bi bi-chevron-left"></i>
+                                                        Back
+                                                    </button>
+                                                    <h3 id="repeatTitle">Repeat</h3>
+                                                </div>
+                                                <div class="sleep-repeat-list" role="group" aria-label="Repeat days" data-repeat-list>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Sunday</span>
+                                                        <input type="checkbox" data-alarm-day="sun" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Monday</span>
+                                                        <input type="checkbox" data-alarm-day="mon" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Tuesday</span>
+                                                        <input type="checkbox" data-alarm-day="tue" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Wednesday</span>
+                                                        <input type="checkbox" data-alarm-day="wed" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Thursday</span>
+                                                        <input type="checkbox" data-alarm-day="thu" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Friday</span>
+                                                        <input type="checkbox" data-alarm-day="fri" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                    <label class="sleep-repeat-item">
+                                                        <span>Every Saturday</span>
+                                                        <input type="checkbox" data-alarm-day="sat" checked>
+                                                        <span class="sleep-repeat-check"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="sleep-repeat-modal" id="snoozeModal" hidden>
+                                            <div class="sleep-repeat-backdrop" data-snooze-close></div>
+                                            <div class="sleep-repeat-sheet" role="dialog" aria-modal="true" aria-labelledby="snoozeTitle">
+                                                <div class="sleep-repeat-header">
+                                                    <button type="button" class="sleep-repeat-back" data-snooze-close>
+                                                        <i class="bi bi-chevron-left"></i>
+                                                        Back
+                                                    </button>
+                                                    <h3 id="snoozeTitle">Snooze</h3>
+                                                </div>
+                                                <div class="snooze-wheel" data-snooze-wheel>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="1">1 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="2">2 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="3">3 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="4">4 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="5">5 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="6">6 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="7">7 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="8">8 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="9">9 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="10">10 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="11">11 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="12">12 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="13">13 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="14">14 min</button>
+                                                    <button type="button" class="snooze-wheel-item" data-snooze-minute="15">15 min</button>
+                                                    <span class="snooze-wheel-highlight" aria-hidden="true"></span>
+                                                    <span class="snooze-wheel-fade" aria-hidden="true"></span>
+                                                </div>
                                             </div>
                                         </div>
 
