@@ -1807,6 +1807,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const dailyPerformanceSummary = document.getElementById('dailyPerformanceSummary');
         const dailyNoteInput = document.getElementById('dailyNoteInput');
         const sleepNowBtn = document.getElementById('sleepNowBtn');
+        const dailyTrackNowBtn = document.getElementById('dailyTrackNowBtn');
+        const dailySleepNowBtn = document.getElementById('dailySleepNowBtn');
         const sleepPopupCharge = document.getElementById('sleepPopupCharge');
         const sleepPopupAudio = document.getElementById('sleepPopupAudio');
         const sleepIntroScreen = document.getElementById('sleepIntroScreen');
@@ -1864,6 +1866,17 @@ document.addEventListener('DOMContentLoaded', function () {
             return pad(hour12) + ':' + pad(minute) + ' ' + period;
         };
 
+        const to12HourFromTimeValue = function (timeValue) {
+            const minutes = toMinutes(timeValue);
+            if (minutes === null) {
+                return '--:--';
+            }
+
+            const hour24 = Math.floor(minutes / 60) % 24;
+            const minute = minutes % 60;
+            return to12Hour(hour24, minute);
+        };
+
         const formatDuration = function (minutesTotal) {
             const hrs = Math.floor(minutesTotal / 60);
             const mins = minutesTotal % 60;
@@ -1900,21 +1913,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const awakeMinutes = 8 + (seed % 22);
             const asleepMinutes = Math.max(inBedMinutes - awakeMinutes, 270);
-
-            const goalHours = 5 + (seed % 4);
-            const alarmStartHour = wakeHour;
-            const alarmStartMinute = wakeMinute;
-            const alarmEndMinuteTotal = wakeInMinutes + 30;
-            const alarmEndHour = Math.floor(alarmEndMinuteTotal / 60) % 24;
-            const alarmEndMinute = alarmEndMinuteTotal % 60;
+            const interval = getSleepInterval();
+            const bedtimeText = to12HourFromTimeValue(interval.bedtime);
+            const alarmStartText = to12HourFromTimeValue(interval.alarmStart);
+            const alarmEndText = to12HourFromTimeValue(interval.alarmEnd);
+            const configuredSleepMinutes = sessionDurationFromInterval(interval);
 
             const sleepQuality = asleepMinutes >= 420 ? 'strong' : (asleepMinutes >= 360 ? 'steady' : 'light');
             const noiseDb = 20 + (seed % 11);
 
             return {
-                bedtime: to12Hour(bedtimeHour % 24, bedtimeMinute),
-                alarm: to12Hour(alarmStartHour % 24, alarmStartMinute) + '-' + to12Hour(alarmEndHour, alarmEndMinute),
-                goal: goalHours + ' h',
+                bedtime: bedtimeText,
+                alarm: alarmStartText + '-' + alarmEndText,
+                goal: formatDuration(configuredSleepMinutes),
                 wentToBed: to12Hour(bedtimeHour % 24, bedtimeMinute),
                 wokeUp: to12Hour(wakeHour % 24, wakeMinute),
                 inBed: formatDuration(inBedMinutes),
@@ -2388,11 +2399,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        if (sleepNowBtn) {
-            sleepNowBtn.addEventListener('click', function () {
+        [sleepNowBtn, dailyTrackNowBtn, dailySleepNowBtn].forEach(function (triggerBtn) {
+            if (!triggerBtn) {
+                return;
+            }
+
+            triggerBtn.addEventListener('click', function () {
                 openSleepNowFlow();
             });
-        }
+        });
 
         if (sleepPopupDoneBtn) {
             sleepPopupDoneBtn.addEventListener('click', function () {

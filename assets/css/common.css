@@ -20,12 +20,29 @@ body {
     min-height: 100%;
 }
 
+html {
+    font-size: clamp(14px, 0.35vw + 13px, 16px);
+}
+
 body {
     margin: 0;
     color: var(--text-main);
     background: radial-gradient(circle at 8% 12%, #253456 0%, #161f33 34%, #0e1422 72%, #0b1020 100%);
     font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
+.container,
+.container-fluid {
+    width: min(100%, 100vw);
 }
 
 .deep-bg {
@@ -79,10 +96,45 @@ body {
     backdrop-filter: blur(8px);
 }
 
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1440px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .glass-nav {
+        border-radius: 16px;
+    }
+}
+
 @media (max-width: 767.98px) {
     .orb-one,
     .orb-two {
         opacity: 0.22;
         filter: blur(24px);
+    }
+
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        min-height: 100dvh;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .container,
+    .container-sm {
+        padding-left: clamp(0.85rem, 2.6vw, 1rem);
+        padding-right: clamp(0.85rem, 2.6vw, 1rem);
+    }
+}
+
+@media (max-width: 420px) {
+    .btn,
+    .btn-lg {
+        width: 100%;
     }
 }

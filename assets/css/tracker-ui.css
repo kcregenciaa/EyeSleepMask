@@ -1,5 +1,6 @@
 .dashboard-page {
     padding-bottom: 1.5rem;
+    overflow-x: clip;
 }
 
 .dashboard-shell {
@@ -8,6 +9,7 @@
     background: rgba(11, 17, 30, 0.68);
     backdrop-filter: blur(6px);
     box-shadow: var(--shadow-outer);
+    min-width: 0;
 }
 
 .sidebar-panel {
@@ -86,6 +88,7 @@
     border: 1px solid rgba(124, 167, 213, 0.2);
     background: linear-gradient(180deg, rgba(26, 38, 61, 0.9), rgba(15, 23, 37, 0.95));
     box-shadow: var(--shadow-inset);
+    min-width: 0;
 }
 
 .panel-card h2 {
@@ -535,6 +538,7 @@
     cursor: grab;
     user-select: none;
     flex-wrap: nowrap;
+    min-width: 0;
 }
 
 .sleep-time-display-combined:active {
@@ -550,7 +554,7 @@
     border-radius: 10px 0 0 10px;
     border: 1px solid rgba(128, 169, 220, 0.32);
     background: rgba(11, 20, 40, 0.95);
-    min-width: 150px;
+    min-width: 126px;
     text-align: center;
     transition: all 0.2s ease;
 }
@@ -569,7 +573,7 @@
     font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: 0.05em;
-    min-width: 50px;
+    min-width: 46px;
     text-align: center;
     cursor: pointer;
     padding: 0.6rem 1rem 0.6rem 0.8rem;
@@ -578,6 +582,10 @@
     user-select: none;
     border: 1px solid rgba(128, 169, 220, 0.32);
     background: rgba(11, 20, 40, 0.95);
+}
+
+.sleep-range-inputs > * {
+    min-width: 0;
 }
 
 .sleep-time-period-editable:hover {
@@ -719,7 +727,7 @@
     justify-content: flex-end;
     flex-wrap: wrap;
     text-align: right;
-    max-width: 70%;
+    max-width: min(70%, 460px);
     border: 0;
     background: transparent;
     padding: 0;
@@ -850,6 +858,7 @@ body.sleep-repeat-open {
     overflow: auto;
     max-height: 100%;
     scrollbar-width: none;
+    overscroll-behavior: contain;
 }
 
 .sleep-repeat-list::-webkit-scrollbar {
@@ -1788,12 +1797,15 @@ body.sleep-repeat-open {
     align-items: center;
     gap: 0.7rem;
     margin-bottom: 0.8rem;
+    min-width: 0;
 }
 
 .daily-week-nav {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    min-width: 0;
+    flex-wrap: wrap;
 }
 
 .daily-week-btn {
@@ -1944,17 +1956,28 @@ body.sleep-repeat-open {
     font-size: clamp(1.2rem, 2.2vw, 2rem);
 }
 
+.daily-diary-line {
+    margin: 0 0 0.75rem;
+    padding: 0;
+    color: #f2f8ff;
+    font-size: clamp(1.2rem, 2.2vw, 2rem);
+    font-weight: 700;
+}
+
 .daily-goal-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 240px);
     gap: 1rem;
+    align-items: center;
 }
 
 .daily-goal-left {
     display: grid;
     gap: 0.95rem;
+    align-content: center;
     padding-right: 0.8rem;
-    border-right: 1px solid rgba(128, 158, 200, 0.24);
+    border-right: 0;
+    margin: 0.2rem 0;
 }
 
 .daily-meta-row p {
@@ -1975,22 +1998,30 @@ body.sleep-repeat-open {
 }
 
 .daily-goal-right {
-    min-width: 220px;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-end;
+    text-align: right;
+    padding-top: 0.15rem;
+    margin-left: -0.25rem;
+    margin: 0.2rem 0;
 }
 
 .daily-goal-caption {
     margin: 0;
     color: #c3d3eb;
     font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
 }
 
 .daily-goal-value {
     display: block;
-    margin: 0.25rem 0 0.8rem;
+    margin: 0.2rem 0 0.7rem;
     font-size: clamp(2rem, 3vw, 2.8rem);
     color: #fcfdff;
     line-height: 1;
@@ -2006,20 +2037,19 @@ body.sleep-repeat-open {
     color: #f8f5ff;
     background: linear-gradient(90deg, #9e53f1, #7768ff);
     box-shadow: 0 14px 28px rgba(55, 32, 94, 0.45);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.15;
+    margin-top: -0.05rem;
 }
 
 .daily-diary-line {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    border-radius: 16px;
-    border: 1px solid rgba(129, 161, 203, 0.2);
-    background: rgba(17, 27, 48, 0.9);
-    color: #eff6ff;
-    padding: 0.85rem 0.95rem;
-    margin-bottom: 0.8rem;
-    font-size: 1.35rem;
-    font-weight: 500;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: #f2f8ff;
+    font-size: clamp(1.2rem, 2.2vw, 2rem);
+    font-weight: 700;
 }
 
 .daily-note-input {
@@ -2259,6 +2289,7 @@ body.sleep-repeat-open {
     gap: 0.25rem;
     align-items: end;
     min-height: 98px;
+    overflow: hidden;
 }
 
 .movement-heat-cell {
@@ -2748,13 +2779,22 @@ body.sleep-flow-active {
     .daily-goal-left {
         border-right: 0;
         padding-right: 0;
-        border-bottom: 1px solid rgba(128, 158, 200, 0.24);
+        border-bottom: 0;
         padding-bottom: 0.9rem;
     }
 
     .daily-goal-right {
         align-items: flex-start;
         min-width: 0;
+        text-align: left;
+    }
+
+    .sleep-repeat-link {
+        max-width: 62%;
+    }
+
+    .sleep-repeat-sheet {
+        width: min(560px, 95vw);
     }
 }
 
@@ -3007,6 +3047,7 @@ body.sleep-flow-active {
 
     .daily-goal-right {
         align-items: stretch;
+        text-align: left;
     }
 
     .daily-goal-caption {
@@ -3057,6 +3098,70 @@ body.sleep-flow-active {
 
     .movement-heat-strip {
         grid-template-columns: repeat(16, minmax(0, 1fr));
+    }
+
+    .daily-program-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .daily-program-toggle {
+        align-self: flex-end;
+    }
+
+    .sleep-repeat-link {
+        max-width: 100%;
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    .sleep-repeat-sheet {
+        width: min(540px, 96vw);
+        border-radius: 18px;
+        padding: 1rem;
+    }
+
+    .sleep-repeat-item {
+        padding: 0.82rem 0.9rem;
+        font-size: 0.95rem;
+    }
+
+    .sleep-time-display-combined {
+        gap: 0;
+    }
+
+    .sleep-time-combined-value {
+        min-width: 0;
+        width: 100%;
+        font-size: 1.8rem;
+        padding: 0.52rem 0.64rem;
+    }
+
+    .sleep-time-period-editable {
+        min-width: 56px;
+        font-size: 1.25rem;
+        padding: 0.52rem 0.64rem;
+    }
+
+    .sleep-wheel-column[data-column="hours"],
+    .sleep-wheel-column[data-column="minutes"],
+    .sleep-wheel-column[data-column="period"] {
+        width: 64px;
+    }
+
+    .sleep-wheel-column[data-column="divider"] {
+        min-width: 20px;
+        font-size: 1.8rem;
+    }
+
+    .sleep-wheel-item {
+        font-size: 1.5rem;
+    }
+
+    .sleep-wheel-selected {
+        width: 54px;
+        min-width: 54px;
+        font-size: 1.65rem;
     }
 
     .sleep-flow-layer {
@@ -3121,5 +3226,58 @@ body.sleep-flow-active {
     .sleep-end-now-btn {
         font-size: 0.92rem;
         padding: 0.62rem 0.9rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .dashboard-shell,
+    .panel-card {
+        border-radius: 16px;
+    }
+
+    .sleep-dial {
+        --dial-size: min(296px, 88vw);
+        --ring-width: 18px;
+        --ring-inset: 18px;
+    }
+
+    .sleep-marker {
+        width: 28px;
+        height: 28px;
+    }
+
+    .sleep-marker i {
+        font-size: 0.74rem;
+    }
+
+    .sleep-repeat-modal {
+        padding: 0.7rem;
+    }
+
+    .sleep-repeat-sheet {
+        max-height: calc(100dvh - 1.4rem);
+    }
+
+    .snooze-wheel {
+        --snooze-item-height: 42px;
+        --snooze-wheel-pad: 100px;
+    }
+
+    .snooze-wheel-item {
+        font-size: 1.16rem;
+    }
+
+    .daily-week-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .daily-week-range {
+        min-width: 116px;
+        font-size: 0.78rem;
+    }
+
+    .daily-day-btn {
+        min-height: 48px;
     }
 }

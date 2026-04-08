@@ -20,6 +20,7 @@
     color: var(--text-soft);
     font-size: 1.05rem;
     max-width: 560px;
+    text-wrap: pretty;
 }
 
 .stats-row {
@@ -156,6 +157,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
+    max-width: 46%;
 }
 
 .chip-left {
@@ -707,6 +709,30 @@
 }
 
 @media (max-width: 767.98px) {
+    .hero-visual {
+        height: clamp(260px, 78vw, 360px);
+    }
+
+    .floating-chip {
+        max-width: 60%;
+        font-size: 0.76rem;
+        padding: 0.38rem 0.62rem;
+    }
+
+    .chip-left {
+        left: 4%;
+        top: 12%;
+    }
+
+    .chip-right {
+        right: 4%;
+        bottom: 10%;
+    }
+
+    .sleep-phone-screen {
+        min-height: 390px;
+    }
+
     .app-visual-right {
         position: relative;
         flex-direction: column;
@@ -729,5 +755,83 @@
     .sleep-phone-card {
         z-index: 2;
         margin-left: 0;
+        width: min(100%, 280px);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-copy {
+        font-size: 0.96rem;
+    }
+
+    .feature-card {
+        padding: 1.15rem;
+    }
+
+    .deepsleepers-app-panel {
+        border-radius: 18px;
+    }
+
+    .sleep-ring-wrap,
+    .sleep-ring {
+        width: 158px;
+        height: 158px;
+    }
+
+    .sleep-ring-inner {
+        inset: 26px;
+    }
+
+    .app-photo-card {
+        margin-bottom: -38px;
+    }
+}
+
+@media (max-width: 420px) {
+    .stats-row {
+        gap: 0.65rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+    }
+
+    .hero-visual {
+        border-radius: 20px;
+    }
+
+    .floating-chip {
+        position: static;
+        max-width: 100%;
+        margin-top: 0.45rem;
+    }
+
+    .chip-left,
+    .chip-right {
+        left: auto;
+        right: auto;
+        top: auto;
+        bottom: auto;
+    }
+
+    .app-visual-right {
+        gap: 0.4rem;
+        padding-top: 0;
+    }
+
+    .app-photo-card {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .sleep-phone-card {
+        width: 100%;
+        border-radius: 24px;
+    }
+
+    .sleep-phone-screen {
+        min-height: 350px;
+        border-radius: 18px;
+        padding: 0.9rem 0.7rem 0.8rem;
     }
 }
