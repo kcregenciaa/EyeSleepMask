@@ -67,6 +67,14 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     </div>
 
                     <article class="panel-card discover-card p-3 p-lg-4">
+                        <div class="discover-soon-banner" role="status" aria-live="polite">
+                            <span class="discover-soon-pill">Coming Soon</span>
+                            <div>
+                                <strong>Discover is in preview.</strong>
+                                <p class="mb-0">The tab is here, but these features are not available yet.</p>
+                            </div>
+                        </div>
+
                         <div class="discover-tabs" role="tablist" aria-label="Discover categories">
                             <button class="discover-tab active" type="button" data-discover-tab="sounds" aria-selected="true">Sounds</button>
                             <button class="discover-tab" type="button" data-discover-tab="music" aria-selected="false">Music</button>
@@ -179,17 +187,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 </article>
                             </div>
 
-                            <div class="player-bar">
-                                <div class="player-thumb"></div>
-                                <div class="player-info">
-                                    <h4>Hypnotic piano</h4>
-                                    <p><i class="bi bi-clock-history"></i> 29:42</p>
-                                </div>
-                                <div class="player-actions">
-                                    <button type="button" class="player-btn" aria-label="Like"><i class="bi bi-heart"></i></button>
-                                    <button type="button" class="player-btn" aria-label="Remove"><i class="bi bi-x-lg"></i></button>
-                                </div>
-                            </div>
                         </section>
                     </article>
                 </section>
