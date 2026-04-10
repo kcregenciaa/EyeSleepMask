@@ -109,7 +109,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <div class="col-12 col-xl-8">
                                 <article class="panel-card p-3 p-lg-4 movement-panel h-100">
                                     <div class="movement-panel-head">
-                                        <h2 class="h5 mb-0">Night movement pattern</h2>
+                                        <h2 class="h5 mb-0">Night Movement Pattern</h2>
                                         <span class="movement-muted">15-minute intervals</span>
                                     </div>
                                     <canvas id="movementPatternChart" height="180"></canvas>
