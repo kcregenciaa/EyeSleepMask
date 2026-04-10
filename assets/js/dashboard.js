@@ -2500,7 +2500,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const movementTurns = document.getElementById('movementTurns');
         const movementStillPeriod = document.getElementById('movementStillPeriod');
         const movementInsight = document.getElementById('movementInsight');
-        const movementHeatStrip = document.getElementById('movementHeatStrip');
 
         const movementPatternChart = document.getElementById('movementPatternChart');
         const movementStyleChart = document.getElementById('movementStyleChart');
@@ -2584,31 +2583,6 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         };
 
-        const renderHeatStrip = function (points) {
-            if (!movementHeatStrip) {
-                return;
-            }
-
-            movementHeatStrip.innerHTML = '';
-
-            points.forEach(function (value) {
-                const cell = document.createElement('span');
-                cell.className = 'movement-heat-cell';
-
-                if (value <= 33) {
-                    cell.classList.add('is-calm');
-                } else if (value >= 67) {
-                    cell.classList.add('is-restless');
-                } else {
-                    cell.classList.add('is-active');
-                }
-
-                cell.style.height = (18 + Math.round((value / 100) * 72)) + 'px';
-                cell.style.opacity = String(0.42 + (value / 170));
-                movementHeatStrip.appendChild(cell);
-            });
-        };
-
         const renderMovement = function (dateValue) {
             const movement = buildMovementData(dateValue);
             const profile = classifySleeper(movement.points);
@@ -2663,76 +2637,77 @@ document.addEventListener('DOMContentLoaded', function () {
                 movementInsight.textContent = profile.insight + ' Volatility index: ' + profile.volatility + '.';
             }
 
-            renderHeatStrip(movement.points);
-
             if (typeof Chart !== 'undefined' && movementPatternChart) {
                 if (patternChartInstance) {
-                    patternChartInstance.destroy();
-                }
-
-                patternChartInstance = new Chart(movementPatternChart, {
-                    type: 'line',
-                    data: {
-                        labels: movement.labels,
-                        datasets: [{
-                            label: 'Movement intensity',
-                            data: movement.points,
-                            borderColor: '#53d0ff',
-                            backgroundColor: 'rgba(83, 208, 255, 0.18)',
-                            fill: true,
-                            tension: 0.32,
-                            pointRadius: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                min: 0,
-                                max: 100,
-                                grid: { color: 'rgba(121, 167, 217, 0.18)' },
-                                ticks: { color: '#99afc8' }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: {
-                                    color: '#99afc8',
-                                    maxTicksLimit: 8
+                    patternChartInstance.data.labels = movement.labels;
+                    patternChartInstance.data.datasets[0].data = movement.points;
+                    patternChartInstance.update('none');
+                } else {
+                    patternChartInstance = new Chart(movementPatternChart, {
+                        type: 'line',
+                        data: {
+                            labels: movement.labels,
+                            datasets: [{
+                                label: 'Movement intensity',
+                                data: movement.points,
+                                borderColor: '#53d0ff',
+                                backgroundColor: 'rgba(83, 208, 255, 0.18)',
+                                fill: true,
+                                tension: 0.32,
+                                pointRadius: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: {
+                                    min: 0,
+                                    max: 100,
+                                    grid: { color: 'rgba(121, 167, 217, 0.18)' },
+                                    ticks: { color: '#99afc8' }
+                                },
+                                x: {
+                                    grid: { display: false },
+                                    ticks: {
+                                        color: '#99afc8',
+                                        maxTicksLimit: 8
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
 
             if (typeof Chart !== 'undefined' && movementStyleChart) {
                 if (styleChartInstance) {
-                    styleChartInstance.destroy();
-                }
-
-                styleChartInstance = new Chart(movementStyleChart, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Still', 'Active'],
-                        datasets: [{
-                            data: [profile.stillPercent, profile.activePercent],
-                            backgroundColor: ['#5ad4ff', '#8d65ff'],
-                            borderWidth: 0,
-                            hoverOffset: 3
-                        }]
-                    },
-                    options: {
-                        cutout: '70%',
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: '#d4e3f6'
+                    styleChartInstance.data.datasets[0].data = [profile.stillPercent, profile.activePercent];
+                    styleChartInstance.update('none');
+                } else {
+                    styleChartInstance = new Chart(movementStyleChart, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Still', 'Active'],
+                            datasets: [{
+                                data: [profile.stillPercent, profile.activePercent],
+                                backgroundColor: ['#5ad4ff', '#8d65ff'],
+                                borderWidth: 0,
+                                hoverOffset: 3
+                            }]
+                        },
+                        options: {
+                            cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: '#d4e3f6'
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
         };
 

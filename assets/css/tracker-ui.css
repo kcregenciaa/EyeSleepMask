@@ -2370,35 +2370,6 @@ body.sleep-repeat-open {
     color: #ebf4ff;
 }
 
-.movement-heat-strip {
-    display: grid;
-    grid-template-columns: repeat(32, minmax(0, 1fr));
-    gap: 0.25rem;
-    align-items: end;
-    min-height: 98px;
-    overflow: hidden;
-}
-
-.movement-heat-cell {
-    width: 100%;
-    border-radius: 999px;
-    min-height: 14px;
-    background: linear-gradient(180deg, rgba(30, 58, 96, 0.65), rgba(20, 39, 66, 0.9));
-    border: 1px solid rgba(133, 172, 222, 0.16);
-}
-
-.movement-heat-cell.is-calm {
-    background: linear-gradient(180deg, rgba(43, 182, 154, 0.78), rgba(24, 109, 99, 0.92));
-}
-
-.movement-heat-cell.is-active {
-    background: linear-gradient(180deg, rgba(167, 104, 249, 0.84), rgba(104, 62, 173, 0.94));
-}
-
-.movement-heat-cell.is-restless {
-    background: linear-gradient(180deg, rgba(240, 134, 112, 0.88), rgba(168, 76, 63, 0.95));
-}
-
 body.sleep-flow-active {
     overflow: hidden;
 }

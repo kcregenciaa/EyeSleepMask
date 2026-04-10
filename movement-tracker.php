@@ -126,13 +126,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             </div>
                         </div>
 
-                        <article class="panel-card p-3 p-lg-4 movement-panel">
-                            <div class="movement-panel-head mb-3">
-                                <h2 class="h5 mb-0">Body movement heat strip</h2>
-                                <span class="movement-muted">Darker bars mean calmer sleep</span>
-                            </div>
-                            <div class="movement-heat-strip" id="movementHeatStrip"></div>
-                        </article>
                     </div>
                 </section>
             </div>

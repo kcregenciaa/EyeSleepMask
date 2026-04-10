@@ -322,15 +322,17 @@
 }
 
 .app-visual-right {
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-items: end;
+    align-items: end;
     gap: 1rem;
-    flex-wrap: nowrap;
+    width: 100%;
 }
 
 .app-photo-card {
-    width: min(100%, 220px);
+    width: 100%;
+    max-width: 220px;
     border-radius: 18px;
     overflow: hidden;
     border: 1px solid rgba(146, 194, 246, 0.24);
@@ -413,7 +415,8 @@
 }
 
 .sleep-phone-card {
-    width: min(100%, 228px);
+    width: 100%;
+    max-width: 228px;
     border-radius: 32px;
     border: 1px solid rgba(145, 169, 203, 0.36);
     background: linear-gradient(165deg, rgba(42, 52, 70, 0.72), rgba(6, 10, 18, 0.98) 18%, rgba(5, 8, 15, 0.99));
@@ -699,8 +702,8 @@
     }
 
     .app-visual-right {
-        justify-content: center;
-        flex-wrap: wrap;
+        grid-template-columns: 1fr;
+        justify-items: center;
     }
 
     .video-template-copy {
@@ -735,15 +738,14 @@
 
     .app-visual-right {
         position: relative;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
+        grid-template-columns: 1fr;
+        justify-items: center;
         gap: 0;
         padding-top: 0.4rem;
     }
 
     .app-photo-card {
-        width: min(100%, 270px);
+        max-width: 270px;
         margin-bottom: -56px;
         z-index: 1;
     }
@@ -755,7 +757,7 @@
     .sleep-phone-card {
         z-index: 2;
         margin-left: 0;
-        width: min(100%, 280px);
+        max-width: 280px;
     }
 }
 
@@ -820,12 +822,12 @@
     }
 
     .app-photo-card {
-        width: 100%;
+        max-width: none;
         margin-bottom: 0;
     }
 
     .sleep-phone-card {
-        width: 100%;
+        max-width: none;
         border-radius: 24px;
     }
 
