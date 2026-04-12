@@ -26,7 +26,7 @@ if ($userName === '') {
     $userName = 'Sleeper';
 }
 
-$pageTitle = 'DeepSleepers | Snoring Tracker';
+$pageTitle = 'DeepSleepers | Device';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
@@ -46,7 +46,8 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
-                            <a class="nav-link active" href="#"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
+                            <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
+                            <a class="nav-link active" href="#"><i class="bi bi-cpu"></i> Device</a>
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
                         <a href="?action=logout" class="nav-link logout-btn mt-auto d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -55,10 +56,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
                 <section class="col-12 col-lg-9 col-xl-10">
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-                        <div>
-                            <p class="daily-date mb-1">Track your snoring activity</p>
-                            <h1 class="h3 mb-0 text-light">Snoring Tracker for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        </div>
+                        <h1 class="h3 mb-0 text-light">Device for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
                         <div class="top-actions d-flex align-items-center gap-2">
                             <a href="#" class="notif-btn" aria-label="Notifications">
                                 <i class="bi bi-bell"></i>
@@ -70,43 +68,26 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         </div>
                     </div>
 
-                    <article class="panel-card p-3 p-lg-4">
-                        <div class="discover-soon-banner mb-3" role="status" aria-live="polite">
-                            <span class="discover-soon-pill">Coming Soon</span>
-                            <div>
-                                <strong>Snoring Tracker is in preview.</strong>
-                                <p class="mb-0">Live board telemetry is ready below while full insights are being built.</p>
-                            </div>
+                    <div class="row g-3 g-lg-4" id="deviceLivePanel">
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <article class="panel-card p-3 p-lg-4 h-100">
+                                <p class="movement-muted mb-1">Battery level</p>
+                                <h2 class="h3 text-light mb-1" id="deviceBatteryValue">--%</h2>
+                                <p class="movement-insight mb-0" id="deviceBatteryStatus">Waiting for live device data...</p>
+                            </article>
                         </div>
-
-                        <div class="row g-3" id="arduinoLivePanel">
-                            <div class="col-12 col-md-4">
-                                <div class="movement-metric-box">
-                                    <p>Snore level</p>
-                                    <strong id="liveSnoreLevel">0</strong>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="movement-metric-box">
-                                    <p>Movement</p>
-                                    <strong id="liveMovement">0</strong>
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <div class="movement-metric-box">
-                                    <p>Battery</p>
-                                    <strong id="liveBattery">0%</strong>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <p class="movement-insight mb-0" id="liveDeviceStatus">Waiting for XIAO nRF52840 data...</p>
-                            </div>
+                        <div class="col-12 col-md-6 col-xl-8">
+                            <article class="panel-card p-3 p-lg-4 h-100">
+                                <p class="movement-muted mb-1">Device telemetry</p>
+                                <h2 class="h5 text-light mb-2" id="deviceName">Device: --</h2>
+                                <p class="movement-insight mb-2" id="deviceConnectionState">Connection: --</p>
+                                <p class="movement-insight mb-0" id="deviceLastUpdate">Last update: --</p>
+                            </article>
                         </div>
-                    </article>
+                    </div>
                 </section>
             </div>
         </div>
     </div>
-    <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>
-</body>
-</html>
+
+<?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>

@@ -9,7 +9,7 @@ $env:MOTION_URL="http://localhost:8000/api/motion-data.php"
 python .\\bridge.py
 """
 
-Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'bridge.py' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+# Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'bridge.py' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
 import json
 import os

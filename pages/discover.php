@@ -47,6 +47,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
                             <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
+                            <a class="nav-link" href="device.php"><i class="bi bi-cpu"></i> Device</a>
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
                         <a href="?action=logout" class="nav-link logout-btn mt-auto d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>

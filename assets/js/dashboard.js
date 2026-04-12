@@ -3217,4 +3217,88 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchLiveMetrics();
         setInterval(fetchLiveMetrics, 2000);
     }
+
+    const deviceLivePanel = document.getElementById('deviceLivePanel');
+    if (deviceLivePanel) {
+        const deviceBatteryValue = document.getElementById('deviceBatteryValue');
+        const deviceBatteryStatus = document.getElementById('deviceBatteryStatus');
+        const deviceName = document.getElementById('deviceName');
+        const deviceConnectionState = document.getElementById('deviceConnectionState');
+        const deviceLastUpdate = document.getElementById('deviceLastUpdate');
+        const connectionFreshMs = 10000;
+
+        const isTelemetryFresh = function (payload) {
+            if (!payload || payload.ok === false) {
+                return false;
+            }
+
+            const stamp = payload.timestamp || payload.receivedAt;
+            if (!stamp) {
+                return false;
+            }
+
+            const parsed = Date.parse(stamp);
+            if (Number.isNaN(parsed)) {
+                return false;
+            }
+
+            return (Date.now() - parsed) <= connectionFreshMs;
+        };
+
+        const renderDeviceLiveMetrics = function (payload) {
+            const battery = Number(payload && payload.battery);
+            const batterySafe = Number.isFinite(battery) ? Math.max(0, Math.min(100, Math.round(battery))) : null;
+            const stamp = payload && (payload.timestamp || payload.receivedAt) ? (payload.timestamp || payload.receivedAt) : null;
+            const device = payload && payload.device ? payload.device : 'unknown';
+            const connected = isTelemetryFresh(payload);
+
+            if (deviceBatteryValue) {
+                deviceBatteryValue.textContent = batterySafe === null ? '--%' : (String(batterySafe) + '%');
+            }
+
+            if (deviceBatteryStatus) {
+                if (batterySafe === null) {
+                    deviceBatteryStatus.textContent = 'Waiting for battery telemetry...';
+                } else if (batterySafe <= 20) {
+                    deviceBatteryStatus.textContent = 'Low battery, consider charging soon.';
+                } else if (batterySafe <= 50) {
+                    deviceBatteryStatus.textContent = 'Battery is moderate.';
+                } else {
+                    deviceBatteryStatus.textContent = 'Battery is healthy.';
+                }
+            }
+
+            if (deviceName) {
+                deviceName.textContent = 'Device: ' + device;
+            }
+
+            if (deviceConnectionState) {
+                deviceConnectionState.textContent = connected ? 'Connection: Connected' : 'Connection: Disconnected';
+            }
+
+            if (deviceLastUpdate) {
+                deviceLastUpdate.textContent = 'Last update: ' + (stamp || '--');
+            }
+        };
+
+        const fetchDeviceLiveMetrics = function () {
+            fetch('api/live-metrics.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        renderDeviceLiveMetrics({});
+                        return;
+                    }
+                    renderDeviceLiveMetrics(payload);
+                })
+                .catch(function () {
+                    if (deviceBatteryStatus) {
+                        deviceBatteryStatus.textContent = 'Unable to reach live API. Start Apache and the serial bridge.';
+                    }
+                });
+        };
+
+        fetchDeviceLiveMetrics();
+        setInterval(fetchDeviceLiveMetrics, 2000);
+    }
 });
