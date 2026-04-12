@@ -46,6 +46,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
                             <a class="nav-link active" href="#"><i class="bi bi-activity"></i> Movement Tracker</a>
+                            <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
                         <a href="?action=logout" class="nav-link logout-btn mt-auto d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -90,8 +91,8 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             </div>
                             <div class="movement-hero-metrics">
                                 <div class="movement-metric-box">
-                                    <p>Movement score</p>
-                                    <strong id="movementScore">0</strong>
+                                    <p>Movement state</p>
+                                    <strong id="movementScore">Calm</strong>
                                 </div>
                                 <div class="movement-metric-box">
                                     <p>Turn events</p>
@@ -140,3 +141,5 @@ include __DIR__ . '/includes/bootstrap-head.php';
     </div>
 
 <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>
+
+

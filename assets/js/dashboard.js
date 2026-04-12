@@ -2804,7 +2804,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (movementScore) {
-                movementScore.textContent = String(profile.avg);
+                movementScore.textContent = profile.level >= 2 ? 'Active' : 'Calm';
             }
 
             if (movementTurns) {
@@ -3070,5 +3070,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+    }
+
+    const livePanel = document.getElementById('arduinoLivePanel');
+    if (livePanel) {
+        const liveSnoreLevel = document.getElementById('liveSnoreLevel');
+        const liveMovement = document.getElementById('liveMovement');
+        const liveBattery = document.getElementById('liveBattery');
+        const liveDeviceStatus = document.getElementById('liveDeviceStatus');
+
+        const renderLiveMetrics = function (payload) {
+            if (liveSnoreLevel) {
+                liveSnoreLevel.textContent = String(payload.snoreLevel ?? 0);
+            }
+            if (liveMovement) {
+                liveMovement.textContent = String(payload.movement ?? 0);
+            }
+            if (liveBattery) {
+                liveBattery.textContent = String(payload.battery ?? 0) + '%';
+            }
+            if (liveDeviceStatus) {
+                const stamp = payload.timestamp || payload.receivedAt || 'n/a';
+                liveDeviceStatus.textContent = 'Device: ' + (payload.device || 'unknown') + ' | Last update: ' + stamp;
+            }
+        };
+
+        const fetchLiveMetrics = function () {
+            fetch('api/live-metrics.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) { renderLiveMetrics(payload || {}); })
+                .catch(function () {
+                    if (liveDeviceStatus) {
+                        liveDeviceStatus.textContent = 'Unable to reach live API. Start Apache and the serial bridge.';
+                    }
+                });
+        };
+
+        fetchLiveMetrics();
+        setInterval(fetchLiveMetrics, 2000);
     }
 });

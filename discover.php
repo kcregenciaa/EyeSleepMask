@@ -46,6 +46,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
+                            <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
                         <a href="?action=logout" class="nav-link logout-btn mt-auto d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -78,7 +79,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <div class="discover-tabs" role="tablist" aria-label="Discover categories">
                             <button class="discover-tab active" type="button" data-discover-tab="sounds" aria-selected="true">Sounds</button>
                             <button class="discover-tab" type="button" data-discover-tab="music" aria-selected="false">Music</button>
-                            <button class="discover-tab" type="button" data-discover-tab="snoring" aria-selected="false">Snoring Patterns</button>
                             <button class="discover-tab" type="button" data-discover-tab="mixes" aria-selected="false">Mixes</button>
                         </div>
 
@@ -142,42 +142,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             </div>
                         </section>
 
-                        <section class="discover-panel" data-discover-panel="snoring" hidden>
-                            <div class="discover-preview-head">
-                                <div>
-                                    <h2 class="h4 mb-1">Snoring Patterns</h2>
-                                    <p class="discover-preview-subtitle mb-0">Pattern tracking and snore insights are coming soon.</p>
-                                </div>
-                                <span class="discover-soon-pill">Coming Soon</span>
-                            </div>
-
-                            <article class="snoring-hero">
-                                <div class="snoring-hero-content">
-                                    <span class="snoring-badge">Preview</span>
-                                    <h3>See how snoring patterns could map through the night.</h3>
-                                    <p>We’re building a calmer way to spot recurring snore bursts, sleep positions, and timing.</p>
-                                </div>
-                            </article>
-
-                            <div class="snoring-pattern-grid" role="list" aria-label="Snoring pattern previews">
-                                <article class="snoring-pattern-card" role="listitem">
-                                    <span class="snoring-pattern-tag">Light</span>
-                                    <strong>Short bursts</strong>
-                                    <p>Intermittent snoring near sleep onset.</p>
-                                </article>
-                                <article class="snoring-pattern-card" role="listitem">
-                                    <span class="snoring-pattern-tag">Medium</span>
-                                    <strong>Mid-night peaks</strong>
-                                    <p>Repeating bursts during deep sleep cycles.</p>
-                                </article>
-                                <article class="snoring-pattern-card" role="listitem">
-                                    <span class="snoring-pattern-tag">High</span>
-                                    <strong>Continuous pattern</strong>
-                                    <p>Longer stretches of snoring with minimal gaps.</p>
-                                </article>
-                            </div>
-                        </section>
-
                         <section class="discover-panel" data-discover-panel="mixes" hidden>
                             <div class="mixes-head">
                                 <div>
@@ -232,3 +196,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
     </div>
 
 <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>
+
+
+
