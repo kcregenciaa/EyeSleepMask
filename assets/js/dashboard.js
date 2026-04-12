@@ -2525,54 +2525,49 @@ document.addEventListener('DOMContentLoaded', function () {
         let latestMovement = null;
         let selectedTelemetryIndex = -1;
 
-        const seeded = function (seed) {
-            const x = Math.sin(seed) * 10000;
-            return x - Math.floor(x);
+        const filterRecordsByDate = function (records, dateValue) {
+            if (!Array.isArray(records)) {
+                return [];
+            }
+
+            if (!dateValue) {
+                return records;
+            }
+
+            return records.filter(function (record) {
+                const stamp = record && record.time ? String(record.time) : '';
+                if (!stamp) {
+                    return false;
+                }
+
+                const parsed = new Date(stamp);
+                if (Number.isNaN(parsed.getTime())) {
+                    return false;
+                }
+
+                const yyyy = parsed.getFullYear();
+                const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const dd = String(parsed.getDate()).padStart(2, '0');
+                return (yyyy + '-' + mm + '-' + dd) === dateValue;
+            });
         };
 
-        const buildMovementData = function (dateValue, bedtimeValue, alarmEndValue) {
-            const seedBase = Number(String(dateValue || '').replace(/-/g, '')) || 20260327;
-            const points = [];
+        const mapMovementSeries = function (records) {
             const labels = [];
-            const sampleIntervalMinutes = 15;
-            const defaultPointCount = 32;
+            const points = [];
 
-            const bedtimeMinutes = bedtimeValue && bedtimeValue.includes(':') ? toMinutes(bedtimeValue) : null;
-            const alarmMinutes = alarmEndValue && alarmEndValue.includes(':') ? toMinutes(alarmEndValue) : null;
-
-            let sleepDurationMinutes = null;
-            if (bedtimeMinutes !== null && alarmMinutes !== null) {
-                sleepDurationMinutes = (alarmMinutes - bedtimeMinutes + 1440) % 1440;
-                if (sleepDurationMinutes === 0) {
-                    sleepDurationMinutes = 1440;
+            records.forEach(function (record) {
+                const motionValue = Number(record && record.motion);
+                if (!Number.isFinite(motionValue)) {
+                    return;
                 }
-            }
 
-            const hasSleepWindow = bedtimeMinutes !== null && sleepDurationMinutes !== null;
-            const pointCount = hasSleepWindow
-                ? (Math.max(1, Math.ceil(sleepDurationMinutes / sampleIntervalMinutes)) + 1)
-                : defaultPointCount;
-            const waveDenominator = Math.max(pointCount - 1, 1);
-
-            for (let i = 0; i < pointCount; i += 1) {
-                const raw = seeded(seedBase + (i * 17));
-                const wave = (Math.sin((i / waveDenominator) * Math.PI * 4) + 1) / 2;
-                const value = Math.round((raw * 68) + (wave * 20));
-                points.push(Math.max(4, Math.min(98, value)));
-
-                if (hasSleepWindow) {
-                    const offsetMinutes = Math.min(i * sampleIntervalMinutes, sleepDurationMinutes);
-                    const timeMinutes = (bedtimeMinutes + offsetMinutes) % 1440;
-                    const h = Math.floor(timeMinutes / 60);
-                    const m = timeMinutes % 60;
-                    labels.push(formatTime(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')));
-                } else {
-                    const totalMins = sampleIntervalMinutes * i;
-                    const h = Math.floor(totalMins / 60);
-                    const m = totalMins % 60;
-                    labels.push(formatTime(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')));
-                }
-            }
+                const clamped = Math.max(0, Math.min(100, Math.round(motionValue)));
+                const stamp = record && record.time ? record.time : null;
+                const label = stamp ? new Date(stamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+                labels.push(label);
+                points.push(clamped);
+            });
 
             return {
                 labels: labels,
@@ -2580,11 +2575,93 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         };
 
-        const classifySleeper = function (points) {
+        const longestStillSecondsFromRecords = function (records, stillThreshold) {
+            if (!Array.isArray(records) || records.length === 0) {
+                return 0;
+            }
+
+            const normalized = records.map(function (record) {
+                const motionValue = Number(record && record.motion);
+                const stamp = record && record.time ? Date.parse(record.time) : NaN;
+                if (!Number.isFinite(motionValue) || Number.isNaN(stamp)) {
+                    return null;
+                }
+
+                return {
+                    motion: Math.max(0, Math.min(100, Math.round(motionValue))),
+                    stamp: stamp
+                };
+            }).filter(function (item) {
+                return item !== null;
+            }).sort(function (a, b) {
+                return a.stamp - b.stamp;
+            });
+
+            if (!normalized.length) {
+                return 0;
+            }
+
+            const gaps = [];
+            for (let i = 1; i < normalized.length; i += 1) {
+                const delta = Math.round((normalized[i].stamp - normalized[i - 1].stamp) / 1000);
+                if (delta > 0 && delta < 60) {
+                    gaps.push(delta);
+                }
+            }
+
+            const sampleSeconds = gaps.length
+                ? Math.max(1, Math.round(gaps.reduce(function (sum, v) { return sum + v; }, 0) / gaps.length))
+                : 2;
+
+            let longest = 0;
+            let current = 0;
+            let previousStill = false;
+
+            normalized.forEach(function (item, index) {
+                const isStill = item.motion <= stillThreshold;
+
+                if (!isStill) {
+                    current = 0;
+                    previousStill = false;
+                    return;
+                }
+
+                if (!previousStill) {
+                    current = sampleSeconds;
+                } else {
+                    const delta = Math.max(1, Math.round((item.stamp - normalized[index - 1].stamp) / 1000));
+                    current += Math.min(delta, 60);
+                }
+
+                if (current > longest) {
+                    longest = current;
+                }
+
+                previousStill = true;
+            });
+
+            return longest;
+        };
+
+        const classifySleeper = function (points, records) {
+            if (!points.length) {
+                return {
+                    type: 'Waiting for device data',
+                    level: 1,
+                    avg: 0,
+                    turns: 0,
+                    longestStillSeconds: 0,
+                    volatility: 0,
+                    needlePos: '50%',
+                    stillPercent: 0,
+                    activePercent: 0,
+                    insight: 'No telemetry received yet from your Seeed device.'
+                };
+            }
+
             const avg = points.reduce(function (sum, p) { return sum + p; }, 0) / points.length;
             const turns = points.filter(function (p) { return p >= 66; }).length;
-            const stillWindows = points.filter(function (p) { return p <= 30; }).length;
-            const longestStill = stillWindows * 15;
+            const longestStillSeconds = longestStillSecondsFromRecords(records || [], 30);
             const peak = Math.max.apply(null, points);
             const trough = Math.min.apply(null, points);
             const volatility = peak - trough;
@@ -2611,13 +2688,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 level: level,
                 avg: Math.round(avg),
                 turns: turns,
-                longestStill: longestStill,
+                longestStillSeconds: longestStillSeconds,
                 volatility: volatility,
                 needlePos: needlePos,
                 stillPercent: Math.round((points.filter(function (p) { return p <= 40; }).length / points.length) * 100),
                 activePercent: Math.round((points.filter(function (p) { return p > 40; }).length / points.length) * 100),
                 insight: insight
             };
+        };
+
+        const formatStillDuration = function (seconds) {
+            const safe = Math.max(0, Math.round(Number(seconds) || 0));
+            const mins = Math.floor(safe / 60);
+            const secs = safe % 60;
+
+            if (mins === 0) {
+                return secs + ' sec';
+            }
+
+            return mins + ' min ' + String(secs).padStart(2, '0') + ' sec';
         };
 
         const getTipOffSeries = function (points, tipOffIndex) {
@@ -2627,7 +2716,12 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const updateTelemetryRangeText = function (labels, points, tipOffIndex) {
-            if (!movementTelemetryRange || labels.length === 0) {
+            if (!movementTelemetryRange) {
+                return;
+            }
+
+            if (labels.length === 0) {
+                movementTelemetryRange.textContent = 'No telemetry from device yet.';
                 return;
             }
 
@@ -2745,27 +2839,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         };
 
-        const renderMovement = function (dateValue) {
-            let bedtimeValue = '';
-            let alarmEndValue = '';
-
-            try {
-                const sleepWindowStorageKey = 'sleepTrackerWindow';
-                const storedWindow = localStorage.getItem(sleepWindowStorageKey);
-                if (storedWindow) {
-                    const parsedWindow = JSON.parse(storedWindow);
-                    if (parsedWindow && typeof parsedWindow === 'object') {
-                        bedtimeValue = parsedWindow.bedtime || '';
-                        alarmEndValue = parsedWindow.alarmEnd || '';
-                    }
-                }
-            } catch (error) {
-                // Ignore storage read errors.
-            }
-
-            const movement = buildMovementData(dateValue, bedtimeValue, alarmEndValue);
+        const renderMovement = function (records) {
+            const movement = mapMovementSeries(records || []);
             latestMovement = movement;
-            const profile = classifySleeper(movement.points);
+            const profile = classifySleeper(movement.points, records || []);
 
             renderTelemetryTimeline(movement.labels, movement.points);
 
@@ -2804,7 +2881,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (movementScore) {
-                movementScore.textContent = profile.level >= 2 ? 'Active' : 'Calm';
+                movementScore.textContent = movement.points.length ? (profile.level >= 2 ? 'Active' : 'Calm') : '--';
             }
 
             if (movementTurns) {
@@ -2812,11 +2889,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (movementStillPeriod) {
-                movementStillPeriod.textContent = profile.longestStill + ' min';
+                movementStillPeriod.textContent = movement.points.length ? formatStillDuration(profile.longestStillSeconds) : '--';
             }
 
             if (movementInsight) {
-                movementInsight.textContent = profile.insight + ' Volatility index: ' + profile.volatility + '.';
+                movementInsight.textContent = movement.points.length
+                    ? (profile.insight + ' Volatility index: ' + profile.volatility + '.')
+                    : profile.insight;
             }
 
             if (typeof Chart !== 'undefined' && movementPatternChart) {
@@ -2893,9 +2972,34 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        const fetchMovementFromApi = function (selectedDate) {
+            fetch('api/motion-data.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        renderMovement([]);
+                        return;
+                    }
+
+                    const allRecords = Array.isArray(payload.data) ? payload.data : [];
+                    const filtered = filterRecordsByDate(allRecords, selectedDate);
+
+                    if (filtered.length) {
+                        renderMovement(filtered);
+                        return;
+                    }
+
+                    // Show the latest real telemetry if selected date has no entries.
+                    renderMovement(allRecords.slice(-50));
+                })
+                .catch(function () {
+                    renderMovement([]);
+                });
+        };
+
         if (movementDateInput) {
             movementDateInput.addEventListener('change', function () {
-                renderMovement(movementDateInput.value || dateForInput);
+                fetchMovementFromApi(movementDateInput.value || dateForInput);
             });
         }
 
@@ -2938,7 +3042,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        renderMovement(dateForInput);
+        fetchMovementFromApi(dateForInput);
+        setInterval(function () {
+            const selectedDate = movementDateInput ? (movementDateInput.value || dateForInput) : dateForInput;
+            fetchMovementFromApi(selectedDate);
+        }, 2000);
     }
 
     const chartDefaults = {

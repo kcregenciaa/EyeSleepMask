@@ -4,13 +4,8 @@ header('Content-Type: application/json; charset=utf-8');
 $dataFile = __DIR__ . '/../data/arduino-latest.json';
 if (!file_exists($dataFile)) {
     echo json_encode([
-        'ok' => true,
-        'device' => 'not-connected',
-        'snoreLevel' => 0,
-        'movement' => 0,
-        'battery' => 0,
-        'timestamp' => null,
-        'receivedAt' => null
+        'ok' => false,
+        'error' => 'No device data yet'
     ]);
     exit;
 }

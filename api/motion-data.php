@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $encoded = json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    if ($encoded === false || file_put_contents($dataFile, $encoded . PHP_EOL, LOCK_EX) === false) {
+    if ($encoded === false || file_put_contents($dataFile, $encoded, LOCK_EX) === false) {
         http_response_code(500);
         echo json_encode(['ok' => false, 'error' => 'Write failed']);
         exit;
