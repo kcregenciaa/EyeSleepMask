@@ -2358,6 +2358,67 @@ body.sleep-repeat-open {
         linear-gradient(180deg, rgba(24, 36, 59, 0.95), rgba(14, 22, 39, 0.97));
 }
 
+.movement-loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.movement-loading-overlay span {
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(140, 191, 245, 0.4);
+    background: linear-gradient(135deg, rgba(18, 32, 56, 0.85), rgba(12, 20, 38, 0.95));
+    color: #f2f7ff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 22px rgba(4, 9, 22, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(6px);
+}
+
+.movement-no-data .movement-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.movement-no-data .movement-loading-overlay {
+    opacity: 1;
+}
+
+.movement-no-data .movement-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(120% 90% at 15% 0%, rgba(110, 180, 255, 0.22), transparent 55%),
+        radial-gradient(90% 80% at 80% 20%, rgba(160, 130, 255, 0.2), transparent 60%);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    animation: movement-panel-pulse 2.6s ease-in-out infinite;
+}
+
+.movement-no-data .movement-panel canvas {
+    filter: blur(1.6px) brightness(1.08);
+    opacity: 0.68;
+}
+
+@keyframes movement-panel-pulse {
+    0%,
+    100% {
+        opacity: 0.45;
+    }
+    50% {
+        opacity: 0.75;
+    }
+}
+
 .movement-panel-head {
     display: flex;
     justify-content: space-between;

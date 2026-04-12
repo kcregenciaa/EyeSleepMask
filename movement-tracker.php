@@ -55,7 +55,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                 <section class="col-12 col-lg-9 col-xl-10" id="movementTrackerRoot">
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
                         <div>
-                            <p class="daily-date mb-1">Movement patterns while sleeping</p>
                             <h1 class="h3 mb-0 text-light">Movement Tracker for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
                         </div>
                         <div class="top-actions d-flex align-items-center gap-2">
@@ -90,15 +89,15 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             </div>
                             <div class="movement-hero-metrics">
                                 <div class="movement-metric-box">
-                                    <p>Movement score</p>
+                                    <p>Movement Status</p>
                                     <strong id="movementScore">0</strong>
                                 </div>
                                 <div class="movement-metric-box">
-                                    <p>Turn events</p>
+                                    <p>Turn Events</p>
                                     <strong id="movementTurns">0</strong>
                                 </div>
                                 <div class="movement-metric-box">
-                                    <p>Longest still period</p>
+                                    <p>Longest Still Period</p>
                                     <strong id="movementStillPeriod">0 min</strong>
                                 </div>
                             </div>
@@ -112,14 +111,20 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         <h2 class="h5 mb-0">Night Movement Pattern</h2>
                                         <span class="movement-muted">15-minute intervals</span>
                                     </div>
+                                    <div class="movement-loading-overlay" aria-hidden="true">
+                                        <span>Data Loading</span>
+                                    </div>
                                     <canvas id="movementPatternChart" height="180"></canvas>
                                 </article>
                             </div>
                             <div class="col-12 col-xl-4">
                                 <article class="panel-card p-3 p-lg-4 movement-panel h-100">
                                     <div class="movement-panel-head">
-                                        <h2 class="h5 mb-0">Sleep style split</h2>
+                                        <h2 class="h5 mb-0">Sleep Style Split</h2>
                                         <span class="movement-muted">Still vs active</span>
+                                    </div>
+                                    <div class="movement-loading-overlay" aria-hidden="true">
+                                        <span>Data Loading</span>
                                     </div>
                                     <canvas id="movementStyleChart" height="180"></canvas>
                                 </article>

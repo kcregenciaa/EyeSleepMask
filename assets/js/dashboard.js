@@ -2514,6 +2514,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let patternChartInstance = null;
         let styleChartInstance = null;
+        let movementDetectInterval = null;
+        let movementDetectTimeout = null;
+        let movementDetectBase = null;
+        let movementNoDataTimeout = null;
 
         const seeded = function (seed) {
             const x = Math.sin(seed) * 10000;
@@ -2583,9 +2587,15 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         };
 
-        const renderMovement = function (dateValue) {
+        const renderMovement = function (dateValue, options) {
+            const isDetecting = options && options.isDetecting;
+            const isNoData = options && options.isNoData;
             const movement = buildMovementData(dateValue);
             const profile = classifySleeper(movement.points);
+
+            if (movementTrackerRoot) {
+                movementTrackerRoot.classList.toggle('movement-no-data', Boolean(isNoData));
+            }
 
             if (movementSleeperType) {
                 movementSleeperType.textContent = profile.type;
@@ -2634,7 +2644,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (movementInsight) {
-                movementInsight.textContent = profile.insight + ' Volatility index: ' + profile.volatility + '.';
+                if (isNoData) {
+                    movementInsight.textContent = 'Data Loading:';
+                } else if (isDetecting) {
+                    movementInsight.textContent = 'Detecting movement pattern...';
+                } else {
+                    movementInsight.textContent = profile.insight + ' Volatility index: ' + profile.volatility + '.';
+                }
             }
 
             if (typeof Chart !== 'undefined' && movementPatternChart) {
@@ -2711,13 +2727,52 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        const stopMovementDetection = function () {
+            if (movementDetectInterval) {
+                clearInterval(movementDetectInterval);
+                movementDetectInterval = null;
+            }
+
+            if (movementDetectTimeout) {
+                clearTimeout(movementDetectTimeout);
+                movementDetectTimeout = null;
+            }
+
+            if (movementNoDataTimeout) {
+                clearTimeout(movementNoDataTimeout);
+                movementNoDataTimeout = null;
+            }
+        };
+
+        const showNoDataThenDetect = function (dateValue) {
+            stopMovementDetection();
+            renderMovement(dateValue, { isNoData: true });
+
+            if (movementScore) {
+                movementScore.textContent = '—';
+            }
+
+            if (movementTurns) {
+                movementTurns.textContent = '—';
+            }
+
+            if (movementStillPeriod) {
+                movementStillPeriod.textContent = '—';
+            }
+
+            if (movementSleeperType) {
+                movementSleeperType.textContent = 'Data Loading';
+                movementSleeperType.classList.remove('is-still', 'is-balanced', 'is-mischievous');
+            }
+        };
+
         if (movementDateInput) {
             movementDateInput.addEventListener('change', function () {
-                renderMovement(movementDateInput.value || dateForInput);
+                showNoDataThenDetect(movementDateInput.value || dateForInput);
             });
         }
 
-        renderMovement(dateForInput);
+        showNoDataThenDetect(dateForInput);
     }
 
     const chartDefaults = {
