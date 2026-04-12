@@ -2247,29 +2247,26 @@ body.sleep-repeat-open {
 }
 
 .movement-type-chip {
-    border-radius: 999px;
-    border: 1px solid rgba(157, 203, 255, 0.36);
-    background: linear-gradient(180deg, rgba(44, 73, 114, 0.95), rgba(28, 48, 77, 0.95));
+    border-radius: 0;
+    border: 0;
+    background: transparent;
     color: #ebf5ff;
-    padding: 0.4rem 0.75rem;
+    padding: 0;
     font-size: 0.84rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 .movement-type-chip.is-still {
-    border-color: rgba(132, 232, 201, 0.45);
-    background: linear-gradient(180deg, rgba(23, 86, 86, 0.95), rgba(18, 58, 67, 0.95));
+    color: #9bf4da;
 }
 
 .movement-type-chip.is-balanced {
-    border-color: rgba(170, 197, 236, 0.45);
-    background: linear-gradient(180deg, rgba(51, 74, 114, 0.95), rgba(35, 54, 87, 0.95));
+    color: #d9e8ff;
 }
 
 .movement-type-chip.is-mischievous {
-    border-color: rgba(240, 178, 157, 0.5);
-    background: linear-gradient(180deg, rgba(118, 65, 72, 0.95), rgba(86, 47, 55, 0.95));
+    color: #ffc2ae;
 }
 
 .movement-type-block {
@@ -2303,13 +2300,24 @@ body.sleep-repeat-open {
     margin-top: 0.42rem;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.74rem;
     color: #9db7d8;
     letter-spacing: 0.01em;
 }
 
 .movement-type-legend span {
+    flex: 1 1 0;
+    text-align: center;
     opacity: 0.62;
+}
+
+.movement-type-legend span:first-child {
+    text-align: left;
+}
+
+.movement-type-legend span:last-child {
+    text-align: right;
 }
 
 .movement-type-legend span.active {
@@ -2366,8 +2374,131 @@ body.sleep-repeat-open {
     margin-bottom: 0.7rem;
 }
 
+.movement-panel-tools {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.movement-telemetry-btn {
+    border: 1px solid rgba(143, 186, 236, 0.36);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(33, 56, 88, 0.96), rgba(22, 38, 63, 0.96));
+    color: #e8f2ff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0.45rem 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.movement-telemetry-btn:hover,
+.movement-telemetry-btn:focus-visible {
+    border-color: rgba(180, 215, 255, 0.65);
+    box-shadow: 0 0 0 3px rgba(103, 168, 235, 0.18);
+    transform: translateY(-1px);
+}
+
+.movement-telemetry-panel {
+    margin-top: 0.9rem;
+    border-radius: 14px;
+    border: 1px solid rgba(130, 171, 221, 0.24);
+    background: rgba(9, 17, 32, 0.72);
+    padding: 0.7rem;
+}
+
+.movement-telemetry-meta {
+    color: #b8cde7;
+    font-size: 0.8rem;
+}
+
+.movement-telemetry-chart-wrap {
+    height: 240px;
+}
+
+.movement-telemetry-panel canvas {
+    width: 100%;
+    height: 100% !important;
+    display: block;
+    border-radius: 10px;
+    border: 1px solid rgba(128, 171, 223, 0.2);
+    background: linear-gradient(180deg, rgba(10, 18, 34, 0.86), rgba(7, 14, 27, 0.72));
+    padding: 0.2rem;
+}
+
 .movement-panel-head h2 {
     color: #ebf4ff;
+}
+
+body.movement-telemetry-open {
+    overflow: hidden;
+}
+
+.movement-telemetry-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.movement-telemetry-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(6, 10, 22, 0.8);
+    backdrop-filter: blur(6px);
+}
+
+.movement-telemetry-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(980px, 100%);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+}
+
+.movement-telemetry-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.movement-telemetry-modal-head h2 {
+    color: #ebf4ff;
+}
+
+.movement-telemetry-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(143, 186, 236, 0.36);
+    background: rgba(12, 22, 41, 0.94);
+    color: #e8f2ff;
+    display: inline-grid;
+    place-items: center;
+}
+
+.movement-telemetry-close:hover,
+.movement-telemetry-close:focus-visible {
+    border-color: rgba(180, 215, 255, 0.65);
+    box-shadow: 0 0 0 3px rgba(103, 168, 235, 0.18);
+}
+
+@media (max-width: 575.98px) {
+    .movement-panel-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .movement-panel-tools {
+        justify-content: flex-start;
+    }
 }
 
 body.sleep-flow-active {

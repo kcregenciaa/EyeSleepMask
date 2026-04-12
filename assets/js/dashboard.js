@@ -2500,6 +2500,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const movementTurns = document.getElementById('movementTurns');
         const movementStillPeriod = document.getElementById('movementStillPeriod');
         const movementInsight = document.getElementById('movementInsight');
+        const movementFullTelemetryToggle = document.getElementById('movementFullTelemetryToggle');
+        const movementTelemetryModal = document.getElementById('movementTelemetryModal');
+        const movementTelemetryRange = document.getElementById('movementTelemetryRange');
+        const movementTelemetryChart = document.getElementById('movementTelemetryChart');
+        const movementTelemetryCloseButtons = movementTelemetryModal
+            ? movementTelemetryModal.querySelectorAll('[data-movement-telemetry-close]')
+            : [];
 
         const movementPatternChart = document.getElementById('movementPatternChart');
         const movementStyleChart = document.getElementById('movementStyleChart');
@@ -2514,27 +2521,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let patternChartInstance = null;
         let styleChartInstance = null;
+        let telemetryChartInstance = null;
+        let latestMovement = null;
+        let selectedTelemetryIndex = -1;
 
         const seeded = function (seed) {
             const x = Math.sin(seed) * 10000;
             return x - Math.floor(x);
         };
 
-        const buildMovementData = function (dateValue) {
+        const buildMovementData = function (dateValue, bedtimeValue, alarmEndValue) {
             const seedBase = Number(String(dateValue || '').replace(/-/g, '')) || 20260327;
             const points = [];
             const labels = [];
+            const sampleIntervalMinutes = 15;
+            const defaultPointCount = 32;
 
-            for (let i = 0; i < 32; i += 1) {
+            const bedtimeMinutes = bedtimeValue && bedtimeValue.includes(':') ? toMinutes(bedtimeValue) : null;
+            const alarmMinutes = alarmEndValue && alarmEndValue.includes(':') ? toMinutes(alarmEndValue) : null;
+
+            let sleepDurationMinutes = null;
+            if (bedtimeMinutes !== null && alarmMinutes !== null) {
+                sleepDurationMinutes = (alarmMinutes - bedtimeMinutes + 1440) % 1440;
+                if (sleepDurationMinutes === 0) {
+                    sleepDurationMinutes = 1440;
+                }
+            }
+
+            const hasSleepWindow = bedtimeMinutes !== null && sleepDurationMinutes !== null;
+            const pointCount = hasSleepWindow
+                ? (Math.max(1, Math.ceil(sleepDurationMinutes / sampleIntervalMinutes)) + 1)
+                : defaultPointCount;
+            const waveDenominator = Math.max(pointCount - 1, 1);
+
+            for (let i = 0; i < pointCount; i += 1) {
                 const raw = seeded(seedBase + (i * 17));
-                const wave = (Math.sin((i / 32) * Math.PI * 4) + 1) / 2;
+                const wave = (Math.sin((i / waveDenominator) * Math.PI * 4) + 1) / 2;
                 const value = Math.round((raw * 68) + (wave * 20));
                 points.push(Math.max(4, Math.min(98, value)));
 
-                const totalMins = 15 * i;
-                const h = Math.floor(totalMins / 60);
-                const m = totalMins % 60;
-                labels.push(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'));
+                if (hasSleepWindow) {
+                    const offsetMinutes = Math.min(i * sampleIntervalMinutes, sleepDurationMinutes);
+                    const timeMinutes = (bedtimeMinutes + offsetMinutes) % 1440;
+                    const h = Math.floor(timeMinutes / 60);
+                    const m = timeMinutes % 60;
+                    labels.push(formatTime(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')));
+                } else {
+                    const totalMins = sampleIntervalMinutes * i;
+                    const h = Math.floor(totalMins / 60);
+                    const m = totalMins % 60;
+                    labels.push(formatTime(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0')));
+                }
             }
 
             return {
@@ -2552,18 +2589,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const trough = Math.min.apply(null, points);
             const volatility = peak - trough;
 
-            let type = 'Balanced sleeper';
+            let type = 'Balanced Sleeper';
             let insight = 'Your movement pattern is moderate and fairly stable through the night.';
             let level = 1;
             let needlePos = '50%';
 
             if (avg <= 34 && turns <= 4) {
-                type = 'Still sleeper';
+                type = 'Still Sleeper';
                 insight = 'You remained mostly calm and still, which often aligns with deeper uninterrupted sleep.';
                 level = 0;
                 needlePos = '14%';
             } else if (avg >= 57 || turns >= 10) {
-                type = 'Mischievous sleeper';
+                type = 'Mischievous Sleeper';
                 insight = 'Frequent movements were detected. Consider adjusting pillow support and room comfort.';
                 level = 2;
                 needlePos = '86%';
@@ -2583,9 +2620,154 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         };
 
+        const getTipOffSeries = function (points, tipOffIndex) {
+            return points.map(function (value, index) {
+                return index === tipOffIndex ? value : null;
+            });
+        };
+
+        const updateTelemetryRangeText = function (labels, points, tipOffIndex) {
+            if (!movementTelemetryRange || labels.length === 0) {
+                return;
+            }
+
+            let text = labels[0] + ' to ' + labels[labels.length - 1] +
+                ' (' + labels.length + ' telemetry points)';
+
+            if (tipOffIndex >= 0 && tipOffIndex < labels.length) {
+                text += ' · Tip-off point: ' + labels[tipOffIndex] + ' (' + points[tipOffIndex] + ')';
+            }
+
+            movementTelemetryRange.textContent = text;
+        };
+
+        const renderTelemetryTimeline = function (labels, points) {
+            const isCompactViewport = window.matchMedia('(max-width: 575.98px)').matches;
+            if (selectedTelemetryIndex >= labels.length) {
+                selectedTelemetryIndex = -1;
+            }
+
+            updateTelemetryRangeText(labels, points, selectedTelemetryIndex);
+
+            if (typeof Chart === 'undefined' || !movementTelemetryChart) {
+                return;
+            }
+
+            if (movementTelemetryModal && movementTelemetryModal.hidden) {
+                return;
+            }
+
+            if (telemetryChartInstance) {
+                telemetryChartInstance.data.labels = labels;
+                telemetryChartInstance.data.datasets[0].data = points;
+                telemetryChartInstance.data.datasets[1].data = getTipOffSeries(points, selectedTelemetryIndex);
+                telemetryChartInstance.options.scales.x.ticks.autoSkip = true;
+                telemetryChartInstance.options.scales.x.ticks.maxTicksLimit = isCompactViewport ? 6 : 12;
+                telemetryChartInstance.options.scales.x.ticks.maxRotation = isCompactViewport ? 0 : 35;
+                telemetryChartInstance.options.scales.x.ticks.minRotation = isCompactViewport ? 0 : 35;
+                telemetryChartInstance.options.scales.x.ticks.font.size = isCompactViewport ? 9 : 10;
+                telemetryChartInstance.update('none');
+                return;
+            }
+
+            telemetryChartInstance = new Chart(movementTelemetryChart, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Full telemetry',
+                        data: points,
+                        borderColor: '#73deff',
+                        backgroundColor: 'rgba(115, 222, 255, 0.2)',
+                        fill: true,
+                        tension: 0.28,
+                        pointRadius: 0,
+                        pointHitRadius: 18,
+                        borderWidth: 2
+                    }, {
+                        label: 'Tip-off point',
+                        data: getTipOffSeries(points, selectedTelemetryIndex),
+                        showLine: false,
+                        borderWidth: 0,
+                        pointRadius: 5,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: '#ffd27a',
+                        pointBorderColor: '#1e2a3f',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    onClick: function (event, activeElements, chart) {
+                        if (!activeElements || !activeElements.length) {
+                            return;
+                        }
+
+                        selectedTelemetryIndex = activeElements[0].index;
+                        chart.data.datasets[1].data = getTipOffSeries(chart.data.datasets[0].data, selectedTelemetryIndex);
+                        updateTelemetryRangeText(chart.data.labels, chart.data.datasets[0].data, selectedTelemetryIndex);
+                        chart.update('none');
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(121, 167, 217, 0.18)' },
+                            ticks: {
+                                color: '#9eb5cf',
+                                stepSize: 20
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#9eb5cf',
+                                autoSkip: true,
+                                maxTicksLimit: isCompactViewport ? 6 : 12,
+                                maxRotation: isCompactViewport ? 0 : 35,
+                                minRotation: isCompactViewport ? 0 : 35,
+                                font: {
+                                    size: isCompactViewport ? 9 : 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
         const renderMovement = function (dateValue) {
-            const movement = buildMovementData(dateValue);
+            let bedtimeValue = '';
+            let alarmEndValue = '';
+
+            try {
+                const sleepWindowStorageKey = 'sleepTrackerWindow';
+                const storedWindow = localStorage.getItem(sleepWindowStorageKey);
+                if (storedWindow) {
+                    const parsedWindow = JSON.parse(storedWindow);
+                    if (parsedWindow && typeof parsedWindow === 'object') {
+                        bedtimeValue = parsedWindow.bedtime || '';
+                        alarmEndValue = parsedWindow.alarmEnd || '';
+                    }
+                }
+            } catch (error) {
+                // Ignore storage read errors.
+            }
+
+            const movement = buildMovementData(dateValue, bedtimeValue, alarmEndValue);
+            latestMovement = movement;
             const profile = classifySleeper(movement.points);
+
+            renderTelemetryTimeline(movement.labels, movement.points);
 
             if (movementSleeperType) {
                 movementSleeperType.textContent = profile.type;
@@ -2716,6 +2898,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 renderMovement(movementDateInput.value || dateForInput);
             });
         }
+
+        if (movementFullTelemetryToggle && movementTelemetryModal) {
+            movementFullTelemetryToggle.addEventListener('click', function () {
+                movementTelemetryModal.hidden = false;
+                document.body.classList.add('movement-telemetry-open');
+                movementFullTelemetryToggle.setAttribute('aria-expanded', 'true');
+                movementFullTelemetryToggle.textContent = 'Hide full telemetry';
+
+                if (latestMovement) {
+                    renderTelemetryTimeline(latestMovement.labels, latestMovement.points);
+                }
+            });
+        }
+
+        if (movementTelemetryCloseButtons.length) {
+            movementTelemetryCloseButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    movementTelemetryModal.hidden = true;
+                    document.body.classList.remove('movement-telemetry-open');
+                    if (movementFullTelemetryToggle) {
+                        movementFullTelemetryToggle.setAttribute('aria-expanded', 'false');
+                        movementFullTelemetryToggle.textContent = 'Show full telemetry';
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape' || !movementTelemetryModal || movementTelemetryModal.hidden) {
+                return;
+            }
+
+            movementTelemetryModal.hidden = true;
+            document.body.classList.remove('movement-telemetry-open');
+            if (movementFullTelemetryToggle) {
+                movementFullTelemetryToggle.setAttribute('aria-expanded', 'false');
+                movementFullTelemetryToggle.textContent = 'Show full telemetry';
+            }
+        });
 
         renderMovement(dateForInput);
     }
