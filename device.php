@@ -69,23 +69,50 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     </div>
 
                     <div class="row g-3 g-lg-4" id="deviceLivePanel">
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <article class="panel-card p-3 p-lg-4 h-100">
-                                <p class="movement-muted mb-1">Battery level</p>
-                                <h2 class="h3 text-light mb-1" id="deviceBatteryValue">--%</h2>
-                                <p class="movement-insight mb-0" id="deviceBatteryStatus">Waiting for live device data...</p>
-                            </article>
-                        </div>
-                        <div class="col-12 col-md-6 col-xl-8">
-                            <article class="panel-card p-3 p-lg-4 h-100">
-                                <p class="movement-muted mb-1">Device telemetry</p>
-                                <h2 class="h5 text-light mb-2" id="deviceName">Device: --</h2>
-                                <p class="movement-insight mb-2" id="deviceConnectionState">Connection: --</p>
-                                <p class="movement-insight mb-0" id="deviceLastUpdate">Last update: --</p>
+                        <div class="col-12 col-md-10 col-lg-8 col-xl-5">
+                            <div class="device-connection-block mb-3">
+                                <p class="movement-muted mb-1">Your Device is</p>
+                                <p class="device-connection-state mb-0" id="deviceConnectionStateLabel">⚪ Disconnected</p>
+                            </div>
+                            <article class="panel-card device-status-card p-3 p-lg-4">
+                                <div class="device-image-wrap mb-3">
+                                    <img src="assets/images/whitemask.png" alt="EyeSleepMask device" class="device-image" loading="lazy">
+                                </div>
+                                <p class="text-light text-center fw-normal mb-3">Connect Your Sleep Mask Device</p>
+                                <button type="button" class="device-connect-btn mb-3" id="connectDeviceBtn">Connect Device</button>
+                                <div id="deviceConnectedDetails">
+                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                        <span class="movement-muted mb-0">Battery</span>
+                                        <strong class="h5 mb-0 text-light" id="deviceBatteryPercent">--%</strong>
+                                    </div>
+                                    <p class="movement-insight device-last-update mt-3 mb-0" id="deviceLastUpdate">Last update: --</p>
+                                </div>
                             </article>
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="connectDeviceModal" tabindex="-1" aria-labelledby="connectDeviceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content device-connect-modal">
+                <div class="modal-header border-0 pb-0">
+                    <h2 class="modal-title h5 text-light" id="connectDeviceModalLabel">Enable Bluetooth Access</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="movement-insight mb-3">We use Bluetooth to connect your sleep mask for tracking and control.</p>
+                    <ul class="device-connect-checklist mb-0">
+                        <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Bluetooth ON</li>
+                        <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Device nearby</li>
+                    </ul>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="connectDeviceContinueBtn">Continue</button>
+                </div>
             </div>
         </div>
     </div>

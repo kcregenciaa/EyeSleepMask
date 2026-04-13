@@ -95,6 +95,131 @@
     color: #e9f2ff;
 }
 
+.device-status-card {
+    border-radius: 18px;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 420px;
+    margin-inline: 0;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(110% 90% at 22% 12%, rgba(37, 94, 160, 0.25), transparent 58%),
+        radial-gradient(120% 80% at 88% 84%, rgba(31, 60, 117, 0.28), transparent 62%),
+        linear-gradient(180deg, rgba(23, 35, 58, 0.93), rgba(14, 22, 37, 0.97));
+}
+
+.device-image-wrap {
+    border-radius: 14px;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(141, 182, 226, 0.28);
+    background: linear-gradient(180deg, rgba(18, 29, 49, 0.95), rgba(11, 18, 34, 0.97));
+    padding: 0.75rem;
+}
+
+.device-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    max-height: 240px;
+}
+
+.device-last-update {
+    word-break: break-word;
+}
+
+.device-connect-btn {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(141, 182, 226, 0.36);
+    background: linear-gradient(180deg, rgba(36, 78, 133, 0.9), rgba(20, 50, 94, 0.95));
+    color: #e9f3ff;
+    font-weight: 600;
+    padding: 0.58rem 0.85rem;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.device-connect-btn:hover,
+.device-connect-btn:focus {
+    border-color: rgba(178, 218, 255, 0.62);
+    color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(120, 181, 235, 0.18);
+    transform: translateY(-1px);
+}
+
+.device-connection-block {
+    width: 100%;
+    max-width: 420px;
+    margin-inline: 0;
+    border: 1px solid rgba(141, 182, 226, 0.24);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(20, 33, 56, 0.78), rgba(12, 21, 39, 0.84));
+    padding: 0.65rem 0.8rem;
+}
+
+.device-connection-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #dce9f8;
+}
+
+.device-connection-state::before {
+    content: "\f293";
+    font-family: "bootstrap-icons";
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.device-connection-state.state-not-connected {
+    color: #ff9f9f;
+}
+
+.device-connection-state.state-disconnected {
+    color: #edf2f9;
+}
+
+.device-connection-state.state-connected {
+    color: #9ef0bd;
+}
+
+.device-connect-modal {
+    border-radius: 16px;
+    border: 1px solid rgba(136, 177, 220, 0.35);
+    background:
+        radial-gradient(120% 100% at 18% 12%, rgba(36, 87, 148, 0.34), transparent 62%),
+        linear-gradient(180deg, rgba(18, 30, 52, 0.97), rgba(12, 20, 38, 0.98));
+    color: #e9f2ff;
+}
+
+.device-connect-checklist {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.device-connect-checklist li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #dce9f8;
+    font-weight: 600;
+}
+
+.device-connect-checklist i {
+    color: #8fe7b4;
+    font-size: 1rem;
+}
+
 .sleep-tracker-card {
     background:
         radial-gradient(120% 90% at 18% 12%, rgba(24, 66, 124, 0.28), transparent 60%),

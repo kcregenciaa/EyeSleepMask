@@ -21,7 +21,7 @@ import requests
 import serial
 from serial import SerialException
 
-PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM4')
+PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM9')
 BAUD_RATE = int(os.environ.get('ARDUINO_BAUD', '115200'))
 INGEST_URL = os.environ.get('INGEST_URL', 'http://localhost:8000/api/arduino-ingest.php')
 MOTION_URL = os.environ.get('MOTION_URL', 'http://localhost:8000/api/motion-data.php')

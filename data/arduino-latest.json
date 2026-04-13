@@ -1,9 +1,9 @@
 {
     "ok": true,
     "device": "seeed-xiao-nrf52840",
-    "snoreLevel": 0,
+    "snoreLevel": 2,
     "movement": 2,
-    "battery": 100,
-    "timestamp": "2026-04-12T14:14:32.110377+00:00",
-    "receivedAt": "2026-04-12T14:14:32+00:00"
+    "battery": 0,
+    "timestamp": "2026-04-13T09:01:52.431056+00:00",
+    "receivedAt": "2026-04-13T09:01:52+00:00"
 }

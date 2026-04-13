@@ -3220,12 +3220,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const deviceLivePanel = document.getElementById('deviceLivePanel');
     if (deviceLivePanel) {
-        const deviceBatteryValue = document.getElementById('deviceBatteryValue');
-        const deviceBatteryStatus = document.getElementById('deviceBatteryStatus');
-        const deviceName = document.getElementById('deviceName');
-        const deviceConnectionState = document.getElementById('deviceConnectionState');
+        const connectDeviceBtn = document.getElementById('connectDeviceBtn');
+        const connectDeviceModalEl = document.getElementById('connectDeviceModal');
+        const connectDeviceContinueBtn = document.getElementById('connectDeviceContinueBtn');
+        const deviceConnectedDetails = document.getElementById('deviceConnectedDetails');
+        const deviceBatteryPercent = document.getElementById('deviceBatteryPercent');
+        const deviceConnectionStateLabel = document.getElementById('deviceConnectionStateLabel');
         const deviceLastUpdate = document.getElementById('deviceLastUpdate');
         const connectionFreshMs = 10000;
+
+        let connectDeviceModal = null;
+        if (connectDeviceModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            connectDeviceModal = new bootstrap.Modal(connectDeviceModalEl);
+        }
+
+        if (connectDeviceBtn) {
+            connectDeviceBtn.addEventListener('click', function () {
+                if (connectDeviceModal) {
+                    connectDeviceModal.show();
+                }
+            });
+        }
+
+        if (connectDeviceContinueBtn) {
+            connectDeviceContinueBtn.addEventListener('click', function () {
+                if (connectDeviceModal) {
+                    connectDeviceModal.hide();
+                }
+            });
+        }
 
         const isTelemetryFresh = function (payload) {
             if (!payload || payload.ok === false) {
@@ -3245,35 +3268,46 @@ document.addEventListener('DOMContentLoaded', function () {
             return (Date.now() - parsed) <= connectionFreshMs;
         };
 
+        const getDeviceConnectionState = function (payload) {
+            if (!payload || payload.ok === false) {
+                return 'not-connected';
+            }
+
+            const stamp = payload.timestamp || payload.receivedAt;
+            if (!stamp) {
+                return 'not-connected';
+            }
+
+            return isTelemetryFresh(payload) ? 'connected' : 'disconnected';
+        };
+
         const renderDeviceLiveMetrics = function (payload) {
             const battery = Number(payload && payload.battery);
             const batterySafe = Number.isFinite(battery) ? Math.max(0, Math.min(100, Math.round(battery))) : null;
             const stamp = payload && (payload.timestamp || payload.receivedAt) ? (payload.timestamp || payload.receivedAt) : null;
-            const device = payload && payload.device ? payload.device : 'unknown';
-            const connected = isTelemetryFresh(payload);
+            const connectionState = getDeviceConnectionState(payload);
+            const isConnected = connectionState === 'connected';
 
-            if (deviceBatteryValue) {
-                deviceBatteryValue.textContent = batterySafe === null ? '--%' : (String(batterySafe) + '%');
+            if (deviceConnectedDetails) {
+                deviceConnectedDetails.hidden = !isConnected;
             }
 
-            if (deviceBatteryStatus) {
-                if (batterySafe === null) {
-                    deviceBatteryStatus.textContent = 'Waiting for battery telemetry...';
-                } else if (batterySafe <= 20) {
-                    deviceBatteryStatus.textContent = 'Low battery, consider charging soon.';
-                } else if (batterySafe <= 50) {
-                    deviceBatteryStatus.textContent = 'Battery is moderate.';
+            if (deviceBatteryPercent) {
+                deviceBatteryPercent.textContent = batterySafe === null ? '--%' : (String(batterySafe) + '%');
+            }
+
+            if (deviceConnectionStateLabel) {
+                if (connectionState === 'connected') {
+                    deviceConnectionStateLabel.textContent = '🟢 Connected';
+                } else if (connectionState === 'disconnected') {
+                    deviceConnectionStateLabel.textContent = '⚪ Disconnected';
                 } else {
-                    deviceBatteryStatus.textContent = 'Battery is healthy.';
+                    deviceConnectionStateLabel.textContent = '🔴 Not Connected';
                 }
-            }
 
-            if (deviceName) {
-                deviceName.textContent = 'Device: ' + device;
-            }
-
-            if (deviceConnectionState) {
-                deviceConnectionState.textContent = connected ? 'Connection: Connected' : 'Connection: Disconnected';
+                deviceConnectionStateLabel.classList.toggle('state-connected', connectionState === 'connected');
+                deviceConnectionStateLabel.classList.toggle('state-disconnected', connectionState === 'disconnected');
+                deviceConnectionStateLabel.classList.toggle('state-not-connected', connectionState === 'not-connected');
             }
 
             if (deviceLastUpdate) {
@@ -3291,11 +3325,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     renderDeviceLiveMetrics(payload);
                 })
-                .catch(function () {
-                    if (deviceBatteryStatus) {
-                        deviceBatteryStatus.textContent = 'Unable to reach live API. Start Apache and the serial bridge.';
-                    }
-                });
+                .catch(function () { renderDeviceLiveMetrics({}); });
         };
 
         fetchDeviceLiveMetrics();
