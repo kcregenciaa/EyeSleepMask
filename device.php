@@ -69,10 +69,15 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     </div>
 
                     <div class="row g-3 g-lg-4" id="deviceLivePanel">
-                        <div class="col-12 col-md-10 col-lg-8 col-xl-5">
+                        <div class="col-12 col-md-10 col-lg-8 col-xl-5 device-module-center">
                             <div class="device-connection-block mb-3">
-                                <p class="movement-muted mb-1">Your Device is</p>
-                                <p class="device-connection-state mb-0" id="deviceConnectionStateLabel">⚪ Disconnected</p>
+                                <div class="device-connection-status-row">
+                                    <img src="assets/images/bluetooth.png" alt="Bluetooth" class="device-bluetooth-icon" loading="lazy">
+                                    <div class="device-connection-text">
+                                        <p class="movement-muted mb-1">Your Device is</p>
+                                        <p class="device-connection-state mb-0" id="deviceConnectionStateLabel">⚪ Disconnected</p>
+                                    </div>
+                                </div>
                             </div>
                             <article class="panel-card device-status-card p-3 p-lg-4">
                                 <div class="device-image-wrap mb-3">
