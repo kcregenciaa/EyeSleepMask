@@ -72,48 +72,41 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     </div>
 
                     <div class="movement-flow">
-                        <article class="panel-card movement-hero-card p-3 p-lg-4">
-                            <div class="movement-hero-head">
-                                <div>
-                                    <p class="movement-muted mb-1">Selected sleep date</p>
-                                    <input type="date" class="movement-date-input" id="movementDateInput">
-                                </div>
-                                <div class="movement-type-block">
-                                    <span class="movement-type-chip" id="movementSleeperType">Still sleeper</span>
-                                    <div class="movement-type-rail" aria-hidden="true">
-                                        <span id="movementTypeNeedle"></span>
-                                    </div>
-                                    <div class="movement-type-legend" aria-hidden="true">
-                                        <span id="movementLegendStill">Still</span>
-                                        <span id="movementLegendBalanced">Balanced</span>
-                                        <span id="movementLegendMischievous">Mischievous</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="movement-hero-metrics">
-                                <div class="movement-metric-box">
-                                    <p>Movement state</p>
-                                    <strong id="movementScore">Calm</strong>
-                                </div>
-                                <div class="movement-metric-box">
-                                    <p>Turn events</p>
-                                    <strong id="movementTurns">0</strong>
-                                </div>
-                                <div class="movement-metric-box">
-                                    <p>Longest still period</p>
-                                    <strong id="movementStillPeriod">0 min</strong>
-                                </div>
-                            </div>
-                            <p class="movement-insight mb-0" id="movementInsight">Loading movement profile...</p>
-                        </article>
-
                         <div class="row g-3 g-lg-4">
                             <div class="col-12 col-xl-8">
-                                <article class="panel-card p-3 p-lg-4 movement-panel h-100">
-                                    <div class="movement-panel-head">
-                                        <h2 class="h5 mb-0">Sleep Movement Pattern</h2>
+                                <article class="panel-card movement-hero-card p-3 p-lg-4 h-100">
+                                    <div class="movement-hero-head">
+                                        <div>
+                                            <p class="movement-muted mb-1">Selected sleep date</p>
+                                            <input type="date" class="movement-date-input" id="movementDateInput">
+                                        </div>
+                                        <div class="movement-type-block">
+                                            <span class="movement-type-chip" id="movementSleeperType">Still sleeper</span>
+                                            <div class="movement-type-rail" aria-hidden="true">
+                                                <span id="movementTypeNeedle"></span>
+                                            </div>
+                                            <div class="movement-type-legend" aria-hidden="true">
+                                                <span id="movementLegendStill">Still</span>
+                                                <span id="movementLegendBalanced">Balanced</span>
+                                                <span id="movementLegendMischievous">Mischievous</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <canvas id="movementPatternChart" height="180"></canvas>
+                                    <div class="movement-hero-metrics">
+                                        <div class="movement-metric-box">
+                                            <p>Movement state</p>
+                                            <strong id="movementScore">Calm</strong>
+                                        </div>
+                                        <div class="movement-metric-box">
+                                            <p>Turn events</p>
+                                            <strong id="movementTurns">0</strong>
+                                        </div>
+                                        <div class="movement-metric-box">
+                                            <p>Longest still period</p>
+                                            <strong id="movementStillPeriod">0 min</strong>
+                                        </div>
+                                    </div>
+                                    <p class="movement-insight mb-0" id="movementInsight">Loading movement profile...</p>
                                 </article>
                             </div>
                             <div class="col-12 col-xl-4">
@@ -125,6 +118,14 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     <canvas id="movementStyleChart" height="180"></canvas>
                                 </article>
                             </div>
+                            <div class="col-12">
+                                <article class="panel-card p-3 p-lg-4 movement-panel h-100">
+                                    <div class="movement-panel-head">
+                                        <h2 class="h5 mb-0">Sleep Movement Pattern</h2>
+                                    </div>
+                                    <canvas id="movementPatternChart" height="100"></canvas>
+                                </article>
+                            </div>
                         </div>
 
                         <div class="movement-telemetry-panel" id="snoreGraphPanel">
@@ -134,6 +135,16 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             </div>
                             <div class="movement-telemetry-chart-wrap">
                                 <canvas id="snoreTrendChart" aria-label="Snore level graph" role="img"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="movement-telemetry-panel" id="heartRateGraphPanel">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h2 class="h5 text-light mb-0">Heart Rate Trend</h2>
+                                <span class="movement-telemetry-meta" id="heartRateGraphStatus">Waiting for live metrics...</span>
+                            </div>
+                            <div class="movement-telemetry-chart-wrap">
+                                <canvas id="heartRateTrendChart" aria-label="Heart rate graph" role="img"></canvas>
                             </div>
                         </div>
 

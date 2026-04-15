@@ -3236,35 +3236,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     datasets: [{
                         label: 'Snore level',
                         data: points,
-                        borderColor: '#79d0ff',
-                        backgroundColor: 'rgba(121, 208, 255, 0.2)',
-                        borderWidth: 2,
+                        borderColor: '#53d0ff',
+                        backgroundColor: 'rgba(83, 208, 255, 0.18)',
                         fill: true,
-                        tension: 0.3,
-                        pointRadius: 2,
-                        pointHoverRadius: 3
+                        tension: 0.32,
+                        pointRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    animation: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: {
                             min: 0,
                             max: 100,
-                            ticks: {
-                                color: chartDefaults.color,
-                                stepSize: 50
-                            },
-                            grid: { color: chartDefaults.borderColor }
+                            grid: { color: 'rgba(121, 167, 217, 0.18)' },
+                            ticks: { color: '#99afc8', stepSize: 50 }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: chartDefaults.color, maxTicksLimit: 8 }
+                            ticks: {
+                                color: '#99afc8',
+                                maxTicksLimit: 8
+                            }
                         }
                     }
                 }
@@ -3336,6 +3330,115 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetchSnoreGraphMetrics();
         setInterval(fetchSnoreGraphMetrics, 1000);
+    }
+
+    const heartRateGraphPanel = document.getElementById('heartRateGraphPanel');
+    if (heartRateGraphPanel) {
+        const heartRateTrendChart = document.getElementById('heartRateTrendChart');
+        const heartRateGraphStatus = document.getElementById('heartRateGraphStatus');
+        const maxPoints = 30;
+        const labels = [];
+        const points = [];
+        let chartInstance = null;
+
+        if (typeof Chart !== 'undefined' && heartRateTrendChart) {
+            chartInstance = new Chart(heartRateTrendChart, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Heart rate',
+                        data: points,
+                        borderColor: '#53d0ff',
+                        backgroundColor: 'rgba(83, 208, 255, 0.18)',
+                        fill: true,
+                        tension: 0.32,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 200,
+                            grid: { color: 'rgba(121, 167, 217, 0.18)' },
+                            ticks: { color: '#99afc8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#99afc8',
+                                maxTicksLimit: 8
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const formatChartTime = function (stamp) {
+            const parsed = new Date(stamp);
+            if (Number.isNaN(parsed.getTime())) {
+                return '--:--:--';
+            }
+
+            return parsed.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+        };
+
+        const pushPoint = function (stamp, value) {
+            labels.push(formatChartTime(stamp));
+            points.push(value);
+
+            if (labels.length > maxPoints) {
+                labels.shift();
+                points.shift();
+            }
+
+            if (chartInstance) {
+                chartInstance.update('none');
+            }
+        };
+
+        const renderHeartRateGraph = function (payload) {
+            const heartRate = Number(payload && payload.heartRate);
+            const heartRateSafe = Number.isFinite(heartRate) ? Math.max(0, Math.min(200, Math.round(heartRate))) : null;
+            const stamp = payload && (payload.timestamp || payload.receivedAt) ? (payload.timestamp || payload.receivedAt) : null;
+
+            if (heartRateSafe !== null && stamp) {
+                pushPoint(stamp, heartRateSafe);
+            }
+
+            if (heartRateGraphStatus) {
+                heartRateGraphStatus.textContent = heartRateSafe === null ? 'Waiting for live metrics...' : ('Current: ' + heartRateSafe + ' BPM');
+            }
+        };
+
+        const fetchHeartRateGraphMetrics = function () {
+            fetch('api/live-metrics.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        renderHeartRateGraph({});
+                        return;
+                    }
+                    renderHeartRateGraph(payload);
+                })
+                .catch(function () {
+                    if (heartRateGraphStatus) {
+                        heartRateGraphStatus.textContent = 'Unable to reach live API.';
+                    }
+                });
+        };
+
+        fetchHeartRateGraphMetrics();
+        setInterval(fetchHeartRateGraphMetrics, 1000);
     }
 
     const deviceLivePanel = document.getElementById('deviceLivePanel');
