@@ -26,7 +26,7 @@ if ($userName === '') {
     $userName = 'Sleeper';
 }
 
-$pageTitle = 'DeepSleepers | Movement Tracker';
+$pageTitle = 'DeepSleepers | Statistics';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
@@ -45,8 +45,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
-                            <a class="nav-link active" href="#"><i class="bi bi-activity"></i> Movement Tracker</a>
-                            <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
+                            <a class="nav-link active" href="#"><i class="bi bi-activity"></i> Statistics</a>
                             <a class="nav-link" href="device.php"><i class="bi bi-cpu"></i> Device</a>
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
@@ -58,7 +57,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
                         <div>
                             <p class="daily-date mb-1">Movement patterns while sleeping</p>
-                            <h1 class="h3 mb-0 text-light">Movement Tracker for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
+                            <h1 class="h3 mb-0 text-light">Statistics for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
                         </div>
                         <div class="top-actions d-flex align-items-center gap-2">
                             <a href="#" class="notif-btn" aria-label="Notifications">
@@ -116,6 +115,29 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         <span class="movement-muted">Still vs active</span>
                                     </div>
                                     <canvas id="movementStyleChart" height="180"></canvas>
+                                </article>
+                            </div>
+                            <div class="col-12">
+                                <article class="panel-card daily-calendar-card">
+                                    <div class="daily-calendar-head">
+                                        <h2 class="daily-section-title">Daily Calendar</h2>
+                                        <div class="daily-week-nav" role="group" aria-label="Week navigation">
+                                            <button type="button" class="daily-week-btn" id="dailyPrevWeek" aria-label="View previous week"><i class="bi bi-chevron-left"></i></button>
+                                            <span class="daily-week-range" id="dailyCalendarRange">This week</span>
+                                            <button type="button" class="daily-week-btn" id="dailyNextWeek" aria-label="View next week"><i class="bi bi-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="daily-weekdays" aria-hidden="true">
+                                        <span>Mon</span>
+                                        <span>Tue</span>
+                                        <span>Wed</span>
+                                        <span>Thu</span>
+                                        <span>Fri</span>
+                                        <span>Sat</span>
+                                        <span>Sun</span>
+                                    </div>
+                                    <div class="daily-calendar-days" id="dailyCalendarDays"></div>
+                                    <p class="daily-calendar-hint mb-0">Select any past day from this or previous weeks to view sleep performance.</p>
                                 </article>
                             </div>
                             <div class="col-12">
