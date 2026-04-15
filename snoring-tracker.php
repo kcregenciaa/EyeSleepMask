@@ -72,14 +72,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     </div>
 
                     <article class="panel-card p-3 p-lg-4">
-                        <div class="discover-soon-banner mb-3" role="status" aria-live="polite">
-                            <span class="discover-soon-pill">Coming Soon</span>
-                            <div>
-                                <strong>Snoring Tracker is in preview.</strong>
-                                <p class="mb-0">Full insights are currently being built.</p>
-                            </div>
-                        </div>
-
                         <div class="movement-telemetry-panel" id="snoreGraphPanel">
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                 <h2 class="h5 text-light mb-0">Snore Level Trend</h2>

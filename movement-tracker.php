@@ -112,14 +112,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 <article class="panel-card p-3 p-lg-4 movement-panel h-100">
                                     <div class="movement-panel-head">
                                         <h2 class="h5 mb-0">Sleep Movement Pattern</h2>
-                                        <div class="movement-panel-tools">
-                                            <a
-                                                href="full-telemetry.php"
-                                                class="movement-telemetry-btn"
-                                            >
-                                                Show full telemetry
-                                            </a>
-                                        </div>
                                     </div>
                                     <canvas id="movementPatternChart" height="180"></canvas>
                                 </article>

@@ -3218,6 +3218,126 @@ document.addEventListener('DOMContentLoaded', function () {
         setInterval(fetchLiveMetrics, 2000);
     }
 
+    const snoreGraphPanel = document.getElementById('snoreGraphPanel');
+    if (snoreGraphPanel) {
+        const snoreTrendChart = document.getElementById('snoreTrendChart');
+        const snoreGraphStatus = document.getElementById('snoreGraphStatus');
+        const snoreGraphLastUpdate = document.getElementById('snoreGraphLastUpdate');
+        const maxPoints = 30;
+        const labels = [];
+        const points = [];
+        let chartInstance = null;
+
+        if (typeof Chart !== 'undefined' && snoreTrendChart) {
+            chartInstance = new Chart(snoreTrendChart, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Snore level',
+                        data: points,
+                        borderColor: '#79d0ff',
+                        backgroundColor: 'rgba(121, 208, 255, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 2,
+                        pointHoverRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                color: chartDefaults.color,
+                                stepSize: 50
+                            },
+                            grid: { color: chartDefaults.borderColor }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: chartDefaults.color, maxTicksLimit: 8 }
+                        }
+                    }
+                }
+            });
+        }
+
+        const formatChartTime = function (stamp) {
+            const parsed = new Date(stamp);
+            if (Number.isNaN(parsed.getTime())) {
+                return '--:--:--';
+            }
+
+            return parsed.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+        };
+
+        const pushPoint = function (stamp, value) {
+            labels.push(formatChartTime(stamp));
+            points.push(value);
+
+            if (labels.length > maxPoints) {
+                labels.shift();
+                points.shift();
+            }
+
+            if (chartInstance) {
+                chartInstance.update('none');
+            }
+        };
+
+        const renderSnoreGraph = function (payload) {
+            const snore = Number(payload && payload.snoreLevel);
+            const snoreSafe = Number.isFinite(snore) ? Math.max(0, Math.min(100, Math.round(snore))) : null;
+            const stamp = payload && (payload.timestamp || payload.receivedAt) ? (payload.timestamp || payload.receivedAt) : null;
+
+            if (snoreSafe !== null && stamp) {
+                pushPoint(stamp, snoreSafe);
+            }
+
+            if (snoreGraphStatus) {
+                snoreGraphStatus.textContent = snoreSafe === null ? 'Waiting for live metrics...' : ('Current: ' + snoreSafe);
+            }
+
+            if (snoreGraphLastUpdate) {
+                snoreGraphLastUpdate.textContent = 'Last update: ' + (stamp ? formatChartTime(stamp) : '--');
+            }
+        };
+
+        const fetchSnoreGraphMetrics = function () {
+            fetch('api/live-metrics.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        renderSnoreGraph({});
+                        return;
+                    }
+                    renderSnoreGraph(payload);
+                })
+                .catch(function () {
+                    if (snoreGraphStatus) {
+                        snoreGraphStatus.textContent = 'Unable to reach live API.';
+                    }
+                });
+        };
+
+        fetchSnoreGraphMetrics();
+        setInterval(fetchSnoreGraphMetrics, 1000);
+    }
+
     const deviceLivePanel = document.getElementById('deviceLivePanel');
     if (deviceLivePanel) {
         const connectDeviceBtn = document.getElementById('connectDeviceBtn');
