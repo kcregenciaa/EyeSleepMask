@@ -44,7 +44,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link active" href="#"><i class="bi bi-calendar3"></i> Daily Tracker</a>
-                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
+                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
                             <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
                             <a class="nav-link" href="device.php"><i class="bi bi-cpu"></i> Device</a>

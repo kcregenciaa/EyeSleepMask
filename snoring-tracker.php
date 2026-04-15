@@ -28,7 +28,7 @@ if ($userName === '') {
 
 $pageTitle = 'DeepSleepers | Snoring Tracker';
 $pageStyles = ['assets/css/tracker-ui.css'];
-$pageScripts = ['assets/js/dashboard.js'];
+$pageScripts = ['https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
 <body class="deep-bg dashboard-page">
@@ -44,7 +44,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
-                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
+                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
                             <a class="nav-link active" href="#"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
                             <a class="nav-link" href="device.php"><i class="bi bi-cpu"></i> Device</a>
@@ -76,32 +76,19 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <span class="discover-soon-pill">Coming Soon</span>
                             <div>
                                 <strong>Snoring Tracker is in preview.</strong>
-                                <p class="mb-0">Live board telemetry is ready below while full insights are being built.</p>
+                                <p class="mb-0">Full insights are currently being built.</p>
                             </div>
                         </div>
 
-                        <div class="row g-3" id="arduinoLivePanel">
-                            <div class="col-12 col-md-4">
-                                <div class="movement-metric-box">
-                                    <p>Snore level</p>
-                                    <strong id="liveSnoreLevel">0</strong>
-                                </div>
+                        <div class="movement-telemetry-panel" id="snoreGraphPanel">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h2 class="h5 text-light mb-0">Snore Level Trend</h2>
+                                <span class="movement-telemetry-meta" id="snoreGraphStatus">Waiting for live metrics...</span>
                             </div>
-                            <div class="col-12 col-md-4">
-                                <div class="movement-metric-box">
-                                    <p>Movement</p>
-                                    <strong id="liveMovement">0</strong>
-                                </div>
+                            <div class="movement-telemetry-chart-wrap">
+                                <canvas id="snoreTrendChart" aria-label="Snore level graph" role="img"></canvas>
                             </div>
-                            <div class="col-12 col-md-4">
-                                <div class="movement-metric-box">
-                                    <p>Battery</p>
-                                    <strong id="liveBattery">0%</strong>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <p class="movement-insight mb-0" id="liveDeviceStatus">Waiting for XIAO nRF52840 data...</p>
-                            </div>
+                            <p class="movement-insight mb-0 mt-2" id="snoreGraphLastUpdate">Last update: --</p>
                         </div>
                     </article>
                 </section>

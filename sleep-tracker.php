@@ -26,7 +26,7 @@ if ($userName === '') {
     $userName = 'Sleeper';
 }
 
-$pageTitle = 'DeepSleepers | Sleep Tracker';
+$pageTitle = 'DeepSleepers | Clock';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
@@ -44,7 +44,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
-                            <a class="nav-link active" href="#"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
+                            <a class="nav-link active" href="#"><i class="bi bi-moon-stars"></i> Clock</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
                             <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
                             <a class="nav-link" href="device.php"><i class="bi bi-cpu"></i> Device</a>
@@ -56,7 +56,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
                 <section class="col-12 col-lg-9 col-xl-10">
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-                        <h1 class="h3 mb-0 text-light"><?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?>'s Sleep Tracker</h1>
+                        <h1 class="h3 mb-0 text-light"><?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?>'s Clock</h1>
                         <div class="top-actions d-flex align-items-center gap-2">
                             <a href="#" class="notif-btn" aria-label="Notifications">
                                 <i class="bi bi-bell"></i>
@@ -73,7 +73,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <article class="panel-card sleep-tracker-card p-3 p-lg-4">
                                 <div class="sleep-tracker-head d-flex justify-content-between align-items-start mb-3">
                                     <div>
-                                        <h2 class="h4 mb-1">Sleep Tracker</h2>
+                                        <h2 class="h4 mb-1">Clock</h2>
                                     </div>
                                 </div>
 

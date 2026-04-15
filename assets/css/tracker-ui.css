@@ -151,6 +151,12 @@
     transform: translateY(-1px);
 }
 
+.device-module-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .device-connection-block {
     width: 100%;
     max-width: 420px;
@@ -161,6 +167,23 @@
     padding: 0.65rem 0.8rem;
 }
 
+.device-connection-status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.device-connection-text {
+    min-width: 0;
+}
+
+.device-bluetooth-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    object-fit: contain;
+}
+
 .device-connection-state {
     display: inline-flex;
     align-items: center;
@@ -169,13 +192,6 @@
     font-weight: 700;
     letter-spacing: 0.01em;
     color: #dce9f8;
-}
-
-.device-connection-state::before {
-    content: "\f293";
-    font-family: "bootstrap-icons";
-    font-size: 0.95rem;
-    line-height: 1;
 }
 
 .device-connection-state.state-not-connected {

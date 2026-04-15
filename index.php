@@ -198,7 +198,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 									<p class="sleep-app-label mb-2">Deep Sleepers</p>
 									<div class="sleep-mask-pill">Battery level: 80%</div>
 									<div class="sleep-time-panel mt-3">
-										<span>Sleep</span>
+										<span>Clock</span>
 										<strong>8:15 AM</strong>
 										<button type="button">Start</button>
 									</div>

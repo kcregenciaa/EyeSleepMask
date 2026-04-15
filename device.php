@@ -44,7 +44,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
-                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Sleep Tracker</a>
+                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
                             <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
                             <a class="nav-link" href="snoring-tracker.php"><i class="bi bi-chat-dots"></i> Snoring Tracker</a>
                             <a class="nav-link active" href="#"><i class="bi bi-cpu"></i> Device</a>
@@ -68,8 +68,8 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         </div>
                     </div>
 
-                    <div class="row g-3 g-lg-4" id="deviceLivePanel">
-                        <div class="col-12 col-md-10 col-lg-8 col-xl-5 device-module-center">
+                    <div class="row g-3 g-lg-4 justify-content-center" id="deviceLivePanel">
+                        <div class="col-12 col-md-10 col-lg-8 col-xl-5 mx-auto device-module-center">
                             <div class="device-connection-block mb-3">
                                 <div class="device-connection-status-row">
                                     <img src="assets/images/bluetooth.png" alt="Bluetooth" class="device-bluetooth-icon" loading="lazy">
