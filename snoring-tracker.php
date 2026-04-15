@@ -71,18 +71,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         </div>
                     </div>
 
-                    <article class="panel-card p-3 p-lg-4">
-                        <div class="movement-telemetry-panel" id="snoreGraphPanel">
-                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                <h2 class="h5 text-light mb-0">Snore Level Trend</h2>
-                                <span class="movement-telemetry-meta" id="snoreGraphStatus">Waiting for live metrics...</span>
-                            </div>
-                            <div class="movement-telemetry-chart-wrap">
-                                <canvas id="snoreTrendChart" aria-label="Snore level graph" role="img"></canvas>
-                            </div>
-                            <p class="movement-insight mb-0 mt-2" id="snoreGraphLastUpdate">Last update: --</p>
-                        </div>
-                    </article>
                 </section>
             </div>
         </div>
