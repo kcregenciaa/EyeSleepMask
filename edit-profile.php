@@ -143,4 +143,5 @@ include __DIR__ . '/includes/bootstrap-head.php';
         </section>
     </main>
 
+<?php include __DIR__ . '/includes/bootstrap-footbar.php'; ?>
 <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>

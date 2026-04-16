@@ -1,13 +1,17 @@
 .settings-page {
     overflow-x: hidden;
+    background:
+        radial-gradient(120% 90% at 18% 12%, rgba(24, 35, 56, 0.95), transparent 58%),
+        radial-gradient(100% 90% at 90% 90%, rgba(15, 22, 35, 0.9), transparent 62%),
+        linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
 }
 
 .settings-card {
     max-width: 760px;
     border-radius: 22px;
-    border: 1px solid rgba(128, 170, 216, 0.26);
-    background: linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
-    box-shadow: var(--shadow-outer);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .settings-card .tracking {

@@ -12,6 +12,51 @@
     min-width: 0;
 }
 
+/* Fullscreen treatment for Clock page */
+.sleep-tracker-page.deep-bg {
+    background: #0a1020;
+}
+
+.sleep-tracker-page {
+    padding-bottom: 0;
+}
+
+.sleep-tracker-page .container-fluid {
+    padding: 0 !important;
+}
+
+.sleep-tracker-page .dashboard-shell {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    min-height: 100dvh;
+    padding: 0 !important;
+}
+
+.sleep-tracker-page .row.g-4 {
+    --bs-gutter-x: 0;
+    --bs-gutter-y: 0;
+}
+
+.sleep-tracker-page .row.g-4 > [class*='col-'] {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.sleep-tracker-page .top-title {
+    padding: 1rem 1rem 0;
+}
+
+.sleep-tracker-page .sleep-tracker-card {
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: #0a1020;
+}
+
 .sidebar-panel {
     border-radius: 20px;
     padding: 1rem;

@@ -35,23 +35,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
     <div class="container-fluid py-3 py-lg-4">
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">
-                <aside class="col-12 col-lg-3 col-xl-2">
-                    <div class="sidebar-panel h-100">
-                        <div class="brand-line d-flex align-items-center gap-2 mb-4">
-                            <span class="avatar-dot"><i class="bi bi-person"></i></span>
-                            <a href="index.php" class="brand-link"><strong>DeepSleepers</strong></a>
-                        </div>
-                        <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
-                            <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
-                            <a class="nav-link active" href="#"><i class="bi bi-activity"></i> Statistics</a>
-                            <a class="nav-link" href="device.php"><i class="bi bi-cpu"></i> Device</a>
-                            <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
-                        </nav>
-                        <a href="?action=logout" class="nav-link logout-btn mt-auto d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                    </div>
-                </aside>
-
-                <section class="col-12 col-lg-9 col-xl-10" id="movementTrackerRoot">
+                <section class="col-12" id="movementTrackerRoot">
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
                         <div>
                             <p class="daily-date mb-1">Movement patterns while sleeping</p>
@@ -175,6 +159,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
         </div>
     </div>
 
+<?php include __DIR__ . '/includes/bootstrap-footbar.php'; ?>
 <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>
 
 

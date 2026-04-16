@@ -33,10 +33,18 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         <p>Update your personal information, age, birthdate, gender, and email address.</p>
                     </a>
                 </div>
+                <div class="col-12 col-md-6">
+                    <a href="logout.php" class="setting-action setting-danger d-block h-100">
+                        <span class="setting-icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <h3>Logout</h3>
+                        <p>Sign out of your account and return to the login page.</p>
+                    </a>
+                </div>
             </div>
         </section>
     </main>
 
+<?php include __DIR__ . '/includes/bootstrap-footbar.php'; ?>
 <?php include __DIR__ . '/includes/bootstrap-foot.php'; ?>
 
 
