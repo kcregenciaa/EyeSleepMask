@@ -25,114 +25,79 @@ $isLoggedIn = $userName !== '';
 if ($userName === '') {
     $userName = 'Sleeper';
 }
+$displayName = ucwords($userName);
 
 $pageTitle = 'DeepSleepers | Statistics';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
-<body class="deep-bg dashboard-page">
+<body class="deep-bg dashboard-page statistics-page">
     <div class="container-fluid py-3 py-lg-4">
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">
                 <section class="col-12" id="movementTrackerRoot">
                     <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-                        <div>
-                            <p class="daily-date mb-1">Movement patterns while sleeping</p>
-                            <h1 class="h3 mb-0 text-light">Statistics for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        </div>
-                        <div class="top-actions d-flex align-items-center gap-2">
-                            <a href="#" class="notif-btn" aria-label="Notifications">
-                                <i class="bi bi-bell"></i>
-                                <span class="notif-count">3</span>
-                            </a>
-                            <?php if (!$isLoggedIn): ?>
-                            <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
-                            <?php endif; ?>
+                        <h1 class="h3 mb-0 text-light">How's your sleep, <?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?>?</h1>
+                        <div class="profile-avatar">
+                            <?php echo strtoupper(substr($displayName, 0, 1)); ?>
                         </div>
                     </div>
 
                     <div class="movement-flow">
-                        <div class="row g-3 g-lg-4">
-                            <div class="col-12 col-xl-8">
-                                <article class="panel-card movement-hero-card p-3 p-lg-4 h-100">
-                                    <div class="movement-hero-head">
-                                        <div>
-                                            <p class="movement-muted mb-1">Selected sleep date</p>
-                                            <input type="date" class="movement-date-input" id="movementDateInput">
-                                        </div>
-                                        <div class="movement-type-block">
-                                            <span class="movement-type-chip" id="movementSleeperType">Still sleeper</span>
-                                            <div class="movement-type-rail" aria-hidden="true">
-                                                <span id="movementTypeNeedle"></span>
-                                            </div>
-                                            <div class="movement-type-legend" aria-hidden="true">
-                                                <span id="movementLegendStill">Still</span>
-                                                <span id="movementLegendBalanced">Balanced</span>
-                                                <span id="movementLegendMischievous">Mischievous</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="movement-hero-metrics">
-                                        <div class="movement-metric-box">
-                                            <p>Movement state</p>
-                                            <strong id="movementScore">Calm</strong>
-                                        </div>
-                                        <div class="movement-metric-box">
-                                            <p>Turn events</p>
-                                            <strong id="movementTurns">0</strong>
-                                        </div>
-                                        <div class="movement-metric-box">
-                                            <p>Longest still period</p>
-                                            <strong id="movementStillPeriod">0 min</strong>
-                                        </div>
-                                    </div>
-                                    <p class="movement-insight mb-0" id="movementInsight">Loading movement profile...</p>
-                                </article>
+                        <article class="panel-card sleep-quality-card p-3 p-lg-4">
+                            <div class="sleep-quality-top">
+                                <div class="sleep-quality-head">
+                                    <h2 class="sleep-section-title mb-0">Sleep Overview</h2>
+                                </div>
+                                <div class="daily-week-nav" role="group" aria-label="Week navigation">
+                                    <button type="button" class="daily-week-btn" id="dailyPrevWeek" aria-label="View previous week"><i class="bi bi-chevron-left"></i></button>
+                                    <span class="daily-week-range" id="dailyCalendarRange">This week</span>
+                                    <button type="button" class="daily-week-btn" id="dailyNextWeek" aria-label="View next week"><i class="bi bi-chevron-right"></i></button>
+                                </div>
                             </div>
-                            <div class="col-12 col-xl-4">
-                                <article class="panel-card p-3 p-lg-4 movement-panel h-100">
-                                    <div class="movement-panel-head">
-                                        <h2 class="h5 mb-0">Sleep style split</h2>
-                                        <span class="movement-muted">Still vs active</span>
-                                    </div>
-                                    <canvas id="movementStyleChart" height="180"></canvas>
-                                </article>
-                            </div>
-                            <div class="col-12">
-                                <article class="panel-card daily-calendar-card">
-                                    <div class="daily-calendar-head">
-                                        <h2 class="daily-section-title">Daily Calendar</h2>
-                                        <div class="daily-week-nav" role="group" aria-label="Week navigation">
-                                            <button type="button" class="daily-week-btn" id="dailyPrevWeek" aria-label="View previous week"><i class="bi bi-chevron-left"></i></button>
-                                            <span class="daily-week-range" id="dailyCalendarRange">This week</span>
-                                            <button type="button" class="daily-week-btn" id="dailyNextWeek" aria-label="View next week"><i class="bi bi-chevron-right"></i></button>
+
+                            <div class="daily-calendar-days sleep-quality-days" id="dailyCalendarDays"></div>
+
+                            <div class="sleep-quality-core">
+                                <div class="sleep-quality-ring">
+                                    <div class="sleep-quality-ring-inner">
+                                        <p class="sleep-quality-label mb-0" id="sleepQualityLabel">Sleep quality</p>
+                                        <div class="sleep-quality-score-wrap" aria-label="Sleep quality score">
+                                            <span id="sleepQualityScore">76</span>
+                                            <span class="sleep-quality-percent">%</span>
                                         </div>
+                                        <p class="sleep-quality-summary mb-0" id="dailyPerformanceSummary">Balanced night with stable sleep performance.</p>
                                     </div>
-                                    <div class="daily-weekdays" aria-hidden="true">
-                                        <span>Mon</span>
-                                        <span>Tue</span>
-                                        <span>Wed</span>
-                                        <span>Thu</span>
-                                        <span>Fri</span>
-                                        <span>Sat</span>
-                                        <span>Sun</span>
-                                    </div>
-                                    <div class="daily-calendar-days" id="dailyCalendarDays"></div>
-                                    <p class="daily-calendar-hint mb-0">Select any past day from this or previous weeks to view sleep performance.</p>
-                                </article>
+                                </div>
                             </div>
-                            <div class="col-12">
-                                <article class="panel-card p-3 p-lg-4 movement-panel h-100">
-                                    <div class="movement-panel-head">
-                                        <h2 class="h5 mb-0">Movement</h2>
-                                    </div>
-                                    <canvas id="movementPatternChart" height="100"></canvas>
-                                </article>
+
+                            <div class="sleep-quality-metrics">
+                                <div class="sleep-metric-box">
+                                    <p>Bedtime</p>
+                                    <strong id="dailyBedtime">--</strong>
+                                </div>
+                                <div class="sleep-metric-box">
+                                    <p>Wake up</p>
+                                    <strong id="dailyWokeUp">--</strong>
+                                </div>
+                                <div class="sleep-metric-box">
+                                    <p>Duration</p>
+                                    <strong id="dailyInBed">--</strong>
+                                </div>
                             </div>
-                        </div>
+                        </article>
 
                         <div class="row g-3 g-lg-4 mt-0">
+                            <div class="col-12">
+                                <article class="panel-card p-3 p-lg-4 movement-panel h-100">
+                                    <div class="movement-panel-head">
+                                        <h2 class="h5 mb-0">Movement Trend</h2>
+                                        <span class="movement-muted">Overnight movement intensity</span>
+                                    </div>
+                                    <canvas id="movementPatternChart" aria-label="Movement trend graph" role="img" height="100"></canvas>
+                                </article>
+                            </div>
                             <div class="col-12 col-xl-6">
                                 <article class="panel-card p-3 p-lg-4 movement-panel h-100" id="snoreGraphPanel">
                                     <div class="movement-panel-head">

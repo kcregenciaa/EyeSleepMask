@@ -31,24 +31,11 @@ $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
-<body class="deep-bg dashboard-page">
+<body class="deep-bg dashboard-page device-page">
     <div class="container-fluid py-3 py-lg-4">
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">
                 <section class="col-12">
-                    <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-                        <h1 class="h3 mb-0 text-light">Device for <?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?></h1>
-                        <div class="top-actions d-flex align-items-center gap-2">
-                            <a href="#" class="notif-btn" aria-label="Notifications">
-                                <i class="bi bi-bell"></i>
-                                <span class="notif-count">3</span>
-                            </a>
-                            <?php if (!$isLoggedIn): ?>
-                            <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
                     <div class="row g-3 g-lg-4 justify-content-center" id="deviceLivePanel">
                         <div class="col-12 col-md-10 col-lg-8 col-xl-5 mx-auto device-module-center">
                             <div class="device-connection-block mb-3">

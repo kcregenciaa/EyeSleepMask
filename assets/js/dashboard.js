@@ -3,6 +3,113 @@ document.addEventListener('DOMContentLoaded', function () {
     const alarmToggle = document.getElementById('alarmToggle');
     const smartAlarmToggle = document.getElementById('smartAlarmToggle');
 
+    const sleepQualityState = {
+        durationMinutes: null,
+        movementProfile: null,
+        snoreLevel: null
+    };
+
+    const clamp = function (value, min, max) {
+        return Math.min(max, Math.max(min, value));
+    };
+
+    const durationQualityScore = function (asleepMinutes) {
+        const mins = Number(asleepMinutes);
+        if (!Number.isFinite(mins)) {
+            return 65;
+        }
+
+        if (mins >= 420 && mins <= 540) {
+            const centerDistance = Math.abs(mins - 480);
+            return Math.round(clamp(100 - (centerDistance * 0.3), 82, 100));
+        }
+
+        if (mins < 420) {
+            return Math.round(clamp(82 - ((420 - mins) * 0.35), 20, 82));
+        }
+
+        return Math.round(clamp(82 - ((mins - 540) * 0.22), 30, 82));
+    };
+
+    const movementQualityScore = function (profile) {
+        if (!profile || !Number.isFinite(profile.avg)) {
+            return 65;
+        }
+
+        const turnsPenalty = clamp(Number(profile.turns) || 0, 0, 20) * 1.5;
+        const volatilityPenalty = clamp(Number(profile.volatility) || 0, 0, 80) * 0.35;
+        const levelPenalty = clamp(Number(profile.level) || 0, 0, 2) * 14;
+        const avgPenalty = clamp((Number(profile.avg) || 0) - 35, 0, 35) * 0.75;
+
+        return Math.round(clamp(100 - turnsPenalty - volatilityPenalty - levelPenalty - avgPenalty, 15, 100));
+    };
+
+    const snoreQualityScore = function (snoreLevel) {
+        const snore = Number(snoreLevel);
+        if (!Number.isFinite(snore)) {
+            return 65;
+        }
+
+        return Math.round(clamp(100 - (clamp(snore, 0, 100) * 0.75), 20, 100));
+    };
+
+    const scoreBand = function (score) {
+        if (score >= 85) {
+            return 'excellent';
+        }
+        if (score >= 70) {
+            return 'balanced';
+        }
+        return 'light';
+    };
+
+    const composeSleepQuality = function () {
+        const durationScore = durationQualityScore(sleepQualityState.durationMinutes);
+        const movementScore = movementQualityScore(sleepQualityState.movementProfile);
+        const snoreScore = snoreQualityScore(sleepQualityState.snoreLevel);
+
+        const composite = Math.round((durationScore * 0.5) + (movementScore * 0.3) + (snoreScore * 0.2));
+        const safeComposite = clamp(composite, 0, 100);
+
+        const durationBand = scoreBand(durationScore);
+        const movementBand = scoreBand(movementScore);
+        const snoreBand = scoreBand(snoreScore);
+
+        let label = 'Sleep quality needs improvement';
+        if (safeComposite >= 85) {
+            label = 'Excellent sleep quality';
+        } else if (safeComposite >= 70) {
+            label = 'Balanced sleep quality';
+        }
+
+        const summary = 'Duration is ' + durationBand + ', movement is ' + movementBand + ', and snore control is ' + snoreBand + '.';
+
+        return {
+            score: safeComposite,
+            label: label,
+            summary: summary
+        };
+    };
+
+    const updateSleepQualityUi = function () {
+        const metrics = composeSleepQuality();
+        const sleepQualityScoreNode = document.getElementById('sleepQualityScore');
+        const sleepQualityLabelNode = document.getElementById('sleepQualityLabel');
+        const dailyPerformanceSummaryNode = document.getElementById('dailyPerformanceSummary');
+
+        if (sleepQualityScoreNode) {
+            sleepQualityScoreNode.textContent = String(metrics.score);
+        }
+
+        if (sleepQualityLabelNode) {
+            sleepQualityLabelNode.textContent = metrics.label;
+        }
+
+        if (dailyPerformanceSummaryNode) {
+            dailyPerformanceSummaryNode.textContent = metrics.summary;
+        }
+    };
+
     const toMinutes = function (value) {
         if (!value || !value.includes(':')) {
             return null;
@@ -1918,9 +2025,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const alarmStartText = to12HourFromTimeValue(interval.alarmStart);
             const alarmEndText = to12HourFromTimeValue(interval.alarmEnd);
             const configuredSleepMinutes = sessionDurationFromInterval(interval);
-
-            const sleepQuality = asleepMinutes >= 420 ? 'strong' : (asleepMinutes >= 360 ? 'steady' : 'light');
             const noiseDb = 20 + (seed % 11);
+            const snoreEstimate = Math.round(clamp((noiseDb - 20) * 5, 0, 100));
 
             return {
                 bedtime: bedtimeText,
@@ -1930,13 +2036,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 wokeUp: to12Hour(wakeHour % 24, wakeMinute),
                 inBed: formatDuration(inBedMinutes),
                 asleep: formatDuration(asleepMinutes),
+                asleepMinutes: asleepMinutes,
                 awake: awakeMinutes + ' min',
                 noise: noiseDb + ' dB',
-                summary: sleepQuality === 'strong'
-                    ? 'Excellent recovery night with deep, steady sleep.'
-                    : (sleepQuality === 'steady'
-                        ? 'Balanced night with stable sleep performance.'
-                        : 'Lighter sleep detected. Try a calmer wind-down tonight.')
+                snoreEstimate: snoreEstimate
             };
         };
 
@@ -2294,6 +2397,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 dailyInBed.textContent = perf.inBed;
             }
 
+            sleepQualityState.durationMinutes = perf.asleepMinutes;
+            if (!Number.isFinite(Number(sleepQualityState.snoreLevel))) {
+                sleepQualityState.snoreLevel = perf.snoreEstimate;
+            }
+            updateSleepQualityUi();
+
             if (dailyAsleep) {
                 dailyAsleep.textContent = perf.asleep;
             }
@@ -2304,10 +2413,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (dailyNoise) {
                 dailyNoise.textContent = perf.noise;
-            }
-
-            if (dailyPerformanceSummary) {
-                dailyPerformanceSummary.textContent = perf.summary;
             }
 
             syncNoteField(date);
@@ -2352,7 +2457,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 btn.disabled = isFuture;
                 btn.dataset.key = dateKey(day);
-                btn.innerHTML = '<span class="day-num">' + day.getDate() + '</span>';
+                btn.innerHTML = '<span class="day-label">' + ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'][day.getDay()] + '</span><span class="day-num">' + day.getDate() + '</span>';
 
                 btn.addEventListener('click', function () {
                     if (isFuture) {
@@ -2844,6 +2949,9 @@ document.addEventListener('DOMContentLoaded', function () {
             latestMovement = movement;
             const profile = classifySleeper(movement.points, records || []);
 
+            sleepQualityState.movementProfile = profile;
+            updateSleepQualityUi();
+
             renderTelemetryTimeline(movement.labels, movement.points);
 
             if (movementSleeperType) {
@@ -2911,9 +3019,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             datasets: [{
                                 label: 'Movement intensity',
                                 data: movement.points,
-                                borderColor: '#53d0ff',
-                                backgroundColor: 'rgba(83, 208, 255, 0.18)',
-                                fill: true,
+                                borderColor: '#d8ad5a',
+                                backgroundColor: 'transparent',
+                                fill: false,
                                 tension: 0.45,
                                 cubicInterpolationMode: 'monotone',
                                 pointRadius: 0
@@ -2927,13 +3035,13 @@ document.addEventListener('DOMContentLoaded', function () {
                                 y: {
                                     min: 0,
                                     max: 50,
-                                    grid: { color: 'rgba(121, 167, 217, 0.18)' },
-                                    ticks: { color: '#99afc8', stepSize: 25 }
+                                    grid: { color: 'rgba(214, 165, 72, 0.16)' },
+                                    ticks: { color: '#ffffff', stepSize: 25 }
                                 },
                                 x: {
                                     grid: { display: false },
                                     ticks: {
-                                        color: '#99afc8',
+                                        color: '#ffffff',
                                         maxTicksLimit: 8
                                     }
                                 }
@@ -3238,9 +3346,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     datasets: [{
                         label: 'Snore level',
                         data: points,
-                        borderColor: '#53d0ff',
-                        backgroundColor: 'rgba(83, 208, 255, 0.18)',
-                        fill: true,
+                                borderColor: '#f0c97a',
+                        backgroundColor: 'transparent',
+                        fill: false,
                         tension: 0.45,
                         cubicInterpolationMode: 'monotone',
                         pointRadius: 0
@@ -3254,13 +3362,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         y: {
                             min: 0,
                             max: 100,
-                            grid: { color: 'rgba(121, 167, 217, 0.18)' },
-                            ticks: { color: '#99afc8', stepSize: 50 }
+                            grid: { color: 'rgba(214, 165, 72, 0.16)' },
+                            ticks: { color: '#ffffff', stepSize: 50 }
                         },
                         x: {
                             grid: { display: false },
                             ticks: {
-                                color: '#99afc8',
+                                color: '#ffffff',
                                 maxTicksLimit: 8
                             }
                         }
@@ -3304,6 +3412,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (snoreSafe !== null && stamp) {
                 pushPoint(stamp, snoreSafe);
+                sleepQualityState.snoreLevel = snoreSafe;
+                updateSleepQualityUi();
             }
 
             if (snoreGraphStatus) {
@@ -3353,7 +3463,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     datasets: [{
                         label: 'Heart rate',
                         data: points,
-                        borderColor: '#66ff9a',
+                                borderColor: '#8b6235',
                         backgroundColor: 'transparent',
                         borderWidth: 2,
                         fill: false,
@@ -3369,8 +3479,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         y: {
                             min: 40,
                             max: 160,
-                            grid: { color: 'rgba(102, 255, 154, 0.16)' },
-                            ticks: { color: '#8dffb4', stepSize: 20 }
+                            grid: { color: 'rgba(214, 165, 72, 0.14)' },
+                            ticks: { color: '#ffffff', stepSize: 20 }
                         },
                         x: {
                             grid: { display: false },

@@ -7,13 +7,13 @@ $isActive = function($page) use ($currentPage) {
 ?>
 <footer class="mobile-footbar">
     <nav class="footbar-container">
-        <a href="sleep-tracker.php" class="footbar-item <?php echo $isActive('sleep-tracker.php'); ?>" title="Clock">
-            <i class="bi bi-moon-stars"></i>
-            <span class="footbar-label">Clock</span>
-        </a>
         <a href="statistics.php" class="footbar-item <?php echo $isActive('statistics.php'); ?>" title="Statistics">
             <i class="bi bi-bar-chart"></i>
             <span class="footbar-label">Stats</span>
+        </a>
+        <a href="sleep-tracker.php" class="footbar-item <?php echo $isActive('sleep-tracker.php'); ?>" title="Clock">
+            <i class="bi bi-moon-stars"></i>
+            <span class="footbar-label">Clock</span>
         </a>
         <a href="device.php" class="footbar-item <?php echo $isActive('device.php'); ?>" title="Device">
             <i class="bi bi-cpu"></i>

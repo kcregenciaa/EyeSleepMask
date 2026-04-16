@@ -36,15 +36,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">
                 <section class="col-12">
-                    <div class="top-title d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-                        <h1 class="h3 mb-0 text-light"><?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?>'s Clock</h1>
-                        <div class="top-actions d-flex align-items-center gap-2">
-                            <?php if (!$isLoggedIn): ?>
-                            <a href="index.php" class="home-btn"><i class="bi bi-house-door"></i> Home</a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
                     <div class="row g-3 g-lg-4 justify-content-center">
                         <div class="col-12 col-xl-8">
                             <article class="panel-card sleep-tracker-card p-3 p-lg-4">
