@@ -43,7 +43,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         </div>
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
-                            <a class="nav-link" href="movement-tracker.php"><i class="bi bi-activity"></i> Movement Tracker</a>
+                            <a class="nav-link" href="statistics.php"><i class="bi bi-activity"></i> Statistics</a>
                             <a class="nav-link active" href="#"><i class="bi bi-cpu"></i> Device</a>
                             <a class="nav-link" href="settings.php"><i class="bi bi-gear"></i> Settings</a>
                         </nav>
