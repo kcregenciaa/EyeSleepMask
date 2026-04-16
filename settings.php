@@ -22,7 +22,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     <h2 class="text-light mb-0">Settings</h2>
                     <p class="mb-0 soft-text">Manage your account and preferences</p>
                 </div>
-                <a href="daily-tracker.php" class="btn btn-outline-light btn-sm">Back to Dashboard</a>
+                <a href="sleep-tracker.php" class="btn btn-outline-light btn-sm">Back to Dashboard</a>
             </div>
 
             <div class="row g-3 g-md-4">
