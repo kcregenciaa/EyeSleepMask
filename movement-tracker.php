@@ -42,7 +42,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <a href="index.php" class="brand-link"><strong>DeepSleepers</strong></a>
                         </div>
                         <nav class="nav flex-row flex-lg-column gap-2 dashboard-nav">
-                            <a class="nav-link" href="discover.php"><i class="bi bi-compass"></i> Discover</a>
                             <a class="nav-link" href="daily-tracker.php"><i class="bi bi-calendar3"></i> Daily Tracker</a>
                             <a class="nav-link" href="sleep-tracker.php"><i class="bi bi-moon-stars"></i> Clock</a>
                             <a class="nav-link active" href="#"><i class="bi bi-activity"></i> Statistics</a>
@@ -143,30 +142,31 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             <div class="col-12">
                                 <article class="panel-card p-3 p-lg-4 movement-panel h-100">
                                     <div class="movement-panel-head">
-                                        <h2 class="h5 mb-0">Sleep Movement Pattern</h2>
+                                        <h2 class="h5 mb-0">Movement</h2>
                                     </div>
                                     <canvas id="movementPatternChart" height="100"></canvas>
                                 </article>
                             </div>
                         </div>
 
-                        <div class="movement-telemetry-panel" id="snoreGraphPanel">
-                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                <h2 class="h5 text-light mb-0">Snore Level Trend</h2>
-                                <span class="movement-telemetry-meta" id="snoreGraphStatus">Waiting for live metrics...</span>
+                        <div class="row g-3 g-lg-4 mt-0">
+                            <div class="col-12 col-xl-6">
+                                <article class="panel-card p-3 p-lg-4 movement-panel h-100" id="snoreGraphPanel">
+                                    <div class="movement-panel-head">
+                                        <h2 class="h5 mb-0">Snore Level Trend</h2>
+                                        <span class="movement-muted" id="snoreGraphStatus">Waiting for live metrics...</span>
+                                    </div>
+                                    <canvas id="snoreTrendChart" aria-label="Snore level graph" role="img" height="100"></canvas>
+                                </article>
                             </div>
-                            <div class="movement-telemetry-chart-wrap">
-                                <canvas id="snoreTrendChart" aria-label="Snore level graph" role="img"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="movement-telemetry-panel" id="heartRateGraphPanel">
-                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                <h2 class="h5 text-light mb-0">Heart Rate Trend</h2>
-                                <span class="movement-telemetry-meta" id="heartRateGraphStatus">Waiting for live metrics...</span>
-                            </div>
-                            <div class="movement-telemetry-chart-wrap">
-                                <canvas id="heartRateTrendChart" aria-label="Heart rate graph" role="img"></canvas>
+                            <div class="col-12 col-xl-6">
+                                <article class="panel-card p-3 p-lg-4 movement-panel h-100" id="heartRateGraphPanel">
+                                    <div class="movement-panel-head">
+                                        <h2 class="h5 mb-0">Heart Rate Trend</h2>
+                                        <span class="movement-muted" id="heartRateGraphStatus">Waiting for live metrics...</span>
+                                    </div>
+                                    <canvas id="heartRateTrendChart" aria-label="Heart rate graph" role="img" height="100"></canvas>
+                                </article>
                             </div>
                         </div>
 

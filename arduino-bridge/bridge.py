@@ -2,14 +2,16 @@
 PowerShell quick start (copy/paste):
 
 cd C:\\xampp\\htdocs\\EyeSleepMask\\EyeSleepMask\\arduino-bridge
-$env:ARDUINO_PORT="COM9"
+$env:ARDUINO_PORT="COM6"
 $env:ARDUINO_BAUD="115200"
 $env:INGEST_URL="http://localhost:8000/api/arduino-ingest.php"
 $env:MOTION_URL="http://localhost:8000/api/motion-data.php"
 python .\\bridge.py
 """
 
-# Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'bridge.py' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+
+
+Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'bridge.py' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
 import json
 import os
@@ -21,12 +23,17 @@ import requests
 import serial
 from serial import SerialException
 
-PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM9')
+PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM6')
 BAUD_RATE = int(os.environ.get('ARDUINO_BAUD', '115200'))
 INGEST_URL = os.environ.get('INGEST_URL', 'http://localhost:8000/api/arduino-ingest.php')
 MOTION_URL = os.environ.get('MOTION_URL', 'http://localhost:8000/api/motion-data.php')
 DEVICE_NAME = os.environ.get('ARDUINO_DEVICE', 'seeed-xiao-nrf52840')
 READ_TIMEOUT = float(os.environ.get('ARDUINO_TIMEOUT', '1'))
+
+KNOWN_STATUS_LINES = {
+    'IMU not detected!': 'IMU not detected on device. Check wiring/board support and restart.',
+}
+_seen_status_lines = set()
 
 
 def now_iso() -> str:
@@ -60,6 +67,12 @@ def coerce_percent(value, fallback=0):
 def parse_payload(line: str):
     text = line.strip()
     if not text:
+        return None
+
+    if text in KNOWN_STATUS_LINES:
+        if text not in _seen_status_lines:
+            print(f"[bridge] device status: {KNOWN_STATUS_LINES[text]}")
+            _seen_status_lines.add(text)
         return None
 
     try:

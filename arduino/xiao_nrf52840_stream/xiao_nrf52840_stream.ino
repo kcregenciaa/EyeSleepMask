@@ -35,9 +35,6 @@ bool alertTriggered = false;
 // ----------------------
 float smoothed = 0;
 float alpha = 0.1;
-const float GRAVITY_MPS2 = 9.81;
-const float MOTION_NOISE_FLOOR = 0.02;
-const float MOTION_TO_PERCENT = 140.0;
 
 // ----------------------
 // SERIAL TIMER (2 seconds)
@@ -45,27 +42,29 @@ const float MOTION_TO_PERCENT = 140.0;
 unsigned long lastSendTime = 0;
 const unsigned long SEND_INTERVAL = 2000;
 
-const char* DEVICE_NAME = "seeed-xiao-nrf52840";
-
 // ----------------------
 // LOW MOTION DETECTION (for LED)
 // ----------------------
 unsigned long lowMotionStart = 0;
 bool isLowMotion = false;
-const float CALM_THRESHOLD = 0.08;
+const float CALM_THRESHOLD = 0.9;
 const unsigned long CALM_TIME = 5000;
 
 // ----------------------
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  delay(300);
+  while (!Serial)
+    ;
 
   strip.begin();
   strip.show();
 
-  if (imu.begin() != 0){
+  if (imu.begin() != 0)
+  {
     Serial.println("IMU not detected!");
-    while(1);
+    while (1)
+      ;
   }
 
   Serial.println("IMU ready!");
@@ -75,7 +74,8 @@ void setup() {
 }
 
 // ----------------------
-void loop() {
+void loop()
+{
   // ----------------------
   // READ IMU
   // ----------------------
@@ -87,50 +87,36 @@ void loop() {
   // MOTION SIGNAL (gravity removed)
   // ----------------------
   float magnitude = sqrt(ax * ax + ay * ay + az * az);
-
-  // LSM6DS3 library outputs can be either in g or m/s^2 depending on config.
-  // If we are clearly above 1g scale, normalize from m/s^2 to g.
-  float magnitudeG = magnitude;
-  if (magnitude > 3.0) {
-    magnitudeG = magnitude / GRAVITY_MPS2;
-  }
-
-  float motion = abs(magnitudeG - 1.0);
-
-  if (motion < MOTION_NOISE_FLOOR) {
-    motion = 0;
-  }
+  float motion = abs(magnitude - 1.0);
 
   smoothed = alpha * motion + (1 - alpha) * smoothed;
 
   // ----------------------
   // SERIAL OUTPUT (every 2 seconds)
   // ----------------------
-  if (millis() - lastSendTime >= SEND_INTERVAL) {
-    int movementPct = (int)round(smoothed * MOTION_TO_PERCENT);
-    movementPct = constrain(movementPct, 0, 100);
-
-    Serial.print("{\"device\":\"");
-    Serial.print(DEVICE_NAME);
-    Serial.print("\",\"snoreLevel\":0,\"movement\":");
-    Serial.print(movementPct);
-    Serial.println(",\"battery\":100}");
-
+  if (millis() - lastSendTime >= SEND_INTERVAL)
+  {
+    Serial.println(smoothed);
     lastSendTime = millis();
   }
 
   // ----------------------
   // LOW MOTION DETECTION (for LED behavior)
   // ----------------------
-  if (smoothed >= 0 && smoothed <= CALM_THRESHOLD) {
-    if (lowMotionStart == 0) {
+  if (smoothed >= 0 && smoothed <= CALM_THRESHOLD)
+  {
+    if (lowMotionStart == 0)
+    {
       lowMotionStart = millis();
     }
 
-    if (millis() - lowMotionStart >= CALM_TIME) {
+    if (millis() - lowMotionStart >= CALM_TIME)
+    {
       isLowMotion = true;
     }
-  } else {
+  }
+  else
+  {
     lowMotionStart = 0;
     isLowMotion = false;
   }
@@ -138,13 +124,15 @@ void loop() {
   // ----------------------
   // LED BEHAVIOR
   // ----------------------
-  if (isLowMotion) {
+  if (isLowMotion)
+  {
     static bool on = false;
 
     uint32_t color = on ? strip.Color(255, 255, 0) : strip.Color(0, 0, 0);
     // YELLOW blink = calm sleep
 
-    for (int i = 0; i < NUM_LEDS * 2; i++) {
+    for (int i = 0; i < NUM_LEDS * 2; i++)
+    {
       strip.setPixelColor(i, color);
     }
 
@@ -152,10 +140,12 @@ void loop() {
     on = !on;
 
     delay(300);
-  } 
-  else {
+  }
+  else
+  {
     // OFF during movement
-    for (int i = 0; i < NUM_LEDS * 2; i++) {
+    for (int i = 0; i < NUM_LEDS * 2; i++)
+    {
       strip.setPixelColor(i, strip.Color(0, 0, 0));
     }
     strip.show();

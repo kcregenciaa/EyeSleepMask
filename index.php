@@ -18,7 +18,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 				<ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-lg-3">
 					<li class="nav-item"><a class="nav-link text-light" href="#features">Features</a></li>
 					<li class="nav-item"><a class="nav-link text-light" href="#mask">Mask Tech</a></li>
-					<li class="nav-item"><a class="nav-link text-light" href="discover.php">Discover</a></li>
+
 				</ul>
 				<a href="login.php" class="btn btn-accent ms-lg-3">Login</a>
 			</div>
@@ -37,7 +37,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
 					</p>
 					<div class="d-flex flex-wrap gap-3">
 						<a href="login.php" class="btn btn-accent btn-lg">Start Sleeping Better</a>
-						<a href="discover.php" class="btn btn-outline-light btn-lg">Explore Discover</a>
 					</div>
 					<div class="stats-row mt-4">
 						<div class="stat-card">

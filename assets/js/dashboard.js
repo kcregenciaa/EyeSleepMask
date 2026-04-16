@@ -2902,7 +2902,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (patternChartInstance) {
                     patternChartInstance.data.labels = movement.labels;
                     patternChartInstance.data.datasets[0].data = movement.points;
-                    patternChartInstance.update('none');
+                    patternChartInstance.update();
                 } else {
                     patternChartInstance = new Chart(movementPatternChart, {
                         type: 'line',
@@ -2914,19 +2914,21 @@ document.addEventListener('DOMContentLoaded', function () {
                                 borderColor: '#53d0ff',
                                 backgroundColor: 'rgba(83, 208, 255, 0.18)',
                                 fill: true,
-                                tension: 0.32,
+                                tension: 0.45,
+                                cubicInterpolationMode: 'monotone',
                                 pointRadius: 0
                             }]
                         },
                         options: {
                             responsive: true,
+                            animation: { duration: 350, easing: 'linear' },
                             plugins: { legend: { display: false } },
                             scales: {
                                 y: {
                                     min: 0,
-                                    max: 100,
+                                    max: 50,
                                     grid: { color: 'rgba(121, 167, 217, 0.18)' },
-                                    ticks: { color: '#99afc8' }
+                                    ticks: { color: '#99afc8', stepSize: 25 }
                                 },
                                 x: {
                                     grid: { display: false },
@@ -3239,12 +3241,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         borderColor: '#53d0ff',
                         backgroundColor: 'rgba(83, 208, 255, 0.18)',
                         fill: true,
-                        tension: 0.32,
+                        tension: 0.45,
+                        cubicInterpolationMode: 'monotone',
                         pointRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
+                    animation: { duration: 350, easing: 'linear' },
                     plugins: { legend: { display: false } },
                     scales: {
                         y: {
@@ -3289,7 +3293,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (chartInstance) {
-                chartInstance.update('none');
+                chartInstance.update();
             }
         };
 
@@ -3336,7 +3340,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (heartRateGraphPanel) {
         const heartRateTrendChart = document.getElementById('heartRateTrendChart');
         const heartRateGraphStatus = document.getElementById('heartRateGraphStatus');
-        const maxPoints = 30;
+        const maxPoints = 120;
         const labels = [];
         const points = [];
         let chartInstance = null;
@@ -3349,29 +3353,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     datasets: [{
                         label: 'Heart rate',
                         data: points,
-                        borderColor: '#53d0ff',
-                        backgroundColor: 'rgba(83, 208, 255, 0.18)',
-                        fill: true,
-                        tension: 0.32,
+                        borderColor: '#66ff9a',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0,
                         pointRadius: 0
                     }]
                 },
                 options: {
                     responsive: true,
+                    animation: { duration: 120, easing: 'linear' },
                     plugins: { legend: { display: false } },
                     scales: {
                         y: {
-                            min: 0,
-                            max: 200,
-                            grid: { color: 'rgba(121, 167, 217, 0.18)' },
-                            ticks: { color: '#99afc8' }
+                            min: 40,
+                            max: 160,
+                            grid: { color: 'rgba(102, 255, 154, 0.16)' },
+                            ticks: { color: '#8dffb4', stepSize: 20 }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: {
-                                color: '#99afc8',
-                                maxTicksLimit: 8
-                            }
+                            ticks: { display: false }
                         }
                     }
                 }
@@ -3393,16 +3396,21 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const pushPoint = function (stamp, value) {
-            labels.push(formatChartTime(stamp));
-            points.push(value);
+            const baseline = Math.max(40, Math.min(160, value));
+            const spikeTop = Math.min(160, baseline + 22);
+            const spikeDip = Math.max(40, baseline - 10);
+
+            labels.push('', '', formatChartTime(stamp), '');
+            points.push(baseline, spikeTop, spikeDip, baseline);
 
             if (labels.length > maxPoints) {
-                labels.shift();
-                points.shift();
+                const overflow = labels.length - maxPoints;
+                labels.splice(0, overflow);
+                points.splice(0, overflow);
             }
 
             if (chartInstance) {
-                chartInstance.update('none');
+                chartInstance.update();
             }
         };
 
