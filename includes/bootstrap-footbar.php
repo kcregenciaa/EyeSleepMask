@@ -11,7 +11,7 @@ $isActive = function($page) use ($currentPage) {
             <i class="bi bi-bar-chart"></i>
             <span class="footbar-label">Stats</span>
         </a>
-        <a href="sleep-tracker.php" class="footbar-item <?php echo $isActive('sleep-tracker.php'); ?>" title="Clock">
+        <a href="sleep-tracker.php" class="footbar-item <?php echo $isActive('sleep-tracker.php'); ?>" title="Clock" aria-label="Clock">
             <i class="bi bi-moon-stars"></i>
             <span class="footbar-label">Clock</span>
         </a>

@@ -9,7 +9,8 @@
     --border-soft: rgba(135, 167, 210, 0.16);
     --shadow-inset: inset 6px 6px 16px rgba(7, 12, 25, 0.65), inset -6px -6px 16px rgba(40, 56, 88, 0.35);
     --shadow-outer: 0 18px 40px rgba(4, 9, 20, 0.5);
-    --footbar-safe-space: 8.25rem;
+    --footbar-safe-space: 6.1rem;
+    --side-margin: 12rem;
 }
 
 @font-face {
@@ -34,7 +35,7 @@ html {
 }
 
 body {
-    margin: 0;
+    margin: 0 var(--side-margin);
     color: var(--text-main);
     background: radial-gradient(circle at 8% 12%, #253456 0%, #161f33 34%, #0e1422 72%, #0b1020 100%);
     font-family: 'SF Pro Display', "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -99,6 +100,43 @@ iframe {
     background: linear-gradient(135deg, #79ddff, #50b7e7);
 }
 
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: transparent;
+    color: #07111d;
+    font-weight: 700;
+    box-shadow: 0 8px 25px rgba(58, 187, 242, 0.35);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+    background: linear-gradient(135deg, #79ddff, #50b7e7) !important;
+    border-color: transparent !important;
+    color: #041019 !important;
+}
+
+.btn-outline-light {
+    border-color: rgba(127, 216, 255, 0.65);
+    color: #dff5ff;
+    background: rgba(15, 26, 43, 0.45);
+}
+
+.btn-outline-light:hover,
+.btn-outline-light:focus,
+.btn-outline-light:active,
+.btn-outline-light.active {
+    border-color: rgba(127, 216, 255, 0.9) !important;
+    color: #f2fbff !important;
+    background: rgba(87, 208, 255, 0.18) !important;
+}
+
+.btn:focus-visible,
+button:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgba(80, 182, 241, 0.32);
+}
+
 .glass-nav {
     border: 1px solid var(--border-soft);
     background: rgba(16, 24, 40, 0.75);
@@ -130,6 +168,7 @@ iframe {
 
     body {
         min-height: 100dvh;
+        margin: 0;
         padding: 0.5rem;
     }
 
@@ -169,16 +208,16 @@ iframe {
 /* Mobile Footbar Navigation */
 .mobile-footbar {
     position: fixed;
-    bottom: 1.5rem;
+    bottom: 1.2rem;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
     border: 1px solid var(--border-soft);
     background: rgba(16, 24, 40, 0.95);
     backdrop-filter: blur(12px);
-    padding: 0.9rem 0.85rem;
+    padding: 0.35rem 0.6rem;
     border-radius: 999px;
-    width: min(94vw, 560px);
+    width: min(90vw, 500px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -189,7 +228,7 @@ iframe {
     max-width: 100%;
     margin: 0;
     padding: 0;
-    gap: 0.4rem;
+    gap: 0.25rem;
 }
 
 .footbar-item {
@@ -197,27 +236,27 @@ iframe {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem 1rem;
+    padding: 0.32rem 0.65rem;
     color: var(--text-soft);
     text-decoration: none;
     transition: all 0.2s ease;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     position: relative;
     white-space: nowrap;
     flex: 1;
 }
 
 .footbar-item i {
-    font-size: 1.5rem;
-    margin-bottom: 0.4rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.15rem;
     display: block;
 }
 
 .footbar-label {
-    font-size: 0.65rem;
+    font-size: 0.56rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.45px;
     font-weight: 600;
 }
 
@@ -248,26 +287,27 @@ body.profile-page {
 
 @media (max-width: 767.98px) {
     :root {
-        --footbar-safe-space: 7.75rem;
+        --footbar-safe-space: 5.7rem;
+        --side-margin: 7rem;
     }
 
     .mobile-footbar {
-        bottom: 1rem;
-        width: min(96vw, 620px);
-        padding: 0.8rem 0.65rem;
+        bottom: 0.85rem;
+        width: min(92vw, 540px);
+        padding: 0.32rem 0.48rem;
     }
 
     .footbar-item {
-        padding: 0.65rem 0.7rem;
-        font-size: 0.7rem;
+        padding: 0.28rem 0.52rem;
+        font-size: 0.64rem;
     }
 
     .footbar-item i {
-        font-size: 1.35rem;
-        margin-bottom: 0.3rem;
+        font-size: 1.12rem;
+        margin-bottom: 0.12rem;
     }
 
     .footbar-label {
-        font-size: 0.6rem;
+        font-size: 0.52rem;
     }
 }
