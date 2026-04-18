@@ -63,7 +63,7 @@
 }
 
 .statistics-page.deep-bg {
-    background: radial-gradient(circle at center, #1c2d4a 0%, #0b1220 66%, #070b14 100%);
+    background: #0f1a2d;
 }
 
 .statistics-page,
@@ -77,10 +77,10 @@
 }
 
 .statistics-page {
-    --stats-grid-solid: #111b2c;
-    --stats-card-grad-start: rgba(24, 35, 56, 0.95);
-    --stats-card-grad-end: rgba(15, 22, 35, 0.94);
-    --stats-border: rgba(128, 170, 216, 0.26);
+    --stats-grid-solid: #0b1424;
+    --stats-card-grad-start: #0b1424;
+    --stats-card-grad-end: #0b1424;
+    --stats-border: transparent;
 }
 
 .statistics-page .container-fluid,
@@ -100,11 +100,10 @@
 }
 
 .statistics-page .dashboard-shell {
-    border: 1px solid var(--stats-border);
-    border-radius: 22px;
-    background: linear-gradient(180deg, var(--stats-card-grad-start), var(--stats-card-grad-end));
-    backdrop-filter: none;
-    box-shadow: var(--shadow-outer);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .statistics-page .row.g-4,
@@ -131,6 +130,7 @@
 
 .statistics-page .top-title h1 {
     text-align: left;
+    flex: 1 1 auto;
     min-width: 0;
     font-size: clamp(2.15rem, 3vw, 2.9rem);
     line-height: 1.05;
@@ -156,6 +156,7 @@
 .statistics-page .top-title .profile-avatar {
     order: 1;
     margin-left: auto;
+    flex-shrink: 0;
 }
 
 .statistics-page #movementTrackerRoot {
@@ -164,16 +165,16 @@
 
 .statistics-page .sleep-quality-card {
     border-radius: 22px;
-    border: 1px solid var(--stats-border);
-    background: linear-gradient(180deg, var(--stats-card-grad-start), var(--stats-card-grad-end));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    border: 0;
+    background: var(--stats-grid-solid);
+    box-shadow: none;
 }
 
 .statistics-page .panel-card {
     border-radius: 22px;
-    border: 1px solid var(--stats-border);
-    background: linear-gradient(180deg, var(--stats-card-grad-start), var(--stats-card-grad-end));
-    box-shadow: var(--shadow-outer);
+    border: 0;
+    background: var(--stats-grid-solid);
+    box-shadow: none;
 }
 
 .statistics-page .sleep-quality-top {
@@ -303,7 +304,7 @@
 
 .statistics-page .sleep-metric-box {
     border-radius: 12px;
-    border: 1px solid rgba(133, 172, 222, 0.18);
+    border: 0;
     background: var(--stats-grid-solid);
     padding: 0.7rem 0.75rem;
     text-align: center;
@@ -332,7 +333,7 @@
 
 .statistics-page .daily-day-btn {
     min-height: auto;
-    border: 1px solid rgba(133, 172, 222, 0.18);
+    border: 0;
     border-radius: 12px;
     background: var(--stats-grid-solid);
     box-shadow: none;
@@ -354,10 +355,10 @@
 }
 
 .statistics-page .daily-day-btn.active {
-    border-color: rgba(123, 205, 255, 0.7);
+    border-color: transparent;
     background: var(--stats-grid-solid);
     color: #ffffff;
-    box-shadow: 0 0 0 0.2rem rgba(80, 182, 241, 0.2);
+    box-shadow: none;
 }
 
 .statistics-page .daily-day-btn.active .day-label {
@@ -376,11 +377,12 @@
 
 .statistics-page .movement-panel {
     border-radius: 22px;
+    border: 0;
 }
 
 .statistics-page .daily-week-btn {
     border-radius: 12px;
-    border-color: rgba(130, 174, 219, 0.35);
+    border-color: transparent;
     background: #111b2c;
 }
 
@@ -389,9 +391,9 @@
 }
 
 .statistics-page .profile-avatar {
-    background: linear-gradient(135deg, #57d0ff, #3da6d9);
+    background: #57b8ea;
     color: #07111d;
-    box-shadow: 0 8px 25px rgba(58, 187, 242, 0.28);
+    box-shadow: none;
 }
 
 .device-page .top-title {
@@ -3513,6 +3515,7 @@ body.sleep-flow-active {
 
     .statistics-page .top-title {
         flex-direction: row;
+        flex-wrap: nowrap;
         align-items: center;
         justify-content: space-between;
         gap: 0.45rem;
@@ -3520,6 +3523,7 @@ body.sleep-flow-active {
 
     .statistics-page .top-title h1 {
         font-size: 1.85rem;
+        flex: 1 1 auto;
     }
 
     .statistics-page .profile-avatar {
@@ -3974,18 +3978,21 @@ body.sleep-flow-active {
     }
 
     .statistics-page .top-title {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.55rem;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
     }
 
     .statistics-page .top-title h1 {
         font-size: clamp(1.45rem, 5.2vw, 1.75rem);
         line-height: 1.08;
+        flex: 1 1 auto;
     }
 
     .statistics-page .top-title .profile-avatar {
-        align-self: flex-end;
+        align-self: auto;
     }
 
     .statistics-page .profile-avatar {
