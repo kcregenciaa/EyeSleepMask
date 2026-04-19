@@ -1,20 +1,99 @@
 <?php
+declare(strict_types=1);
+
+session_start();
 header('Content-Type: application/json; charset=utf-8');
 
+require __DIR__ . '/../backend/db.php';
+
 $dataFile = __DIR__ . '/../data/arduino-latest.json';
-if (!file_exists($dataFile)) {
-    echo json_encode([
-        'ok' => false,
-        'error' => 'No device data yet'
-    ]);
-    exit;
+$userId = !empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+
+$loadFilePayload = function () use ($dataFile): ?array {
+    if (!file_exists($dataFile)) {
+        return null;
+    }
+
+    $content = file_get_contents($dataFile);
+    $payload = json_decode((string) $content, true);
+    return is_array($payload) ? $payload : null;
+};
+
+$payload = null;
+
+function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId): ?array
+{
+    if ($filterUserId === null) {
+        $query = $mysqli->prepare(
+            'SELECT device, snore_level, movement, battery, heart_rate, recorded_at, received_at
+             FROM telemetry_samples
+             WHERE user_id IS NULL
+             ORDER BY received_at DESC
+             LIMIT 1'
+        );
+        if (!$query) {
+            return null;
+        }
+    } else {
+        $query = $mysqli->prepare(
+            'SELECT device, snore_level, movement, battery, heart_rate, recorded_at, received_at
+             FROM telemetry_samples
+             WHERE user_id = ?
+             ORDER BY received_at DESC
+             LIMIT 1'
+        );
+        if (!$query) {
+            return null;
+        }
+        $query->bind_param('i', $filterUserId);
+    }
+
+    if (!$query->execute()) {
+        $query->close();
+        return null;
+    }
+
+    $result = $query->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $query->close();
+
+    if (!is_array($row)) {
+        return null;
+    }
+
+    $timestamp = !empty($row['recorded_at']) ? (string) $row['recorded_at'] : (string) $row['received_at'];
+
+    return [
+        'ok' => true,
+        'device' => (string) ($row['device'] ?? 'xiao-nrf52840'),
+        'snoreLevel' => (int) ($row['snore_level'] ?? 0),
+        'movement' => (int) ($row['movement'] ?? 0),
+        'battery' => (int) ($row['battery'] ?? 0),
+        'heartRate' => isset($row['heart_rate']) ? (int) $row['heart_rate'] : null,
+        'timestamp' => $timestamp,
+        'receivedAt' => (string) ($row['received_at'] ?? gmdate('c'))
+    ];
 }
 
-$content = file_get_contents($dataFile);
-$payload = json_decode((string) $content, true);
-if (!is_array($payload)) {
-    http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'Corrupt data']);
+if ($userId !== null) {
+    $payload = fetchLatestTelemetrySample($mysqli, $userId);
+}
+
+if (!$payload) {
+    $payload = fetchLatestTelemetrySample($mysqli, null);
+}
+
+if (!$payload) {
+    $filePayload = $loadFilePayload();
+    if (!$filePayload) {
+        echo json_encode([
+            'ok' => false,
+            'error' => 'No device data yet'
+        ]);
+        exit;
+    }
+
+    echo json_encode($filePayload);
     exit;
 }
 

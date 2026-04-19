@@ -1,11 +1,11 @@
 <?php
 session_start();
+require __DIR__ . '/backend/form_security.php';
 
 $pageTitle = 'DeepSleepers | Register';
 $pageStyles = ['assets/css/register.css'];
 $pageScripts = ['assets/js/register.js'];
 
-$errors = [];
 $formData = [
 	'fullname' => '',
 	'username' => '',
@@ -15,78 +15,12 @@ $formData = [
 	'gender' => ''
 ];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	$formData['fullname'] = trim($_POST['fullname'] ?? '');
-	$formData['username'] = trim($_POST['username'] ?? '');
-	$formData['email'] = trim($_POST['email'] ?? '');
-	$formData['birthdate'] = trim($_POST['birthdate'] ?? '');
-	$formData['age'] = trim($_POST['age'] ?? '');
-	$formData['gender'] = trim($_POST['gender'] ?? '');
-	$password = (string)($_POST['password'] ?? '');
-	$confirmPassword = (string)($_POST['confirm_password'] ?? '');
+$registerFlash = pop_form_flash('register');
+$csrfToken = csrf_token();
 
-	if ($formData['fullname'] === '') {
-		$errors[] = 'Full name is required.';
-	}
-
-	if ($formData['username'] === '') {
-		$errors[] = 'Username is required.';
-	}
-
-	if ($formData['email'] === '' || !filter_var($formData['email'], FILTER_VALIDATE_EMAIL)) {
-		$errors[] = 'A valid email address is required.';
-	}
-
-	if ($formData['birthdate'] === '') {
-		$errors[] = 'Birthdate is required.';
-	}
-
-	$ageInput = filter_var($formData['age'], FILTER_VALIDATE_INT);
-	if ($ageInput === false || $ageInput < 18) {
-		$errors[] = 'Registration is only allowed for users aged 18 and above.';
-	}
-
-	if ($formData['birthdate'] !== '') {
-		$birthDate = DateTime::createFromFormat('Y-m-d', $formData['birthdate']);
-		if ($birthDate instanceof DateTime) {
-			$today = new DateTime('today');
-			$calculatedAge = $birthDate->diff($today)->y;
-			if ($calculatedAge < 18) {
-				$errors[] = 'Birthdate indicates an age below 18.';
-			}
-			if ($ageInput !== false && $calculatedAge !== (int)$ageInput) {
-				$errors[] = 'Age and birthdate must match.';
-			}
-		} else {
-			$errors[] = 'Birthdate format is invalid.';
-		}
-	}
-
-	if (!in_array($formData['gender'], ['male', 'female', 'other'], true)) {
-		$errors[] = 'Please select a gender option.';
-	}
-
-	if (strlen($password) < 6) {
-		$errors[] = 'Password must be at least 6 characters long.';
-	}
-
-	if ($password !== $confirmPassword) {
-		$errors[] = 'Password and confirmation do not match.';
-	}
-
-	if (empty($errors)) {
-		$_SESSION['registered_user'] = [
-			'fullname' => $formData['fullname'],
-			'username' => $formData['username'],
-			'email' => $formData['email'],
-			'birthdate' => $formData['birthdate'],
-			'age' => (int)$ageInput,
-			'gender' => $formData['gender']
-		];
-
-		header('Location: login.php?registered=1');
-		exit;
-	}
+if (isset($_SESSION['register_form_data']) && is_array($_SESSION['register_form_data'])) {
+	$formData = array_merge($formData, $_SESSION['register_form_data']);
+	unset($_SESSION['register_form_data']);
 }
 
 include __DIR__ . '/includes/bootstrap-head.php';
@@ -100,17 +34,16 @@ include __DIR__ . '/includes/bootstrap-head.php';
 				<p class="text-muted mb-0">Join the sleep experience. Registration is for users 18+.</p>
 			</div>
 
-			<?php if (!empty($errors)): ?>
-				<div class="alert alert-danger py-2" role="alert">
-					<ul>
-						<?php foreach ($errors as $error): ?>
-							<li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
-						<?php endforeach; ?>
-					</ul>
-				</div>
-			<?php endif; ?>
+			<form id="registerForm" class="row g-3" action="backend/backend_register.php" method="post" novalidate>
+				<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+				<?php if (is_array($registerFlash) && !empty($registerFlash['message'])): ?>
+					<div class="col-12">
+						<div class="card <?php echo $registerFlash['type'] === 'success' ? 'success' : 'error'; ?> auth-card auth-card-form" role="alert">
+							<?php echo htmlspecialchars((string)$registerFlash['message'], ENT_QUOTES, 'UTF-8'); ?>
+						</div>
+					</div>
+				<?php endif; ?>
 
-			<form id="registerForm" class="row g-3" action="register.php" method="post" novalidate>
 				<div class="col-12 col-md-6">
 					<label for="fullname" class="form-label">Full Name</label>
 					<input

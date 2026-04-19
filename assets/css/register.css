@@ -74,6 +74,26 @@
     text-decoration: underline;
 }
 
+.register-card .auth-card {
+    border-radius: 12px;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0;
+    border: 1px solid transparent;
+    background: #111b2c;
+}
+
+.register-card .card.error {
+    border-color: #d75a5a;
+    color: #ffd8d8;
+    background: #3a1d25;
+}
+
+.register-card .card.success {
+    border-color: #3fbd75;
+    color: #d7ffe8;
+    background: #153127;
+}
+
 .alert ul {
     margin: 0;
 }

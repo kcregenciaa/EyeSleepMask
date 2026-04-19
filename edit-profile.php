@@ -1,5 +1,6 @@
 <?php
 session_start();
+require __DIR__ . '/backend/form_security.php';
 
 $userName = trim($_SESSION['user_name'] ?? '');
 if ($userName === '') {
@@ -9,6 +10,9 @@ if ($userName === '') {
 $pageTitle = 'DeepSleepers | Edit Profile';
 $pageStyles = ['assets/css/profile.css'];
 
+$profileFlash = pop_form_flash('profile');
+$csrfToken = csrf_token();
+
 $profile = $_SESSION['user_profile'] ?? [];
 $old = [
     'name' => (string) ($profile['name'] ?? $userName),
@@ -17,56 +21,6 @@ $old = [
     'gender' => (string) ($profile['gender'] ?? ''),
     'email' => (string) ($profile['email'] ?? '')
 ];
-
-$errors = [];
-$saved = false;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $old['name'] = trim($_POST['name'] ?? '');
-    $old['age'] = trim($_POST['age'] ?? '');
-    $old['birthdate'] = trim($_POST['birthdate'] ?? '');
-    $old['gender'] = trim($_POST['gender'] ?? '');
-    $old['email'] = trim($_POST['email'] ?? '');
-
-    if ($old['name'] === '') {
-        $errors[] = 'Name is required.';
-    }
-
-    if ($old['age'] === '' || !ctype_digit($old['age'])) {
-        $errors[] = 'Age must be a valid number.';
-    } elseif ((int) $old['age'] < 18) {
-        $errors[] = 'Age must be 18 or above.';
-    }
-
-    if ($old['birthdate'] === '') {
-        $errors[] = 'Birthdate is required.';
-    } else {
-        $birthDate = DateTime::createFromFormat('Y-m-d', $old['birthdate']);
-        $today = new DateTime('today');
-        if (!$birthDate) {
-            $errors[] = 'Birthdate format is invalid.';
-        } else {
-            $eighteenthBirthday = (clone $birthDate)->modify('+18 years');
-            if ($eighteenthBirthday > $today) {
-                $errors[] = 'Birthdate indicates age is below 18.';
-            }
-        }
-    }
-
-    if (!in_array($old['gender'], ['Male', 'Female', 'Other', 'Prefer not to say'], true)) {
-        $errors[] = 'Please select a valid gender.';
-    }
-
-    if (!filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Please enter a valid email address.';
-    }
-
-    if (!$errors) {
-        $_SESSION['user_profile'] = $old;
-        $_SESSION['user_name'] = $old['name'];
-        $saved = true;
-    }
-}
 
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
@@ -84,23 +38,14 @@ include __DIR__ . '/includes/bootstrap-head.php';
                 <a href="settings.php" class="btn btn-outline-light btn-sm">Back to Settings</a>
             </div>
 
-            <?php if ($saved): ?>
-                <div class="alert alert-success py-2" role="alert">
-                    <i class="bi bi-check-circle"></i> Profile updated successfully!
+            <?php if (is_array($profileFlash) && !empty($profileFlash['message'])): ?>
+                <div class="alert <?php echo $profileFlash['type'] === 'success' ? 'alert-success' : 'alert-danger'; ?> py-2" role="alert">
+                    <?php echo htmlspecialchars((string) $profileFlash['message'], ENT_QUOTES, 'UTF-8'); ?>
                 </div>
             <?php endif; ?>
 
-            <?php if ($errors): ?>
-                <div class="alert alert-danger" role="alert">
-                    <ul class="mb-0 ps-3">
-                        <?php foreach ($errors as $error): ?>
-                            <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <form class="row g-3" action="edit-profile.php" method="post" novalidate>
+            <form class="row g-3" action="backend/backend_edit_profile.php" method="post" novalidate>
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="col-12">
                     <label for="name" class="form-label">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($old['name'], ENT_QUOTES, 'UTF-8'); ?>" required>

@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require __DIR__ . '/backend/auth_guard.php';
+
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
@@ -26,12 +28,21 @@ if ($userName === '') {
     $userName = 'Sleeper';
 }
 
+$dashboardLoader = $_SESSION['dashboard_loader'] ?? null;
+unset($_SESSION['dashboard_loader']);
+
 $pageTitle = 'DeepSleepers | Clock';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
-<body class="deep-bg dashboard-page sleep-tracker-page">
+<body class="deep-bg dashboard-page sleep-tracker-page<?php echo is_array($dashboardLoader) ? ' dashboard-loading' : ''; ?>">
+    <?php if (is_array($dashboardLoader) && !empty($dashboardLoader['message'])): ?>
+        <div id="dashboardLoader" class="dashboard-loader" aria-live="polite" aria-label="Loading dashboard">
+            <img class="dashboard-loader-logo" src="assets/images/logo.png" alt="Eye Sleep Mask logo">
+            <p><?php echo htmlspecialchars((string)$dashboardLoader['message'], ENT_QUOTES, 'UTF-8'); ?></p>
+        </div>
+    <?php endif; ?>
     <div class="container-fluid py-3 py-lg-4">
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">

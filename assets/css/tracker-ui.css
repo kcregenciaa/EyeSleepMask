@@ -12,6 +12,41 @@
     min-width: 0;
 }
 
+.dashboard-loading {
+    overflow: hidden;
+}
+
+.dashboard-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.85rem;
+    background: rgba(9, 15, 28, 0.96);
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.dashboard-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.dashboard-loader-logo {
+    width: min(180px, 52vw);
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 18px rgba(75, 155, 219, 0.42));
+}
+
+.dashboard-loader p {
+    margin: 0;
+    color: #c4d7eb;
+    font-size: 0.95rem;
+}
+
 /* Fullscreen treatment for Clock page */
 .sleep-tracker-page.deep-bg {
     background: #0b1424;

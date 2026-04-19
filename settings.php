@@ -1,13 +1,11 @@
 <?php
 session_start();
 
-$userName = trim($_SESSION['user_name'] ?? '');
-if ($userName === '') {
-    $userName = 'User';
-}
+require __DIR__ . '/backend/auth_guard.php';
 
-$profile = $_SESSION['user_profile'] ?? [];
-$displayName = trim((string) ($profile['name'] ?? $userName));
+$profile = require __DIR__ . '/backend/backend_settings.php';
+
+$displayName = trim((string) ($profile['fullname'] ?? 'User'));
 if ($displayName === '') {
     $displayName = 'User';
 }
