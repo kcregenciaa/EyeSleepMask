@@ -1,13 +1,13 @@
 .login-page {
     overflow: hidden;
-    background: #0b1220;
+    background: linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
 }
 
 .login-card {
     max-width: 520px;
     border-radius: 22px;
     border: 1px solid rgba(128, 170, 216, 0.26);
-    background: linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
+    background: #0b1220;
     box-shadow: var(--shadow-outer);
 }
 
@@ -84,7 +84,7 @@
 .page-loader {
     position: fixed;
     inset: 0;
-    background: #0b1220;
+    background: linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
     display: flex;
     flex-direction: column;
     align-items: center;

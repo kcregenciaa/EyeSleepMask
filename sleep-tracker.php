@@ -36,7 +36,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">
                 <section class="col-12">
-                    <div class="row g-3 g-lg-4 justify-content-center">
+                    <div class="row g-3 g-lg-4 justify-content-center" id="sleepTrackerPanel">
                         <div class="col-12 col-xl-8">
                             <article class="panel-card sleep-tracker-card p-3 p-lg-4">
                                 <div class="sleep-tracker-head d-flex justify-content-between align-items-start mb-3">
@@ -70,7 +70,8 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 <p class="sleep-total-hours mt-3 mb-0">Total sleep: <strong data-display="total-sleep">5 h</strong></p>
 
                                 <div class="sleep-times mt-3 mt-lg-4">
-                                    <div class="sleep-time-row">
+                                    <div class="sleep-time-row sleep-time-pill sleep-time-row-bedtime">
+                                        <span class="sleep-time-pill-dot" aria-hidden="true"><i class="bi bi-moon-stars-fill"></i></span>
                                         <span class="sleep-time-name">Bedtime</span>
                                         <span class="sleep-time-value"><span class="sleep-time-text" data-display="bedtime">12:20 AM</span></span>
                                         <button type="button" class="sleep-edit-btn" data-edit="bedtime" aria-label="Edit bedtime">
@@ -104,7 +105,8 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         </div>
                                     </form>
 
-                                    <div class="sleep-time-row">
+                                    <div class="sleep-time-row sleep-time-pill sleep-time-row-alarm">
+                                        <span class="sleep-time-pill-dot" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
                                         <span class="sleep-time-name">Alarm</span>
                                         <span class="sleep-time-value"><span class="sleep-time-text" data-display="alarm">05:20 AM</span></span>
                                         <button type="button" class="sleep-edit-btn" data-edit="alarm" aria-label="Edit alarm">

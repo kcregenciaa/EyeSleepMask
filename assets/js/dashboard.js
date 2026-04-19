@@ -3560,13 +3560,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const deviceLivePanel = document.getElementById('deviceLivePanel');
-    if (deviceLivePanel) {
+    const sharedDeviceConnectionStateLabel = document.getElementById('deviceConnectionStateLabel');
+    if (deviceLivePanel || sharedDeviceConnectionStateLabel) {
         const connectDeviceBtn = document.getElementById('connectDeviceBtn');
         const connectDeviceModalEl = document.getElementById('connectDeviceModal');
         const connectDeviceContinueBtn = document.getElementById('connectDeviceContinueBtn');
         const deviceConnectedDetails = document.getElementById('deviceConnectedDetails');
         const deviceBatteryPercent = document.getElementById('deviceBatteryPercent');
-        const deviceConnectionStateLabel = document.getElementById('deviceConnectionStateLabel');
+        const deviceConnectionStateLabel = sharedDeviceConnectionStateLabel;
         const deviceLastUpdate = document.getElementById('deviceLastUpdate');
         const connectionFreshMs = 10000;
 

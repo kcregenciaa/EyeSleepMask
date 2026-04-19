@@ -72,19 +72,18 @@ include __DIR__ . '/includes/bootstrap-head.php';
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content device-connect-modal">
                 <div class="modal-header border-0 pb-0">
-                    <h2 class="modal-title h5 text-light" id="connectDeviceModalLabel">Enable Bluetooth Access</h2>
+                    <h2 class="modal-title h5 text-light" id="connectDeviceModalLabel">Device Pairing</h2>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body pt-2">
-                    <p class="movement-insight mb-3">We use Bluetooth to connect your sleep mask for tracking and control.</p>
-                    <ul class="device-connect-checklist mb-0">
-                        <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Bluetooth ON</li>
-                        <li><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Device nearby</li>
-                    </ul>
+                    <div class="device-connect-visual" aria-hidden="true">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <p class="movement-insight mb-3">Place your device near your phone.</p>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="connectDeviceContinueBtn">Continue</button>
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>

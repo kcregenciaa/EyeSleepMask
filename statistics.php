@@ -45,11 +45,20 @@ include __DIR__ . '/includes/bootstrap-head.php';
                     </div>
 
                     <div class="movement-flow">
-                        <article class="panel-card sleep-quality-card p-3 p-lg-4">
-                            <div class="sleep-quality-top">
-                                <div class="sleep-quality-head">
-                                    <h2 class="sleep-section-title mb-0">Sleep Overview</h2>
+                        <div class="device-connection-block">
+                            <div class="device-connection-status-row">
+                                <img src="assets/images/bluetooth.png" alt="Bluetooth" class="device-bluetooth-icon" loading="lazy">
+                                <div class="device-connection-text">
+                                    <p class="movement-muted mb-1">Your Device is</p>
+                                    <p class="device-connection-state mb-0" id="deviceConnectionStateLabel">⚪ Disconnected</p>
                                 </div>
+                            </div>
+                        </div>
+
+                        <h2 class="sleep-section-title sleep-overview-title mb-2">Sleep Overview</h2>
+
+                        <article class="panel-card sleep-calendar-card p-3 p-lg-4">
+                            <div class="sleep-quality-top">
                                 <div class="daily-week-nav" role="group" aria-label="Week navigation">
                                     <button type="button" class="daily-week-btn" id="dailyPrevWeek" aria-label="View previous week"><i class="bi bi-chevron-left"></i></button>
                                     <span class="daily-week-range" id="dailyCalendarRange">This week</span>
@@ -58,7 +67,9 @@ include __DIR__ . '/includes/bootstrap-head.php';
                             </div>
 
                             <div class="daily-calendar-days sleep-quality-days" id="dailyCalendarDays"></div>
+                        </article>
 
+                        <article class="panel-card sleep-quality-card sleep-quality-details-card p-3 p-lg-4 mt-3">
                             <div class="sleep-quality-core">
                                 <div class="sleep-quality-ring">
                                     <div class="sleep-quality-ring-inner">

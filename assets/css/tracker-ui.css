@@ -14,7 +14,7 @@
 
 /* Fullscreen treatment for Clock page */
 .sleep-tracker-page.deep-bg {
-    background: #0a1020;
+    background: #0b1424;
 }
 
 .sleep-tracker-page {
@@ -27,7 +27,7 @@
 
 .sleep-tracker-page .dashboard-shell {
     border: 0;
-    border-radius: 0;
+    border-radius: 22px;
     background: transparent;
     backdrop-filter: none;
     box-shadow: none;
@@ -52,9 +52,9 @@
 .sleep-tracker-page .sleep-tracker-card {
     min-height: calc(100dvh - 1rem);
     border: 0;
-    border-radius: 0;
+    border-radius: 22px;
     box-shadow: none;
-    background: #0a1020;
+    background: #0f1a2d;
 }
 
 .statistics-page.deep-bg,
@@ -63,7 +63,11 @@
 }
 
 .statistics-page.deep-bg {
-    background: #0f1a2d;
+    background: #0b1424;
+}
+
+.device-page.deep-bg {
+    background: #0b1424;
 }
 
 .statistics-page,
@@ -77,10 +81,17 @@
 }
 
 .statistics-page {
-    --stats-grid-solid: #0b1424;
+    --stats-grid-solid: #0f1a2d;
     --stats-card-grad-start: #0b1424;
     --stats-card-grad-end: #0b1424;
     --stats-border: transparent;
+}
+
+.device-page {
+    --stats-grid-solid: #0f1a2d;
+    --stats-border: transparent;
+    --device-box-bg: #0f1a2d;
+    --device-box-border: rgba(63, 104, 166, 0.24);
 }
 
 .statistics-page .container-fluid,
@@ -163,7 +174,29 @@
     padding: 0 0.9rem 5.75rem;
 }
 
+.sleep-tracker-page #sleepTrackerPanel {
+    padding: 1.25rem 0.9rem 5.75rem;
+}
+
+.device-page #deviceLivePanel {
+    padding: 0 0.9rem 5.75rem;
+}
+
 .statistics-page .sleep-quality-card {
+    border-radius: 22px;
+    border: 0;
+    background: var(--stats-grid-solid);
+    box-shadow: none;
+}
+
+.statistics-page .sleep-calendar-card {
+    border-radius: 22px;
+    border: 0;
+    background: var(--stats-grid-solid);
+    box-shadow: none;
+}
+
+.statistics-page .sleep-quality-details-card {
     border-radius: 22px;
     border: 0;
     background: var(--stats-grid-solid);
@@ -182,7 +215,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.55rem;
+    margin-bottom: 0.65rem;
 }
 
 .statistics-page .sleep-quality-head {
@@ -192,6 +225,17 @@
 .statistics-page .sleep-section-title {
     font-size: 1.15rem;
     line-height: 1.1;
+}
+
+.statistics-page .sleep-overview-title {
+    margin: 0 0 0.55rem;
+    padding: 0 0.2rem;
+}
+
+.statistics-page .device-connection-block {
+    max-width: none;
+    margin-top: 0;
+    margin-bottom: 0.8rem;
 }
 
 .statistics-page .sleep-quality-kicker {
@@ -205,8 +249,8 @@
 }
 
 .statistics-page .sleep-quality-days {
-    margin-top: 0.35rem;
-    margin-bottom: 0.55rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0;
 }
 
 .statistics-page .sleep-quality-top .daily-week-nav {
@@ -231,7 +275,7 @@
 .statistics-page .sleep-quality-core {
     display: flex;
     justify-content: center;
-    margin: 0.05rem 0 0.6rem;
+    margin: 0.05rem 0 0.85rem;
 }
 
 .statistics-page .sleep-quality-ring {
@@ -254,10 +298,7 @@
     place-items: center;
     text-align: center;
     padding: 0.7rem;
-    background-image: url('../images/moon.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 76% auto;
+    background: none;
 }
 
 .statistics-page .sleep-quality-label {
@@ -484,25 +525,26 @@
 }
 
 .device-status-card {
-    border-radius: 28px;
+    border-radius: 22px;
     aspect-ratio: 1 / 1;
     width: 100%;
     max-width: 420px;
     margin-inline: 0;
     display: flex;
     flex-direction: column;
-    background: var(--stats-grid-solid);
+    border: 0;
+    background: var(--device-box-bg);
     box-shadow: none;
 }
 
 .device-image-wrap {
-    border-radius: 28px;
+    border-radius: 22px;
     flex: 1;
     min-height: 0;
     display: grid;
     place-items: center;
-    border: 1px solid rgba(141, 182, 226, 0.28);
-    background: var(--stats-grid-solid);
+    border: 0;
+    background: var(--device-box-bg);
     padding: 0.75rem;
 }
 
@@ -522,8 +564,8 @@
 .device-connect-btn {
     width: 100%;
     border-radius: 10px;
-    border: 0.75px solid rgba(68, 101, 188, 0.95);
-    background: #000824;
+    border: 0.75px solid rgba(73, 115, 180, 0.78);
+    background: linear-gradient(180deg, #001033 0%, #000b24 100%);
     color: #eaf2ff;
     font-weight: 700;
     padding: 0.58rem 0.85rem;
@@ -534,7 +576,7 @@
 .device-connect-btn:focus {
     border-color: rgba(34, 55, 112, 1);
     color: #f6f9ff;
-    background: #021033;
+    background: #000c28;
     box-shadow: 0 0 0 3px rgba(29, 48, 101, 0.28);
     transform: translateY(-1px);
 }
@@ -550,9 +592,9 @@
     max-width: 420px;
     margin-inline: 0;
     margin-top: 1.25rem;
-    border: 1px solid rgba(141, 182, 226, 0.24);
-    border-radius: 28px;
-    background: var(--stats-grid-solid);
+    border: 0;
+    border-radius: 22px;
+    background: var(--device-box-bg);
     box-shadow: none;
     padding: 0.65rem 0.8rem;
 }
@@ -597,10 +639,110 @@
 }
 
 .device-connect-modal {
-    border-radius: 16px;
-    border: 1px solid rgba(136, 177, 220, 0.35);
-    background: rgba(15, 23, 37, 0.95);
+    border-radius: 26px;
+    border: 1px solid rgba(136, 177, 220, 0.24);
+    background: linear-gradient(180deg, rgba(18, 30, 52, 0.98), rgba(10, 16, 32, 0.98));
     color: #e9f2ff;
+    overflow: hidden;
+    box-shadow: 0 22px 60px rgba(4, 8, 20, 0.52);
+}
+
+.device-page #connectDeviceModal.fade .modal-dialog {
+    transform: translateY(42px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.35s ease;
+    will-change: transform, opacity;
+}
+
+.device-page #connectDeviceModal.show .modal-dialog {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.device-connect-modal .modal-header {
+    justify-content: center;
+    padding: 1.4rem 1.35rem 0.35rem;
+    position: relative;
+}
+
+.device-connect-modal .modal-title {
+    text-align: center;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.device-connect-modal .btn-close {
+    position: absolute;
+    top: 0.95rem;
+    right: 0.95rem;
+    filter: invert(1) saturate(0.2) brightness(1.4);
+    opacity: 0.72;
+}
+
+.device-connect-modal .modal-body {
+    padding: 0.35rem 1.35rem 0.75rem;
+    text-align: center;
+}
+
+.device-connect-visual {
+    width: 82px;
+    height: 82px;
+    margin: 0.4rem auto 1rem;
+    border-radius: 50%;
+    border: 3px solid rgba(63, 144, 220, 0.96);
+    display: grid;
+    place-items: center;
+    color: #3f8edc;
+    background: rgba(12, 22, 40, 0.45);
+    box-shadow: inset 0 0 0 8px rgba(12, 22, 40, 0.18);
+}
+
+.device-connect-visual i {
+    font-size: 2.2rem;
+    line-height: 1;
+}
+
+.device-connect-modal .modal-body p {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 26ch;
+}
+
+.device-connect-modal .modal-footer {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.7rem;
+    padding: 0.15rem 1.35rem 1.35rem 0.75rem;
+}
+
+.device-connect-modal .modal-footer .btn {
+    display: block;
+    width: 100% !important;
+    margin: 0;
+    border-radius: 14px;
+    padding: 0.86rem 1rem;
+    font-weight: 700;
+}
+
+.device-connect-modal .modal-footer .btn-primary {
+    border: 1px solid rgba(73, 115, 180, 0.86);
+    background: linear-gradient(180deg, #001033 0%, #000b24 100%);
+    color: #eaf2ff;
+}
+
+.device-connect-modal .modal-footer .btn-primary:hover,
+.device-connect-modal .modal-footer .btn-primary:focus {
+    background: #000c28;
+    color: #f6f9ff;
+}
+
+.device-connect-modal .modal-footer .btn-outline-light {
+    border-color: rgba(136, 177, 220, 0.22);
+    background: rgba(21, 31, 52, 0.92);
+    color: #dbe8f8;
 }
 
 .device-connect-checklist {
@@ -622,6 +764,46 @@
 .device-connect-checklist i {
     color: #8fe7b4;
     font-size: 1rem;
+}
+
+@media (max-width: 767.98px) {
+    .device-page #connectDeviceModal .modal-dialog {
+        display: flex;
+        align-items: flex-end;
+        min-height: 100%;
+        margin: 0;
+        max-width: 100%;
+    }
+
+    .device-page #connectDeviceModal .modal-content {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 28px 28px 0 0;
+    }
+
+    .device-connect-modal .modal-header {
+        padding-top: 1.25rem;
+    }
+
+    .device-connect-modal .modal-title {
+        font-size: 1.35rem;
+    }
+
+    .device-connect-modal .btn-close {
+        top: 0.9rem;
+        right: 0.9rem;
+    }
+
+    .device-connect-modal .modal-body {
+        padding-left: 1.15rem;
+        padding-right: 1.15rem;
+    }
+
+    .device-connect-modal .modal-footer {
+        padding-left: 0.65rem;
+        padding-right: 1.15rem;
+        padding-bottom: 1.15rem;
+    }
 }
 
 .sleep-tracker-card {
@@ -921,6 +1103,10 @@
 
 .sleep-times {
     border-top: 1px solid rgba(130, 165, 213, 0.16);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    padding-top: 1rem;
 }
 
 .sleep-time-row {
@@ -932,6 +1118,58 @@
     border-bottom: 1px solid rgba(130, 165, 213, 0.14);
 }
 
+.sleep-time-row.sleep-time-pill {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 0.15rem;
+    padding: 1.15rem 0.72rem 0.62rem;
+    border: 0;
+    border-radius: 22px;
+    box-shadow: inset 0 0 0 1px rgba(122, 157, 203, 0.2);
+}
+
+.sleep-time-row.sleep-time-row-bedtime {
+    background: rgba(17, 27, 44, 0.88);
+}
+
+.sleep-time-row.sleep-time-row-alarm {
+    background: rgba(125, 136, 255, 0.2);
+}
+
+.sleep-time-pill-dot {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(186, 214, 245, 0.45);
+    box-shadow: 0 4px 10px rgba(8, 14, 30, 0.4);
+    z-index: 2;
+}
+
+.sleep-time-row.sleep-time-row-bedtime .sleep-time-pill-dot {
+    background: #dbe9f9;
+    color: #1a2540;
+}
+
+.sleep-time-row.sleep-time-row-alarm .sleep-time-pill-dot {
+    background: #f0c97a;
+    color: #523600;
+}
+
+.sleep-time-pill-dot i {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
 .sleep-time-row.sleep-time-row-hidden {
     display: none;
 }
@@ -939,6 +1177,13 @@
 .sleep-time-name {
     color: #eaf3ff;
     font-size: 1.02rem;
+}
+
+.sleep-time-row.sleep-time-pill .sleep-time-name {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #9cb6d8;
 }
 
 .sleep-time-value {
@@ -949,6 +1194,22 @@
     font-weight: 700;
     font-size: 1.02rem;
     white-space: nowrap;
+}
+
+.sleep-time-row.sleep-time-pill .sleep-time-value {
+    order: initial;
+    width: auto;
+    font-size: clamp(1.6rem, 4.3vw, 2rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.sleep-times > .sleep-edit-panel {
+    grid-column: 1 / -1;
+    margin-top: -0.1rem;
 }
 
 .sleep-time-value i {
@@ -966,6 +1227,22 @@
     display: inline-grid;
     place-items: center;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sleep-time-row.sleep-time-pill .sleep-edit-btn {
+    position: absolute;
+    right: 0.42rem;
+    top: 0.42rem;
+    margin-left: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: rgba(18, 28, 50, 0.42);
+    border-color: rgba(149, 187, 236, 0.24);
+}
+
+.sleep-time-row.sleep-time-pill .sleep-edit-btn i {
+    font-size: 0.68rem;
 }
 
 .sleep-edit-btn:hover,

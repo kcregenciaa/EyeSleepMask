@@ -1,102 +1,253 @@
 .settings-page {
     overflow-x: hidden;
-    background:
-        radial-gradient(120% 90% at 18% 12%, rgba(24, 35, 56, 0.95), transparent 58%),
-        radial-gradient(100% 90% at 90% 90%, rgba(15, 22, 35, 0.9), transparent 62%),
-        linear-gradient(180deg, rgba(24, 35, 56, 0.95), rgba(15, 22, 35, 0.94));
+    background: #0b1424;
+    padding-bottom: var(--footbar-safe-space);
+}
+
+.settings-page .bg-orb {
+    display: none;
+}
+
+.settings-page main.container {
+    width: 100%;
+    max-width: none;
+    min-height: calc(100dvh - 1rem) !important;
+    padding: 0 !important;
+    display: block !important;
 }
 
 .settings-card {
-    max-width: 760px;
-    border-radius: 22px;
+    max-width: none;
+    border-radius: 0;
     border: 0;
     background: transparent;
     box-shadow: none;
+    padding: 0.9rem 0.9rem 5.75rem !important;
 }
 
-.settings-card .tracking {
-    letter-spacing: 0.16em;
-    color: #8eb8de;
+.settings-head {
+    padding: 0 1.15rem;
+    margin: 0.9rem 0 1.3rem !important;
+}
+
+.settings-head h2 {
+    font-size: clamp(2.15rem, 3vw, 2.9rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
 }
 
 .soft-text {
-    color: #9ab3cc;
+    color: #9db4d1;
+    font-size: 1rem;
 }
 
-.setting-action {
-    text-decoration: none;
-    border-radius: 16px;
-    border: 1px solid rgba(130, 174, 219, 0.32);
-    background: linear-gradient(180deg, rgba(20, 30, 48, 0.95), rgba(14, 21, 34, 0.95));
-    padding: 1.5rem;
-    color: #e7f3ff;
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+.profile-summary-card,
+.info-card {
+    border-radius: 24px;
+    border: 0;
+    background: #0f1a2d;
+    box-shadow: none;
+}
+
+.profile-summary-card {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 1.25rem 1rem;
 }
 
-.setting-action:hover,
-.setting-action:focus {
-    color: #ffffff;
-    transform: translateY(-2px);
-    border-color: rgba(157, 205, 246, 0.65);
-    box-shadow: 0 0 0 3px rgba(90, 175, 236, 0.14);
-    text-decoration: none;
+.profile-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
 }
 
-.setting-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+.profile-initial {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #f4f8ff;
+    background: linear-gradient(150deg, #57b8ea 0%, #2e8ec8 100%);
+    border: 2px solid rgba(198, 228, 255, 0.28);
+}
+
+.profile-identity {
+    min-width: 0;
+}
+
+.profile-identity h3 {
+    color: #e9f2ff;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem !important;
+    text-transform: lowercase;
+}
+
+.profile-identity p {
+    color: #9db4d1;
+    font-size: 1rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-edit-link {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
     display: inline-grid;
     place-items: center;
-    margin-bottom: 0.75rem;
-    background: rgba(87, 208, 255, 0.16);
-    border: 1px solid rgba(131, 217, 255, 0.42);
-    color: #bfe8ff;
-    font-size: 1.3rem;
+    color: #c4d7eb;
+    text-decoration: none;
+    background: #111b2c;
+    border: 1px solid rgba(120, 156, 199, 0.32);
+    transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
-.setting-action h3 {
+.profile-edit-link:hover,
+.profile-edit-link:focus {
+    color: #eaf6ff;
+    background: #14243c;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.info-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.1rem 0.2rem;
+}
+
+.info-section-head p {
+    font-size: 0.98rem;
+    color: #9db4d1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.info-card {
+    overflow: hidden;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.05rem 1rem;
+}
+
+.info-row + .info-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: #111b2c;
+    color: #c4d7eb;
     font-size: 1.1rem;
-    margin: 0 0 0.4rem;
+}
+
+.info-copy {
+    min-width: 0;
+}
+
+.info-label {
+    font-size: 1.86rem;
+    color: #e9f2ff;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.info-value {
+    margin-top: 0.2rem !important;
+    font-size: 1rem;
+    color: #9db4d1;
+    line-height: 1.2;
+}
+
+.metric-value {
+    color: #e9f2ff;
+    margin-right: 0.3rem;
+}
+
+.metric-tag {
+    color: #9ef0bd;
     font-weight: 600;
 }
 
-.setting-action p {
-    margin: 0;
-    color: #9ab3cc;
-    font-size: 0.9rem;
-    line-height: 1.4;
+.metric-note {
+    color: #c4d7eb;
+    font-weight: 600;
 }
 
-.setting-danger {
-    border-color: rgba(215, 126, 126, 0.35);
-    background: linear-gradient(180deg, rgba(61, 28, 35, 0.86), rgba(39, 19, 25, 0.9));
+.logout-wrap {
+    display: flex;
+    justify-content: flex-end;
 }
 
-.setting-danger .setting-icon {
-    background: rgba(234, 124, 124, 0.18);
-    border-color: rgba(239, 153, 153, 0.5);
-    color: #ffd8d8;
+.logout-link {
+    border-radius: 999px;
+    border: 1px solid rgba(120, 156, 199, 0.38);
+    background: #111b2c;
+    color: #c4d7eb;
+    text-decoration: none;
+    padding: 0.48rem 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 700;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.setting-danger p {
-    color: #f0c3c3;
-}
-
-.setting-danger:hover,
-.setting-danger:focus {
-    border-color: rgba(237, 151, 151, 0.65);
-    box-shadow: 0 0 0 3px rgba(220, 96, 96, 0.14);
+.logout-link:hover,
+.logout-link:focus {
+    color: #eaf6ff;
+    background: #14243c;
+    text-decoration: none;
+    transform: translateY(-1px);
 }
 
 @media (max-width: 575.98px) {
     .settings-card {
-        border-radius: 18px;
+        padding: 0.9rem 0.9rem 5.75rem !important;
     }
 
-    .setting-action {
-        padding: 1.25rem;
+    .profile-summary-card {
+        padding: 1rem 0.85rem;
+    }
+
+    .profile-initial {
+        width: 72px;
+        height: 72px;
+        font-size: 1.75rem;
+    }
+
+    .profile-identity h3 {
+        font-size: 1.8rem;
+    }
+
+    .info-label {
+        font-size: 1.55rem;
+    }
+
+    .info-row {
+        padding: 0.95rem 0.85rem;
     }
 }

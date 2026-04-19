@@ -237,7 +237,7 @@ button:focus-visible {
     align-items: center;
     justify-content: center;
     padding: 0.32rem 0.65rem;
-    color: var(--text-soft);
+    color: var(--accent);
     text-decoration: none;
     transition: all 0.2s ease;
     border-radius: 999px;

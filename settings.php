@@ -6,40 +6,76 @@ if ($userName === '') {
     $userName = 'User';
 }
 
+$profile = $_SESSION['user_profile'] ?? [];
+$displayName = trim((string) ($profile['name'] ?? $userName));
+if ($displayName === '') {
+    $displayName = 'User';
+}
+
+$email = trim((string) ($profile['email'] ?? ''));
+$emailDisplay = $email !== '' ? $email : 'No email set';
+
+$birthdateRaw = trim((string) ($profile['birthdate'] ?? ''));
+$birthdateDisplay = 'Not set';
+if ($birthdateRaw !== '') {
+    $birthDate = DateTime::createFromFormat('Y-m-d', $birthdateRaw);
+    if ($birthDate) {
+        $birthdateDisplay = $birthDate->format('F j, Y');
+    }
+}
+
+$initial = strtoupper(substr($displayName, 0, 1));
+
 $pageTitle = 'DeepSleepers | Settings';
 $pageStyles = ['assets/css/settings.css'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
-<body class="deep-bg settings-page">
+<body class="deep-bg dashboard-page settings-page">
     <div class="bg-orb orb-one"></div>
     <div class="bg-orb orb-two"></div>
 
     <main class="container py-4 min-vh-100 d-flex align-items-center justify-content-center">
         <section class="settings-card p-4 p-md-5 w-100">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-                <div>
-                    <p class="small text-uppercase tracking mb-1">DeepSleepers</p>
-                    <h2 class="text-light mb-0">Settings</h2>
-                    <p class="mb-0 soft-text">Manage your account and preferences</p>
+            <header class="settings-head mb-4">
+                <h2 class="text-light mb-1">Settings</h2>
+                <p class="mb-0 soft-text">Manage your account</p>
+            </header>
+
+            <article class="profile-summary-card mb-4">
+                <div class="profile-summary-left">
+                    <span class="profile-initial" aria-hidden="true"><?php echo htmlspecialchars($initial, ENT_QUOTES, 'UTF-8'); ?></span>
+                    <div class="profile-identity">
+                        <h3 class="mb-0"><?php echo htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'); ?></h3>
+                        <p class="mb-0"><?php echo htmlspecialchars($emailDisplay, ENT_QUOTES, 'UTF-8'); ?></p>
+                    </div>
                 </div>
-                <a href="sleep-tracker.php" class="btn btn-outline-light btn-sm">Back to Dashboard</a>
+                <a href="edit-profile.php" class="profile-edit-link" aria-label="Edit profile">
+                    <i class="bi bi-pencil"></i>
+                </a>
+            </article>
+
+            <div class="info-section-head mb-3">
+                <p class="mb-0">Personal Information</p>
+                <a href="edit-profile.php" class="profile-edit-link" aria-label="Edit personal information">
+                    <i class="bi bi-pencil"></i>
+                </a>
             </div>
 
-            <div class="row g-3 g-md-4">
-                <div class="col-12 col-md-6">
-                    <a href="edit-profile.php" class="setting-action d-block h-100">
-                        <span class="setting-icon"><i class="bi bi-person-lines-fill"></i></span>
-                        <h3>Edit Profile</h3>
-                        <p>Update your personal information, age, birthdate, gender, and email address.</p>
-                    </a>
+            <section class="info-card" aria-label="Personal information list">
+                <div class="info-row">
+                    <span class="info-icon"><i class="bi bi-calendar-event"></i></span>
+                    <div class="info-copy">
+                        <p class="info-label mb-0">Birthdate</p>
+                        <p class="info-value mb-0"><?php echo htmlspecialchars($birthdateDisplay, ENT_QUOTES, 'UTF-8'); ?></p>
+                    </div>
                 </div>
-                <div class="col-12 col-md-6">
-                    <a href="logout.php" class="setting-action setting-danger d-block h-100">
-                        <span class="setting-icon"><i class="bi bi-box-arrow-right"></i></span>
-                        <h3>Logout</h3>
-                        <p>Sign out of your account and return to the login page.</p>
-                    </a>
-                </div>
+            </section>
+
+            <div class="logout-wrap mt-4">
+                <a href="logout.php" class="logout-link">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                </a>
             </div>
         </section>
     </main>
