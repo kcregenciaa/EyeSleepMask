@@ -107,9 +107,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const sleepQualityScoreNode = document.getElementById('sleepQualityScore');
         const sleepQualityLabelNode = document.getElementById('sleepQualityLabel');
         const dailyPerformanceSummaryNode = document.getElementById('dailyPerformanceSummary');
+        const sleepScoreDisplayNode = document.getElementById('sleepScoreDisplay');
+        const sleepQualityBadgeNode = document.getElementById('sleepQualityBadge');
+        const sleepQualityTextNode = document.getElementById('sleepQualityText');
 
         if (sleepQualityScoreNode) {
             sleepQualityScoreNode.textContent = String(metrics.score);
+        }
+
+        if (sleepScoreDisplayNode) {
+            sleepScoreDisplayNode.textContent = String(metrics.score);
         }
 
         if (sleepQualityLabelNode) {
@@ -118,6 +125,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (dailyPerformanceSummaryNode) {
             dailyPerformanceSummaryNode.textContent = metrics.summary;
+        }
+
+        // Determine quality level (Good/Fair/Poor) and update badge
+        if (sleepQualityBadgeNode && sleepQualityTextNode) {
+            let qualityLevel = 'fair';
+            let qualityText = 'Fair';
+            
+            const score = Number(metrics.score);
+            if (score >= 75) {
+                qualityLevel = 'good';
+                qualityText = 'Good';
+            } else if (score < 50) {
+                qualityLevel = 'poor';
+                qualityText = 'Poor';
+            }
+            
+            sleepQualityBadgeNode.setAttribute('data-quality', qualityLevel);
+            sleepQualityTextNode.textContent = qualityText;
         }
     };
 

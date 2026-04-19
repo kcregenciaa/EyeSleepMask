@@ -209,6 +209,13 @@
     padding: 0 0.9rem 5.75rem;
 }
 
+@media (min-width: 1200px) {
+    .statistics-page #movementTrackerRoot {
+        padding-left: calc(0.9rem + 96px);
+        padding-right: calc(0.9rem + 96px);
+    }
+}
+
 .sleep-tracker-page #sleepTrackerPanel {
     padding: 1.25rem 0.9rem 5.75rem;
 }
@@ -236,6 +243,123 @@
     border: 0;
     background: var(--stats-grid-solid);
     box-shadow: none;
+}
+
+/* New Sleep Summary Card Styles */
+.statistics-page .sleep-summary-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.statistics-page .sleep-summary-main {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
+    padding: 1.5rem;
+    background: rgba(15, 26, 45, 0.5);
+    border-radius: 18px;
+    text-align: center;
+}
+
+.statistics-page .sleep-summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.statistics-page .sleep-item-label {
+    color: #9db4d1;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.statistics-page .sleep-item-value {
+    color: #f4f9ff;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.statistics-page .score-item .sleep-item-value {
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+}
+
+.statistics-page .sleep-score-display {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.2rem;
+    line-height: 1;
+}
+
+.statistics-page .sleep-score-number {
+    color: #f4f9ff;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.statistics-page .sleep-score-unit {
+    color: #9db4d1;
+    font-size: 1rem;
+    font-weight: 700;
+    padding-top: 0.2rem;
+}
+
+.statistics-page .sleep-quality-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+    transition: all 0.3s ease;
+}
+
+.statistics-page .sleep-quality-badge[data-quality="good"] {
+    background: rgba(132, 176, 134, 0.14);
+    color: #89b88c;
+    border: 1px solid rgba(132, 176, 134, 0.28);
+}
+
+.statistics-page .sleep-quality-badge[data-quality="fair"] {
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.statistics-page .sleep-quality-badge[data-quality="poor"] {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.statistics-page .sleep-summary-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(123, 166, 214, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .statistics-page .sleep-summary-main {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1.2rem;
+    }
+    
+    .statistics-page .sleep-summary-details {
+        gap: 0.6rem;
+    }
 }
 
 .statistics-page .panel-card {
@@ -3795,6 +3919,9 @@ body.sleep-flow-active {
         border-bottom: 0;
         padding-bottom: 0.9rem;
     }
+}
+
+
 
     .daily-goal-right {
         align-items: flex-start;
