@@ -2,7 +2,7 @@
 session_start();
 require __DIR__ . '/backend/form_security.php';
 
-$pageTitle = 'DeepSleepers | Register';
+$pageTitle = 'DOZE | Register';
 $pageStyles = ['assets/css/register.css'];
 $pageScripts = ['assets/js/register.js'];
 
@@ -29,7 +29,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 	<main class="container py-4 min-vh-100 d-flex align-items-center justify-content-center">
 		<section class="register-card p-4 p-md-5 w-100">
 			<div class="text-center mb-4">
-				<p class="small text-uppercase tracking">DeepSleepers</p>
+				<p class="small text-uppercase tracking">DOZE</p>
 				<h2 class="text-light">Create Account</h2>
 				<p class="text-muted mb-0">Join the sleep experience. Registration is for users 18+.</p>
 			</div>

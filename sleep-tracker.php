@@ -31,7 +31,7 @@ if ($userName === '') {
 $dashboardLoader = $_SESSION['dashboard_loader'] ?? null;
 unset($_SESSION['dashboard_loader']);
 
-$pageTitle = 'DeepSleepers | Clock';
+$pageTitle = 'Doze | Clock';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';

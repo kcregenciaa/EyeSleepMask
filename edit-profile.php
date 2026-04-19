@@ -7,7 +7,7 @@ if ($userName === '') {
     $userName = 'User';
 }
 
-$pageTitle = 'DeepSleepers | Edit Profile';
+$pageTitle = 'Doze | Edit Profile';
 $pageStyles = ['assets/css/profile.css'];
 
 $profileFlash = pop_form_flash('profile');
@@ -32,7 +32,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
         <section class="profile-card p-4 p-md-5 w-100">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                 <div>
-                    <p class="small text-uppercase tracking mb-1">DeepSleepers</p>
+                    <p class="small text-uppercase tracking mb-1">Doze</p>
                     <h2 class="text-light mb-0">Edit Profile</h2>
                 </div>
                 <a href="settings.php" class="btn btn-outline-light btn-sm">Back to Settings</a>

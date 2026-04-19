@@ -24,7 +24,7 @@ if ($birthdateRaw !== '') {
 
 $initial = strtoupper(substr($displayName, 0, 1));
 
-$pageTitle = 'DeepSleepers | Settings';
+$pageTitle = 'Doze | Settings';
 $pageStyles = ['assets/css/settings.css'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>

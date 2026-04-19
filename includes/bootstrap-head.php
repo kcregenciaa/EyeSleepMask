@@ -1,6 +1,6 @@
 <?php
 if (!isset($pageTitle)) {
-    $pageTitle = 'DeepSleepers';
+    $pageTitle = 'Doze';
 }
 if (!isset($pageStyles) || !is_array($pageStyles)) {
     $pageStyles = [];

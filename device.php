@@ -27,7 +27,7 @@ if ($userName === '') {
     $userName = 'Sleeper';
 }
 
-$pageTitle = 'DeepSleepers | Device';
+$pageTitle = 'Doze | Device';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';

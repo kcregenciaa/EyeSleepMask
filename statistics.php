@@ -28,7 +28,7 @@ if ($userName === '') {
 }
 $displayName = ucwords($userName);
 
-$pageTitle = 'DeepSleepers | Statistics';
+$pageTitle = 'Doze | Statistics';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
