@@ -87,6 +87,7 @@
     margin-bottom: 0.75rem;
     border: 1px solid transparent;
     background: #111b2c;
+    text-align: center;
 }
 
 .login-page .auth-card-form {

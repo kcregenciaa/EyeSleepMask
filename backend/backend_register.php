@@ -56,32 +56,32 @@ if (
     redirectWithRegisterFlash('All fields are required', 'error');
 }
 
+if ($password !== $confirmPassword) {
+    $_SESSION['register_form_data'] = $persistFormData;
+    redirectWithRegisterFlash('Please make sure your passwords match.', 'error');
+}
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $_SESSION['register_form_data'] = $persistFormData;
-    redirectWithRegisterFlash('All fields are required', 'error');
+    redirectWithRegisterFlash('A valid email address is required.', 'error');
 }
 
 $ageInt = filter_var($age, FILTER_VALIDATE_INT);
 if ($ageInt === false || $ageInt < 18) {
     $_SESSION['register_form_data'] = $persistFormData;
-    redirectWithRegisterFlash('All fields are required', 'error');
+    redirectWithRegisterFlash('Age must be 18 or above.', 'error');
 }
 
 if (!in_array($gender, ['male', 'female', 'other'], true)) {
     $_SESSION['register_form_data'] = $persistFormData;
-    redirectWithRegisterFlash('All fields are required', 'error');
+    redirectWithRegisterFlash('Please select a valid gender.', 'error');
 }
 
 $birthDateObj = DateTime::createFromFormat('Y-m-d', $birthdate);
 $validBirthdate = $birthDateObj instanceof DateTime && $birthDateObj->format('Y-m-d') === $birthdate;
 if (!$validBirthdate) {
     $_SESSION['register_form_data'] = $persistFormData;
-    redirectWithRegisterFlash('All fields are required', 'error');
-}
-
-if ($password !== $confirmPassword) {
-    $_SESSION['register_form_data'] = $persistFormData;
-    redirectWithRegisterFlash('Please make sure your passwords match.', 'error');
+    redirectWithRegisterFlash('Birthdate format is invalid.', 'error');
 }
 
 $passwordPattern = '/^(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/';

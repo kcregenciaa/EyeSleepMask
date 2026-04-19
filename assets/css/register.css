@@ -31,6 +31,44 @@
     padding: 0.78rem 0.95rem;
 }
 
+.password-field-wrap {
+    position: relative;
+}
+
+.password-field-wrap .password-field {
+    padding-right: 3rem;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 0.65rem;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: transparent;
+    color: #9fc7e8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 999px;
+}
+
+.password-toggle-btn:hover,
+.password-toggle-btn:focus {
+    color: #eaf6ff;
+    background: rgba(87, 208, 255, 0.12);
+    outline: none;
+}
+
+.password-toggle-btn i {
+    font-size: 1.1rem;
+}
+
 .form-control:focus {
     background: #101a2a;
     color: #f0f5fb;
@@ -80,6 +118,7 @@
     margin-bottom: 0;
     border: 1px solid transparent;
     background: #111b2c;
+    text-align: center;
 }
 
 .register-card .card.error {

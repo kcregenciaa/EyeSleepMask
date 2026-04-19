@@ -116,12 +116,22 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
 				<div class="col-12 col-md-6">
 					<label for="password" class="form-label">Password</label>
-					<input type="password" class="form-control" id="password" name="password" required>
+					<div class="password-field-wrap">
+						<input type="password" class="form-control password-field" id="password" name="password" required>
+						<button type="button" class="password-toggle-btn" data-password-toggle="password" aria-label="Show password" aria-pressed="false">
+							<i class="bi bi-eye"></i>
+						</button>
+					</div>
 				</div>
 
 				<div class="col-12 col-md-6">
 					<label for="confirm_password" class="form-label">Confirm Password</label>
-					<input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+					<div class="password-field-wrap">
+						<input type="password" class="form-control password-field" id="confirm_password" name="confirm_password" required>
+						<button type="button" class="password-toggle-btn" data-password-toggle="confirm_password" aria-label="Show confirm password" aria-pressed="false">
+							<i class="bi bi-eye"></i>
+						</button>
+					</div>
 				</div>
 
 				<div class="col-12 d-grid mt-2">
