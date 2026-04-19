@@ -70,31 +70,36 @@ include __DIR__ . '/includes/bootstrap-head.php';
                         </article>
 
                         <article class="panel-card sleep-quality-card sleep-quality-details-card p-3 p-lg-4 mt-3">
-                            <div class="sleep-quality-core">
-                                <div class="sleep-quality-ring">
-                                    <div class="sleep-quality-ring-inner">
-                                        <p class="sleep-quality-label mb-0" id="sleepQualityLabel">Sleep quality</p>
-                                        <div class="sleep-quality-score-wrap" aria-label="Sleep quality score">
-                                            <span id="sleepQualityScore">76</span>
-                                            <span class="sleep-quality-percent">%</span>
+                            <div class="sleep-summary-container">
+                                <div class="sleep-summary-main">
+                                    <div class="sleep-summary-item score-item">
+                                        <p class="sleep-item-label">Sleep Score</p>
+                                        <div class="sleep-score-display">
+                                            <span class="sleep-score-number" id="sleepScoreDisplay">76</span>
                                         </div>
-                                        <p class="sleep-quality-summary mb-0" id="dailyPerformanceSummary">Balanced night with stable sleep performance.</p>
+                                    </div>
+                                    
+                                    <div class="sleep-summary-item quality-item">
+                                        <p class="sleep-item-label">Sleep Quality</p>
+                                        <div class="sleep-quality-badge" id="sleepQualityBadge" data-quality="fair">
+                                            <span id="sleepQualityText">Fair</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="sleep-quality-metrics">
-                                <div class="sleep-metric-box">
-                                    <p>Bedtime</p>
-                                    <strong id="dailyBedtime">--</strong>
-                                </div>
-                                <div class="sleep-metric-box">
-                                    <p>Wake up</p>
-                                    <strong id="dailyWokeUp">--</strong>
-                                </div>
-                                <div class="sleep-metric-box">
-                                    <p>Duration</p>
-                                    <strong id="dailyInBed">--</strong>
+                                
+                                <div class="sleep-summary-details mt-4 pt-4">
+                                    <div class="sleep-metric-box">
+                                        <p>Bedtime</p>
+                                        <strong id="dailyBedtime">--</strong>
+                                    </div>
+                                    <div class="sleep-metric-box">
+                                        <p>Wake up</p>
+                                        <strong id="dailyWokeUp">--</strong>
+                                    </div>
+                                    <div class="sleep-metric-box">
+                                        <p>Duration</p>
+                                        <strong id="dailyInBed">--</strong>
+                                    </div>
                                 </div>
                             </div>
                         </article>
