@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require __DIR__ . '/backend/auth_guard.php';
+
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
@@ -21,13 +23,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 }
 
 $userName = trim($_SESSION['user_name'] ?? '');
-$isLoggedIn = $userName !== '';
 if ($userName === '') {
     $userName = 'Sleeper';
 }
 $displayName = ucwords($userName);
 
-$pageTitle = 'DeepSleepers | Statistics';
+$pageTitle = 'Doze | Statistics';
 $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';

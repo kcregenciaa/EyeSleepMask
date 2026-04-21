@@ -1,7 +1,18 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const dashboardLoader = document.getElementById('dashboardLoader');
     const sleepDial = document.querySelector('.sleep-dial');
     const alarmToggle = document.getElementById('alarmToggle');
     const smartAlarmToggle = document.getElementById('smartAlarmToggle');
+
+    if (dashboardLoader) {
+        window.setTimeout(function () {
+            dashboardLoader.classList.add('hidden');
+            document.body.classList.remove('dashboard-loading');
+            window.setTimeout(function () {
+                dashboardLoader.remove();
+            }, 500);
+        }, 1400);
+    }
 
     const sleepQualityState = {
         durationMinutes: null,
@@ -224,7 +235,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const alarmEndInput = document.getElementById('alarmEndInput');
         const sleepArc = sleepDial.querySelector('.sleep-dial-arc');
         const markerButtons = sleepDial.querySelectorAll('[data-marker]');
-        const sleepWindowStorageKey = 'sleepTrackerWindow';
         const alarmDayToggles = document.querySelectorAll('[data-alarm-day]');
         const alarmDayGroup = document.querySelector('[data-repeat-list]');
         const repeatOpenButton = document.querySelector('[data-repeat-open]');
@@ -636,8 +646,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const payload = {
                 bedtime: sleepDial.dataset.bedtime || '',
                 alarmEnd: sleepDial.dataset.alarmEnd || '',
+                alarmEnabled: alarmToggle ? alarmToggle.checked : true,
+                smartAlarmEnabled: smartAlarmToggle ? smartAlarmToggle.checked : true,
                 snoozeMinutes: Number(sleepDial.dataset.snoozeMinutes || 15),
                 wakeupMinutes: Number(sleepDial.dataset.wakeupMinutes || 30),
+                remindToSleep: sleepReminderToggle ? sleepReminderToggle.checked : true,
                 alarmDays: Array.from(alarmDayToggles).filter(function (toggle) {
                     return toggle.checked;
                 }).map(function (toggle) {
@@ -647,53 +660,91 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
             };
 
-            try {
-                localStorage.setItem(sleepWindowStorageKey, JSON.stringify(payload));
-            } catch (error) {
-                // Ignore storage failures so tracker still functions.
-            }
+            fetch('api/sleep-settings.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(function () {
+                // Ignore save failures so the tracker stays usable.
+            });
         };
 
-        try {
-            const storedWindow = localStorage.getItem(sleepWindowStorageKey);
-            if (storedWindow) {
-                const parsedWindow = JSON.parse(storedWindow);
-                if (parsedWindow && typeof parsedWindow === 'object') {
-                    if (typeof parsedWindow.bedtime === 'string' && parsedWindow.bedtime.includes(':')) {
-                        sleepDial.dataset.bedtime = parsedWindow.bedtime;
-                        if (bedtimeInput) {
-                            bedtimeInput.value = parsedWindow.bedtime;
-                        }
-                    }
+        const applySleepSettings = function (settings) {
+            const payload = settings && typeof settings === 'object' ? settings : {};
 
-                    if (typeof parsedWindow.alarmEnd === 'string' && parsedWindow.alarmEnd.includes(':')) {
-                        sleepDial.dataset.alarmEnd = parsedWindow.alarmEnd;
-                        if (alarmEndInput) {
-                            alarmEndInput.value = parsedWindow.alarmEnd;
-                        }
-                    }
-
-                    if (Array.isArray(parsedWindow.alarmDays) && alarmDayToggles.length) {
-                        alarmDayToggles.forEach(function (toggle) {
-                            const key = toggle.dataset.alarmDay || '';
-                            toggle.checked = parsedWindow.alarmDays.includes(key);
-                        });
-                    }
-
-                    if (Number.isFinite(parsedWindow.snoozeMinutes)) {
-                        const snoozeValue = Math.min(15, Math.max(1, parsedWindow.snoozeMinutes));
-                        sleepDial.dataset.snoozeMinutes = String(snoozeValue);
-                    }
-
-                    if (Number.isFinite(parsedWindow.wakeupMinutes)) {
-                        const wakeupValue = Math.min(60, Math.max(5, parsedWindow.wakeupMinutes));
-                        sleepDial.dataset.wakeupMinutes = String(wakeupValue);
-                    }
+            if (typeof payload.bedtime === 'string' && payload.bedtime.includes(':')) {
+                sleepDial.dataset.bedtime = payload.bedtime;
+                if (bedtimeInput) {
+                    bedtimeInput.value = payload.bedtime;
                 }
             }
-        } catch (error) {
-            // Ignore malformed storage values.
-        }
+
+            if (typeof payload.alarmEnd === 'string' && payload.alarmEnd.includes(':')) {
+                sleepDial.dataset.alarmEnd = payload.alarmEnd;
+                if (alarmEndInput) {
+                    alarmEndInput.value = payload.alarmEnd;
+                }
+            }
+
+            if (Number.isFinite(Number(payload.snoozeMinutes))) {
+                const snoozeValue = Math.min(15, Math.max(1, Number(payload.snoozeMinutes)));
+                sleepDial.dataset.snoozeMinutes = String(snoozeValue);
+            }
+
+            if (Number.isFinite(Number(payload.wakeupMinutes))) {
+                const wakeupValue = Math.min(60, Math.max(5, Number(payload.wakeupMinutes)));
+                sleepDial.dataset.wakeupMinutes = String(wakeupValue);
+            }
+
+            if (alarmToggle && typeof payload.alarmEnabled !== 'undefined') {
+                alarmToggle.checked = !!payload.alarmEnabled;
+            }
+
+            if (smartAlarmToggle && typeof payload.smartAlarmEnabled !== 'undefined') {
+                smartAlarmToggle.checked = !!payload.smartAlarmEnabled;
+            }
+
+            if (sleepReminderToggle && typeof payload.remindToSleep !== 'undefined') {
+                sleepReminderToggle.checked = !!payload.remindToSleep;
+            }
+
+            if (Array.isArray(payload.alarmDays) && alarmDayToggles.length) {
+                alarmDayToggles.forEach(function (toggle) {
+                    const key = toggle.dataset.alarmDay || '';
+                    toggle.checked = payload.alarmDays.includes(key);
+                });
+            }
+
+            updateAlarmRepeatDisplay();
+            updateSnoozeDisplay();
+            updateWakeupDisplay();
+            syncAlarmPanelState();
+            syncSleepFields();
+            updateSleepDial();
+        };
+
+        const loadSleepWindowFromApi = function () {
+            fetch('api/sleep-settings.php', { cache: 'no-store' })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        return;
+                    }
+
+                    if (payload.data && typeof payload.data === 'object') {
+                        applySleepSettings(payload.data);
+                    }
+                })
+                .catch(function () {
+                    // Keep the current on-screen defaults if the API is unavailable.
+                });
+        };
+
+        loadSleepWindowFromApi();
 
         if (!sleepDial.dataset.snoozeMinutes) {
             sleepDial.dataset.snoozeMinutes = '15';
@@ -1614,12 +1665,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (alarmToggle) {
             alarmToggle.addEventListener('change', syncAlarmPanelState);
+            alarmToggle.addEventListener('change', persistSleepWindow);
         }
 
         if (smartAlarmToggle) {
             smartAlarmToggle.addEventListener('change', syncSmartAlarmState);
             smartAlarmToggle.addEventListener('input', syncSmartAlarmState);
             smartAlarmToggle.addEventListener('click', syncSmartAlarmState);
+            smartAlarmToggle.addEventListener('change', persistSleepWindow);
         }
 
         if (alarmDayToggles.length) {
@@ -1632,23 +1685,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (sleepReminderToggle) {
-            try {
-                const storedReminderEnabled = localStorage.getItem(sleepReminderEnabledKey);
-                if (storedReminderEnabled !== null) {
-                    sleepReminderToggle.checked = storedReminderEnabled === 'true';
-                }
-            } catch (error) {
-                // Ignore storage failures.
-            }
-
             sleepReminderToggle.addEventListener('change', function () {
                 if (!sleepReminderToggle.checked) {
-                    try {
-                        localStorage.setItem(sleepReminderEnabledKey, 'false');
-                    } catch (error) {
-                        // Ignore storage failures.
-                    }
                     clearSleepReminderTimer();
+                    persistSleepWindow();
                     return;
                 }
 
@@ -1658,25 +1698,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (sleepReminderHint) {
                             sleepReminderHint.hidden = false;
                         }
-                        try {
-                            localStorage.setItem(sleepReminderEnabledKey, 'false');
-                        } catch (error) {
-                            // Ignore storage failures.
-                        }
                         clearSleepReminderTimer();
+                        persistSleepWindow();
                         return;
-                    }
-
-                    try {
-                        localStorage.setItem(sleepReminderEnabledKey, 'true');
-                    } catch (error) {
-                        // Ignore storage failures.
                     }
 
                     if (sleepReminderHint) {
                         sleepReminderHint.hidden = true;
                     }
                     scheduleSleepReminder(true);
+                    persistSleepWindow();
                 });
             });
 
@@ -1959,20 +1990,40 @@ document.addEventListener('DOMContentLoaded', function () {
         const sleepSessionCountdown = document.getElementById('sleepSessionCountdown');
         const sleepSessionNoise = document.getElementById('sleepSessionNoise');
 
-        const noteStorageKey = 'dailyTrackerNotes';
         let notesByDate = {};
 
-        try {
-            const storedNotes = localStorage.getItem(noteStorageKey);
-            if (storedNotes) {
-                const parsedNotes = JSON.parse(storedNotes);
-                if (parsedNotes && typeof parsedNotes === 'object') {
-                    notesByDate = parsedNotes;
-                }
-            }
-        } catch (error) {
-            notesByDate = {};
-        }
+        const saveNotes = function () {
+            const payload = {
+                noteDate: dateKey(selected),
+                noteText: dailyNoteInput ? dailyNoteInput.value.trim() : ''
+            };
+
+            fetch('api/sleep-notes.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(function () {
+                // Ignore save failures so the UI remains responsive.
+            });
+        };
+
+        const loadNotesFromApi = function () {
+            fetch('api/sleep-notes.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false || !payload.data || typeof payload.data !== 'object') {
+                        return;
+                    }
+
+                    notesByDate = payload.data;
+                    syncNoteField(selected);
+                })
+                .catch(function () {
+                    // Keep empty notes if the API is unavailable.
+                });
+        };
 
         const pad = function (value) {
             return String(value).padStart(2, '0');
@@ -2072,14 +2123,6 @@ document.addEventListener('DOMContentLoaded', function () {
         let selected = cloneDate(today);
         let weekOffset = 0;
 
-        const saveNotes = function () {
-            try {
-                localStorage.setItem(noteStorageKey, JSON.stringify(notesByDate));
-            } catch (error) {
-                // Ignore storage failures so UI keeps working.
-            }
-        };
-
         const sleepWindowStorageKey = 'sleepTrackerWindow';
         const sleepReminderPrefsKey = 'sleepReminderPrefs';
         const sleepSessionStateKey = 'sleepSessionState';
@@ -2088,6 +2131,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let sleepNoiseTimer = null;
         let sleepIntroTimer = null;
         let activeSleepSession = null;
+        let sleepSessionSaveInFlight = false;
 
         let sleepReminderPrefs = {
             chargeReminder: true,
@@ -2212,7 +2256,41 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
+        const persistCompletedSleepSession = function (sessionData) {
+            if (!sessionData || sleepSessionSaveInFlight) {
+                return;
+            }
+
+            sleepSessionSaveInFlight = true;
+
+            fetch('api/sleep-sessions.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sessionData),
+                keepalive: true
+            }).catch(function () {
+                // Ignore save failures so the UX can still close cleanly.
+            }).finally(function () {
+                sleepSessionSaveInFlight = false;
+            });
+        };
+
         const endSleepSession = function () {
+            if (activeSleepSession) {
+                const currentScore = composeSleepQuality();
+                persistCompletedSleepSession({
+                    startAt: new Date(activeSleepSession.startAt).toISOString(),
+                    endAt: new Date().toISOString(),
+                    bedtime: sleepDial && sleepDial.dataset.bedtime ? sleepDial.dataset.bedtime : '00:20',
+                    alarmEnd: sleepDial && sleepDial.dataset.alarmEnd ? sleepDial.dataset.alarmEnd : '05:20',
+                    durationMinutes: Number(activeSleepSession.durationMinutes || 0),
+                    sleepScore: currentScore.score,
+                    notes: ''
+                });
+            }
+
             try {
                 localStorage.removeItem(sleepSessionStateKey);
             } catch (error) {
@@ -2252,6 +2330,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (remainingMs <= 0) {
+                endSleepSession();
                 try {
                     localStorage.removeItem(sleepSessionStateKey);
                 } catch (error) {
@@ -2528,6 +2607,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 saveNotes();
             });
         }
+
+        loadNotesFromApi();
 
         [sleepNowBtn, dailyTrackNowBtn, dailySleepNowBtn].forEach(function (triggerBtn) {
             if (!triggerBtn) {
@@ -3182,6 +3263,55 @@ document.addEventListener('DOMContentLoaded', function () {
             const selectedDate = movementDateInput ? (movementDateInput.value || dateForInput) : dateForInput;
             fetchMovementFromApi(selectedDate);
         }, 2000);
+
+        const loadSleepHistory = function () {
+            fetch('api/sleep-history.php?limit=30', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false || !Array.isArray(payload.data) || !payload.data.length) {
+                        return;
+                    }
+
+                    const latestSession = payload.data[0];
+                    if (!latestSession) {
+                        return;
+                    }
+
+                    if (dailyBedtime && latestSession.bedtime) {
+                        dailyBedtime.textContent = formatTime(latestSession.bedtime);
+                    }
+
+                    if (dailyAlarm && latestSession.alarmEnd) {
+                        dailyAlarm.textContent = formatTime(latestSession.alarmEnd);
+                    }
+
+                    if (dailyGoalValue && Number.isFinite(Number(latestSession.sleepScore))) {
+                        dailyGoalValue.textContent = String(latestSession.sleepScore) + '%';
+                    }
+
+                    if (dailyInBed) {
+                        const durationHours = Math.floor((Number(latestSession.durationMinutes) || 0) / 60);
+                        const durationMins = Math.max(0, Number(latestSession.durationMinutes) || 0) % 60;
+                        dailyInBed.textContent = durationHours + ' h ' + durationMins + ' m';
+                    }
+
+                    if (dailyAsleep) {
+                        dailyAsleep.textContent = latestSession.durationMinutes ? (Math.floor(latestSession.durationMinutes / 60) + ' h') : '--';
+                    }
+
+                    if (dailyAwake) {
+                        dailyAwake.textContent = '--';
+                    }
+
+                    sleepQualityState.durationMinutes = Number(latestSession.durationMinutes || sleepQualityState.durationMinutes || 0);
+                    updateSleepQualityUi();
+                })
+                .catch(function () {
+                    // Keep the existing UI fallbacks if history cannot be loaded.
+                });
+        };
+
+        loadSleepHistory();
     }
 
     const chartDefaults = {

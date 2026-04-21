@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Open EyeSleepMask (XAMPP)",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost/eyesleepmask/EyeSleepMask/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Run PHP built-in server",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "\"C:\\xampp\\php\\php.exe\" -S localhost:8081 -t \"${workspaceFolder}\""
+    }
+  ]
+}

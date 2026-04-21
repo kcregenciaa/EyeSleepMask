@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const registerForm = document.getElementById('registerForm');
     const ageInput = document.getElementById('age');
     const birthdateInput = document.getElementById('birthdate');
+    const passwordToggleButtons = document.querySelectorAll('[data-password-toggle]');
     let syncing = false;
 
     function computeAge(dateValue) {
@@ -33,10 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function computeBirthdateFromAge(ageValue) {
-        const parsedAge = parseInt(ageValue, 10);
-        if (Number.isNaN(parsedAge) || parsedAge < 0) {
-            return null;
-        }
 
         const today = new Date();
         const birthDate = new Date(today.getFullYear() - parsedAge, today.getMonth(), today.getDate());
@@ -72,14 +69,35 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (registerForm) {
-        registerForm.addEventListener('submit', function (event) {
-            const age = parseInt(ageInput.value, 10);
-            const ageFromBirthdate = computeAge(birthdateInput.value);
+        registerForm.addEventListener('submit', function () {
+            // Submit normally so backend validation can render styled form messages.
+        });
+    }
 
-            if (Number.isNaN(age) || age < 18 || ageFromBirthdate === null || ageFromBirthdate < 18 || age !== ageFromBirthdate) {
-                event.preventDefault();
-                window.alert('Age and birthdate must match and must be 18+ to register.');
-            }
+    if (passwordToggleButtons.length) {
+        passwordToggleButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const targetId = button.getAttribute('data-password-toggle');
+                if (!targetId) {
+                    return;
+                }
+
+                const targetInput = document.getElementById(targetId);
+                if (!targetInput) {
+                    return;
+                }
+
+                const isPassword = targetInput.getAttribute('type') === 'password';
+                targetInput.setAttribute('type', isPassword ? 'text' : 'password');
+                button.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+                button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+
+                const icon = button.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('bi-eye');
+                    icon.classList.toggle('bi-eye-slash');
+                }
+            });
         });
     }
 });

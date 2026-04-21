@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'DeepSleepers | Home';
+$pageTitle = 'Doze | Home';
 $pageStyles = ['assets/css/home.css'];
 $pageScripts = ['assets/js/home.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
@@ -10,7 +10,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
 	<header class="container py-3">
 		<nav class="navbar navbar-expand-lg glass-nav px-3 py-2 rounded-4">
-			<a class="navbar-brand fw-semibold text-light" href="index.php">DeepSleepers</a>
+			<a class="navbar-brand fw-semibold text-light" href="index.php">Doze</a>
 			<button class="navbar-toggler border-0 text-light" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
 				<i class="bi bi-list fs-3"></i>
 			</button>
@@ -30,7 +30,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 			<div class="row align-items-center g-4 g-lg-5">
 				<div class="col-lg-6 order-2 order-lg-1">
 					<span class="eyebrow-pill">Sleep Reimagined</span>
-					<h1 class="display-5 fw-bold mt-3 text-light">DeepSleepers</h1>
+					<h1 class="display-5 fw-bold mt-3 text-light">Doze</h1>
 					<p class="hero-copy mt-3 mb-4">
 						Power your nights with a smarter eye sleep mask experience. Designed to block distractions,
 						calm your senses, and help you wake up focused.
@@ -124,12 +124,12 @@ include __DIR__ . '/includes/bootstrap-head.php';
 					<div class="col-lg-5">
 						<span class="eyebrow-pill">Dashboard Demo</span>
 						<h2 class="text-light mt-3">See the sleep dashboard in action</h2>
-						<p class="mb-0 video-template-copy">Auto-playing product walkthrough styled to match your DeepSleepers interface. This block sits right after Features for a smooth story flow.</p>
+						<p class="mb-0 video-template-copy">Auto-playing product walkthrough styled to match your Doze interface. This block sits right after Features for a smooth story flow.</p>
 					</div>
 					<div class="col-lg-7">
 						<div class="video-template-frame">
 							<iframe
-								title="DeepSleepers Dashboard Video"
+								title="Doze Dashboard Video"
 								src="https://www.youtube.com/embed/u8CACcZGrOY?autoplay=1&mute=1&loop=1&playlist=u8CACcZGrOY&controls=1&modestbranding=1&rel=0"
 								allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
 								allowfullscreen
@@ -140,9 +140,9 @@ include __DIR__ . '/includes/bootstrap-head.php';
 			</div>
 		</section>
 
-		<section id="deepsleepers-app" class="container pb-5">
-			<div class="deepsleepers-app-panel p-4 p-lg-5">
-				<h2 class="deepsleepers-app-title text-center">Great Sleep Begins With the Deep Sleepers App</h2>
+		<section id="doze-app" class="container pb-5">
+			<div class="doze-app-panel p-4 p-lg-5">
+				<h2 class="doze-app-title text-center">Great Sleep Begins With the Doze App</h2>
 				<div class="row g-4 g-xl-5 align-items-center mt-1">
 					<div class="col-12 col-lg-6">
 						<div class="app-ring-content">
@@ -150,7 +150,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 								<span class="store-chip"><i class="bi bi-google-play"></i></span>
 								<span class="store-chip"><i class="bi bi-apple"></i></span>
 							</div>
-							<p class="mb-3">Choose your program, wear the mask, and leave the rest to Deep Sleepers.</p>
+							<p class="mb-3">Choose your program, wear the mask, and leave the rest to Doze.</p>
 							<div class="ring-stage-row">
 								<div class="sleep-ring-wrap">
 									<div class="sleep-ring"></div>
@@ -194,7 +194,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 								<div class="sleep-phone-notch"></div>
 								<div class="sleep-phone-screen">
 									<span class="sleep-phone-close" aria-hidden="true">×</span>
-									<p class="sleep-app-label mb-2">Deep Sleepers</p>
+									<p class="sleep-app-label mb-2">Doze</p>
 									<div class="sleep-mask-pill">Battery level: 80%</div>
 									<div class="sleep-time-panel mt-3">
 										<span>Clock</span>
