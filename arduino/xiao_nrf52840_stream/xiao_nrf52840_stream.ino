@@ -1,155 +1,169 @@
 #include <Wire.h>
-#include <SparkFunLSM6DS3.h>
+#include <MPU6050.h>
 #include <Adafruit_NeoPixel.h>
+#include <Arduino.h>
 
-// ----------------------
-// IMU SETUP
-// ----------------------
-LSM6DS3 imu(I2C_MODE, 0x6B);
+// =====================
+// MPU6050
+// =====================
+MPU6050 mpu;
 
-// ----------------------
-// LED SETUP (ONE PIN for BOTH RINGS)
-// ----------------------
-#define LED_PIN D1
+// =====================
+// MIC
+// =====================
+const int micPin = A0;
+const int windowSize = 50;
+int samples[50];
+int sampleIndex = 0;
+
+// =====================
+// LED
+// =====================
+#define LED_PIN D6
 #define NUM_LEDS 12
-
 Adafruit_NeoPixel strip(NUM_LEDS * 2, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// ----------------------
-// MOVEMENT DETECTION (kept for reference, not used for LED anymore)
-// ----------------------
-int movementCount = 0;
-unsigned long movementWindowStart = 0;
-const unsigned long MOVEMENT_WINDOW = 10000;
-const float MOVEMENT_THRESHOLD = 1.5;
+// =====================
+// SMOOTHING VARIABLES
+// =====================
+float smoothMotion = 0;
+float smoothMic = 0;
 
-// ----------------------
-// CALM TIMER (kept optional)
-// ----------------------
-unsigned long calmStartTime = 0;
-const unsigned long CALM_DURATION = 30000;
-bool alertTriggered = false;
+float alpha = 0.15; // smoothing strength
 
-// ----------------------
-// MOTION SMOOTHING
-// ----------------------
-float smoothed = 0;
-float alpha = 0.1;
+// =====================
+// TIMING
+// =====================
+unsigned long lastUpdate = 0;
 
-// ----------------------
-// SERIAL TIMER (2 seconds)
-// ----------------------
-unsigned long lastSendTime = 0;
-const unsigned long SEND_INTERVAL = 2000;
-
-// ----------------------
-// LOW MOTION DETECTION (for LED)
-// ----------------------
-unsigned long lowMotionStart = 0;
-bool isLowMotion = false;
-const float CALM_THRESHOLD = 0.9;
-const unsigned long CALM_TIME = 5000;
-
-// ----------------------
+// =====================
+// SETUP
+// =====================
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial)
-    ;
+  delay(2000);
+
+  Wire.begin();
+  Wire.setClock(400000);
+
+  mpu.initialize();
 
   strip.begin();
   strip.show();
 
-  if (imu.begin() != 0)
-  {
-    Serial.println("IMU not detected!");
-    while (1)
-      ;
-  }
-
-  Serial.println("IMU ready!");
-
-  movementWindowStart = millis();
-  calmStartTime = millis();
+  Serial.println("SMOOTH SLEEP SYSTEM READY");
 }
 
-// ----------------------
+// =====================
+// MIC RMS
+// =====================
+int readMicRMS()
+{
+  int val = analogRead(micPin);
+
+  samples[sampleIndex] = val;
+  sampleIndex = (sampleIndex + 1) % windowSize;
+
+  long sum = 0;
+  for (int i = 0; i < windowSize; i++)
+  {
+    sum += samples[i];
+  }
+
+  int avg = sum / windowSize;
+
+  long energy = 0;
+  for (int i = 0; i < windowSize; i++)
+  {
+    int diff = samples[i] - avg;
+    energy += diff * diff;
+  }
+
+  return sqrt(energy / windowSize);
+}
+
+// =====================
+// MOTION
+// =====================
+float readMotion()
+{
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
+
+  float ax_g = ax / 16384.0;
+  float ay_g = ay / 16384.0;
+  float az_g = az / 16384.0;
+
+  float mag = sqrt(ax_g * ax_g + ay_g * ay_g + az_g * az_g);
+  return abs(mag - 1.0);
+}
+
+// =====================
+// LED
+// =====================
+void setLED(uint8_t r, uint8_t g, uint8_t b)
+{
+  for (int i = 0; i < NUM_LEDS * 2; i++)
+  {
+    strip.setPixelColor(i, strip.Color(r, g, b));
+  }
+  strip.show();
+}
+
+// =====================
+// LOOP
+// =====================
 void loop()
 {
-  // ----------------------
-  // READ IMU
-  // ----------------------
-  float ax = imu.readFloatAccelX();
-  float ay = imu.readFloatAccelY();
-  float az = imu.readFloatAccelZ();
 
-  // ----------------------
-  // MOTION SIGNAL (gravity removed)
-  // ----------------------
-  float magnitude = sqrt(ax * ax + ay * ay + az * az);
-  float motion = abs(magnitude - 1.0);
-
-  smoothed = alpha * motion + (1 - alpha) * smoothed;
-
-  // ----------------------
-  // SERIAL OUTPUT (every 2 seconds)
-  // ----------------------
-  if (millis() - lastSendTime >= SEND_INTERVAL)
+  if (millis() - lastUpdate >= 1000)
   {
-    Serial.println(smoothed);
-    lastSendTime = millis();
-  }
+    lastUpdate = millis();
 
-  // ----------------------
-  // LOW MOTION DETECTION (for LED behavior)
-  // ----------------------
-  if (smoothed >= 0 && smoothed <= CALM_THRESHOLD)
-  {
-    if (lowMotionStart == 0)
+    // ---------------------
+    // RAW VALUES
+    // ---------------------
+    float motionRaw = readMotion();
+    int micRaw = readMicRMS();
+
+    // ---------------------
+    // SMOOTHING (EMA)
+    // ---------------------
+    smoothMotion = (alpha * motionRaw) + ((1 - alpha) * smoothMotion);
+    smoothMic = (alpha * micRaw) + ((1 - alpha) * smoothMic);
+
+    // normalize mic (0–100 scale)
+    float micLevel = constrain(smoothMic, 0, 200);
+    micLevel = map(micLevel, 0, 200, 0, 100);
+
+    // ---------------------
+    // SERIAL OUTPUT (FOR XAMPP / PHP)
+    // ---------------------
+    Serial.print("{");
+    Serial.print("\"motion\":");
+    Serial.print(smoothMotion, 3);
+    Serial.print(",\"mic\":");
+    Serial.print(micLevel);
+    Serial.println("}");
+
+    // ---------------------
+    // STATE LOGIC
+    // ---------------------
+    bool lowMotion = smoothMotion < 0.08;
+    bool noise = micLevel > 20;
+
+    if (lowMotion && !noise)
     {
-      lowMotionStart = millis();
+      setLED(255, 255, 0); // deep sleep
     }
-
-    if (millis() - lowMotionStart >= CALM_TIME)
+    else if (lowMotion || noise)
     {
-      isLowMotion = true;
+      setLED(80, 80, 0); // light sleep
     }
-  }
-  else
-  {
-    lowMotionStart = 0;
-    isLowMotion = false;
-  }
-
-  // ----------------------
-  // LED BEHAVIOR
-  // ----------------------
-  if (isLowMotion)
-  {
-    static bool on = false;
-
-    uint32_t color = on ? strip.Color(255, 255, 0) : strip.Color(0, 0, 0);
-    // YELLOW blink = calm sleep
-
-    for (int i = 0; i < NUM_LEDS * 2; i++)
+    else
     {
-      strip.setPixelColor(i, color);
+      setLED(0, 0, 0); // awake
     }
-
-    strip.show();
-    on = !on;
-
-    delay(300);
   }
-  else
-  {
-    // OFF during movement
-    for (int i = 0; i < NUM_LEDS * 2; i++)
-    {
-      strip.setPixelColor(i, strip.Color(0, 0, 0));
-    }
-    strip.show();
-  }
-
-  delay(50);
 }
