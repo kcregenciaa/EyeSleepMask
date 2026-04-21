@@ -42,16 +42,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'motion' => $motion
     ];
 
-    $stmt = $mysqli->prepare('INSERT INTO motion_samples (user_id, motion, sample_time) VALUES (?, ?, ?)');
-    if ($stmt) {
-        $stmt->bind_param('iis', $userId, $motion, $stamp);
-        if (!$stmt->execute()) {
+    $dbSaved = false;
+    if ($userId === null) {
+        $stmt = $mysqli->prepare('INSERT INTO motion_samples (user_id, motion, sample_time) VALUES (NULL, ?, ?)');
+        if ($stmt) {
+            $stmt->bind_param('is', $motion, $stamp);
+            $dbSaved = $stmt->execute();
             $stmt->close();
-            http_response_code(500);
-            echo json_encode(['ok' => false, 'error' => 'Write failed']);
-            exit;
         }
-        $stmt->close();
+    } else {
+        $stmt = $mysqli->prepare('INSERT INTO motion_samples (user_id, motion, sample_time) VALUES (?, ?, ?)');
+        if ($stmt) {
+            $stmt->bind_param('iis', $userId, $motion, $stamp);
+            $dbSaved = $stmt->execute();
+            $stmt->close();
+        }
     }
 
     $existing = $loadFileData();
@@ -65,7 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         @file_put_contents($dataFile, $encoded, LOCK_EX);
     }
 
-    echo json_encode(['ok' => true, 'saved' => $record]);
+    echo json_encode([
+        'ok' => true,
+        'saved' => $record,
+        'dbSaved' => $dbSaved
+    ]);
     exit;
 }
 
@@ -78,7 +87,7 @@ $loadMotionRows = function (?int $filterUserId) use ($mysqli): array {
             'SELECT DATE_FORMAT(sample_time, "%Y-%m-%dT%H:%i:%sZ") AS time, motion
              FROM motion_samples
              WHERE user_id IS NULL
-             ORDER BY sample_time ASC
+             ORDER BY sample_time DESC
              LIMIT 100'
         );
         if (!$stmt) {
@@ -88,8 +97,8 @@ $loadMotionRows = function (?int $filterUserId) use ($mysqli): array {
         $stmt = $mysqli->prepare(
             'SELECT DATE_FORMAT(sample_time, "%Y-%m-%dT%H:%i:%sZ") AS time, motion
              FROM motion_samples
-             WHERE user_id = ?
-             ORDER BY sample_time ASC
+             WHERE user_id = ? OR user_id IS NULL
+             ORDER BY sample_time DESC
              LIMIT 100'
         );
         if (!$stmt) {
@@ -108,6 +117,8 @@ $loadMotionRows = function (?int $filterUserId) use ($mysqli): array {
         }
     }
     $stmt->close();
+
+    $rows = array_reverse($rows);
 
     return $rows;
 };

@@ -21,6 +21,19 @@ $loadFilePayload = function () use ($dataFile): ?array {
 
 $payload = null;
 
+$normalizeSnapshot = function (array $snapshot): array {
+    return [
+        'ok' => true,
+        'device' => (string) ($snapshot['device'] ?? 'seeed-xiao-nrf52840'),
+        'snoreLevel' => (int) round((float) ($snapshot['snoreLevel'] ?? 0)),
+        'movement' => (int) round((float) ($snapshot['movement'] ?? 0)),
+        'battery' => (int) round((float) ($snapshot['battery'] ?? 0)),
+        'heartRate' => isset($snapshot['heartRate']) ? (int) round((float) $snapshot['heartRate']) : null,
+        'timestamp' => (string) ($snapshot['timestamp'] ?? gmdate('c')),
+        'receivedAt' => (string) ($snapshot['receivedAt'] ?? gmdate('c'))
+    ];
+};
+
 function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId): ?array
 {
     if ($filterUserId === null) {
@@ -75,25 +88,30 @@ function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId): ?array
     ];
 }
 
-if ($userId !== null) {
-    $payload = fetchLatestTelemetrySample($mysqli, $userId);
-}
-
-if (!$payload) {
-    $payload = fetchLatestTelemetrySample($mysqli, null);
-}
-
 if (!$payload) {
     $filePayload = $loadFilePayload();
     if (!$filePayload) {
-        echo json_encode([
-            'ok' => false,
-            'error' => 'No device data yet'
-        ]);
+        if ($userId !== null) {
+            $payload = fetchLatestTelemetrySample($mysqli, $userId);
+        }
+
+        if (!$payload) {
+            $payload = fetchLatestTelemetrySample($mysqli, null);
+        }
+
+        if (!$payload) {
+            echo json_encode([
+                'ok' => false,
+                'error' => 'No device data yet'
+            ]);
+            exit;
+        }
+
+        echo json_encode($payload);
         exit;
     }
 
-    echo json_encode($filePayload);
+    echo json_encode($normalizeSnapshot($filePayload));
     exit;
 }
 

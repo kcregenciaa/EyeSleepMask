@@ -107,28 +107,37 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
                         <div class="row g-3 g-lg-4 mt-0">
                             <div class="col-12">
-                                <article class="panel-card p-3 p-lg-4 movement-panel h-100">
+                                <article class="panel-card p-3 p-lg-4 movement-panel movement-panel-trend h-100">
                                     <div class="movement-panel-head">
                                         <h2 class="h5 mb-0">Movement Trend</h2>
-                                        <span class="movement-muted">Overnight movement intensity</span>
+                                        <div class="movement-panel-tools">
+                                            <span class="movement-muted">Overnight movement intensity</span>
+                                            <a href="movement-trend.php" class="movement-next-link" aria-label="Open movement trend details">&#8250;</a>
+                                        </div>
                                     </div>
                                     <canvas id="movementPatternChart" aria-label="Movement trend graph" role="img" height="100"></canvas>
                                 </article>
                             </div>
                             <div class="col-12 col-xl-6">
-                                <article class="panel-card p-3 p-lg-4 movement-panel h-100" id="snoreGraphPanel">
+                                <article class="panel-card p-3 p-lg-4 movement-panel movement-panel-trend h-100" id="snoreGraphPanel">
                                     <div class="movement-panel-head">
                                         <h2 class="h5 mb-0">Snore Level Trend</h2>
-                                        <span class="movement-muted" id="snoreGraphStatus">Waiting for live metrics...</span>
+                                        <div class="movement-panel-tools">
+                                            <span class="movement-muted" id="snoreGraphStatus">Waiting for live metrics...</span>
+                                            <a href="snore-trend.php" class="movement-next-link" aria-label="Open snore trend details">&#8250;</a>
+                                        </div>
                                     </div>
                                     <canvas id="snoreTrendChart" aria-label="Snore level graph" role="img" height="100"></canvas>
                                 </article>
                             </div>
                             <div class="col-12 col-xl-6">
-                                <article class="panel-card p-3 p-lg-4 movement-panel h-100" id="heartRateGraphPanel">
+                                <article class="panel-card p-3 p-lg-4 movement-panel movement-panel-trend h-100" id="heartRateGraphPanel">
                                     <div class="movement-panel-head">
                                         <h2 class="h5 mb-0">Heart Rate Trend</h2>
-                                        <span class="movement-muted" id="heartRateGraphStatus">Waiting for live metrics...</span>
+                                        <div class="movement-panel-tools">
+                                            <span class="movement-muted" id="heartRateGraphStatus">Waiting for live metrics...</span>
+                                            <a href="heart-rate-trend.php" class="movement-next-link" aria-label="Open heart rate trend details">&#8250;</a>
+                                        </div>
                                     </div>
                                     <canvas id="heartRateTrendChart" aria-label="Heart rate graph" role="img" height="100"></canvas>
                                 </article>

@@ -47,15 +47,12 @@ include __DIR__ . '/includes/bootstrap-head.php';
         <div class="dashboard-shell p-3 p-lg-4">
             <div class="row g-4">
                 <section class="col-12">
+                    <div class="sleep-tracker-title-wrap">
+                        <h1 class="mb-0">Clock</h1>
+                    </div>
                     <div class="row g-3 g-lg-4 justify-content-center" id="sleepTrackerPanel">
                         <div class="col-12 col-xl-8">
                             <article class="panel-card sleep-tracker-card p-3 p-lg-4">
-                                <div class="sleep-tracker-head d-flex justify-content-between align-items-start mb-3">
-                                    <div>
-                                        <h2 class="h4 mb-1">Clock</h2>
-                                    </div>
-                                </div>
-
                                 <div class="sleep-dial" data-bedtime="00:20" data-alarm-end="05:20">
                                     <div class="sleep-dial-track" aria-hidden="true"></div>
                                     <div class="sleep-dial-arc" aria-hidden="true"></div>
@@ -371,7 +368,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     </form>
                                 </div>
 
-                                <button type="button" class="sleep-now-btn mt-4" id="sleepNowBtn">Sleep Now</button>
                             </article>
                         </div>
                     </div>

@@ -92,6 +92,18 @@
     background: #0f1a2d;
 }
 
+.sleep-tracker-page .sleep-tracker-title-wrap {
+    padding: 0 1.15rem;
+    margin: 0.9rem 0 1.2rem;
+}
+
+.sleep-tracker-page .sleep-tracker-title-wrap h1 {
+    font-size: clamp(2.15rem, 3vw, 2.9rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #e9f2ff;
+}
+
 .statistics-page.deep-bg,
 .device-page.deep-bg {
     background: #0a1020;
@@ -222,6 +234,221 @@
 
 .device-page #deviceLivePanel {
     padding: 0 0.9rem 5.75rem;
+}
+
+.device-hub-card {
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.device-hub-top-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.device-top-item {
+    background: var(--stats-grid-solid);
+    border: 0;
+    border-radius: 14px;
+    padding: 0.75rem 0.8rem;
+    min-height: 74px;
+}
+
+.device-top-label {
+    display: block;
+    color: #9db4d1;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.device-top-value {
+    color: #eef5ff;
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
+.device-battery-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+    color: #eef5ff;
+}
+
+.device-battery-row strong {
+    font-size: 1.05rem;
+}
+
+.device-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #ef6d6d;
+}
+
+.device-dot[data-level="high"] {
+    background: #60d394;
+}
+
+.device-dot[data-level="medium"] {
+    background: #f0c97a;
+}
+
+.device-signal-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+}
+
+.device-signal-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 16px;
+}
+
+.device-signal-bars i {
+    display: inline-block;
+    width: 3px;
+    border-radius: 999px;
+    background: rgba(157, 180, 209, 0.35);
+}
+
+.device-signal-bars i:nth-child(1) { height: 5px; }
+.device-signal-bars i:nth-child(2) { height: 8px; }
+.device-signal-bars i:nth-child(3) { height: 11px; }
+.device-signal-bars i:nth-child(4) { height: 14px; }
+
+.device-signal-bars[data-level="1"] i:nth-child(-n+1),
+.device-signal-bars[data-level="2"] i:nth-child(-n+2),
+.device-signal-bars[data-level="3"] i:nth-child(-n+3),
+.device-signal-bars[data-level="4"] i:nth-child(-n+4) {
+    background: #7fe0a7;
+}
+
+.device-hub-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 16px;
+    padding: 0.85rem;
+    background: var(--stats-grid-solid);
+}
+
+.device-session-label {
+    color: #f5f9ff;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.device-controls-wrap {
+    border: 0;
+    border-radius: 14px;
+    background: var(--stats-grid-solid);
+    padding: 0.75rem 0.8rem;
+}
+
+.device-brightness-slider {
+    width: 100%;
+    accent-color: #8ec5ff;
+}
+
+.device-mode-segment {
+    display: inline-flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.device-mode-btn {
+    border: 1px solid rgba(120, 156, 199, 0.38);
+    background: #20283a;
+    color: #c8d3e7;
+    border-radius: 999px;
+    padding: 0.33rem 0.82rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.device-mode-btn.is-active {
+    color: #eff6ff;
+    border-color: rgba(89, 171, 231, 0.6);
+    background: rgba(58, 122, 171, 0.55);
+}
+
+.device-wake-hint {
+    color: #9db4d1;
+    font-size: 0.78rem;
+}
+
+.device-live-data-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.device-live-data-item {
+    border: 0;
+    border-radius: 14px;
+    background: var(--stats-grid-solid);
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.device-live-data-item span {
+    display: block;
+    color: #9db4d1;
+    font-size: 0.82rem;
+    margin-bottom: 0.2rem;
+}
+
+.device-live-data-item strong {
+    color: #f5f9ff;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.device-hub-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.device-action-btn {
+    border: 1px solid rgba(134, 172, 216, 0.3);
+    border-radius: 12px;
+    background: rgba(14, 25, 42, 0.9);
+    color: #e7f1ff;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.62rem 0.8rem;
+    text-decoration: none;
+}
+
+.device-action-btn:hover,
+.device-action-btn:focus {
+    color: #ffffff;
+    border-color: rgba(174, 205, 240, 0.5);
+}
+
+.device-action-primary {
+    background: linear-gradient(180deg, #263f61 0%, #1a2f4b 100%);
+}
+
+@media (max-width: 767.98px) {
+    .device-hub-top-grid,
+    .device-live-data-grid,
+    .device-hub-actions {
+        grid-template-columns: 1fr;
+    }
 }
 
 .statistics-page .sleep-quality-card {
@@ -3336,6 +3563,14 @@ body.sleep-repeat-open {
     box-shadow: none;
 }
 
+.movement-panel-trend {
+    position: relative;
+}
+
+.movement-panel-trend .movement-panel-head {
+    padding-right: 3rem;
+}
+
 .movement-panel-head {
     display: flex;
     justify-content: space-between;
@@ -3376,8 +3611,198 @@ body.sleep-repeat-open {
     font-size: 0.8rem;
 }
 
+.movement-back-link {
+    width: 34px;
+    height: 34px;
+    border-radius: 0;
+    border: 0;
+    background: rgba(6, 10, 16, 0.94);
+    color: #a6b6cd;
+    display: inline-grid;
+    place-items: center;
+    text-decoration: none;
+    font-size: 1.35rem;
+    font-weight: 300;
+    line-height: 1;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.movement-next-link {
+    width: auto;
+    height: auto;
+    border: 0;
+    background: transparent;
+    color: #b8cbe3;
+    display: inline-block;
+    text-decoration: none;
+    font-size: 2.1rem;
+    font-weight: 300;
+    line-height: 1;
+    transition: color 0.2s ease, transform 0.2s ease;
+    position: absolute;
+    top: 0.8rem;
+    right: 1.9rem;
+    z-index: 2;
+}
+
+.movement-next-link:hover,
+.movement-next-link:focus-visible,
+.movement-back-link:hover,
+.movement-back-link:focus-visible {
+    color: #d5e2f3;
+    transform: translateY(-1px);
+}
+
 .movement-panel-head h2 {
     color: #ebf4ff;
+}
+
+.movement-trend-extras {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.movement-stage-wrap {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.movement-extra-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    color: #ebf4ff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.movement-stage-timeline {
+    min-height: 16px;
+    border-radius: 999px;
+    overflow: hidden;
+    display: flex;
+    background: rgba(20, 34, 56, 0.7);
+    border: 1px solid rgba(143, 186, 236, 0.25);
+}
+
+.movement-stage-segment {
+    min-width: 2px;
+}
+
+.movement-stage-segment.stage-deep {
+    background: #2b6de6;
+}
+
+.movement-stage-segment.stage-light {
+    background: #6ec7ff;
+}
+
+.movement-stage-segment.stage-awake {
+    background: #ff9f43;
+}
+
+.movement-stage-legend {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: #c8d9ee;
+}
+
+.movement-stage-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.stage-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.stage-dot.stage-deep {
+    background: #2b6de6;
+}
+
+.stage-dot.stage-light {
+    background: #6ec7ff;
+}
+
+.stage-dot.stage-awake {
+    background: #ff9f43;
+}
+
+.movement-extra-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.movement-extra-card {
+    border: 1px solid rgba(143, 186, 236, 0.18);
+    background: rgba(12, 23, 41, 0.56);
+    border-radius: 14px;
+    padding: 0.7rem 0.8rem;
+}
+
+.movement-extra-card p {
+    margin: 0;
+    color: #b8cde7;
+    font-size: 0.78rem;
+}
+
+.movement-extra-card strong {
+    display: block;
+    margin-top: 0.2rem;
+    color: #f0f7ff;
+    font-size: 1.1rem;
+}
+
+.movement-score-meter {
+    margin-top: 0.45rem;
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(133, 169, 209, 0.2);
+    overflow: hidden;
+}
+
+.movement-score-meter span {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #5ac8fa 0%, #ffb55e 100%);
+    transition: width 0.25s ease;
+}
+
+.movement-disturbance-detail {
+    color: #c8d9ee;
+    font-size: 0.86rem;
+}
+
+#heartRateGraphPanel {
+    position: relative;
+}
+
+.heart-rate-no-data-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #d9e8fb;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+    z-index: 2;
+}
+
+#heartRateGraphPanel.is-no-data #heartRateTrendChart {
+    opacity: 0.24;
+    filter: saturate(0.45);
 }
 
 body.movement-telemetry-open {
@@ -3446,6 +3871,10 @@ body.movement-telemetry-open {
 
     .movement-panel-tools {
         justify-content: flex-start;
+    }
+
+    .movement-extra-grid {
+        grid-template-columns: 1fr;
     }
 }
 

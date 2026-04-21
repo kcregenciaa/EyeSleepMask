@@ -2702,6 +2702,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const movementTrackerRoot = document.getElementById('movementTrackerRoot');
     if (movementTrackerRoot) {
         const movementDateInput = document.getElementById('movementDateInput');
+        const movementStageTimeline = document.getElementById('movementStageTimeline');
+        const movementStageSummary = document.getElementById('movementStageSummary');
+        const movementScoreValue = document.getElementById('movementScoreValue');
+        const movementScoreLabel = document.getElementById('movementScoreLabel');
+        const movementScoreMeterFill = document.getElementById('movementScoreMeterFill');
+        const tossTurnCount = document.getElementById('tossTurnCount');
+        const disturbanceCountText = document.getElementById('disturbanceCountText');
+        const movementStabilityLabel = document.getElementById('movementStabilityLabel');
+        const movementStabilityHint = document.getElementById('movementStabilityHint');
+        const movementDisturbanceDetail = document.getElementById('movementDisturbanceDetail');
         const movementSleeperType = document.getElementById('movementSleeperType');
         const movementTypeNeedle = document.getElementById('movementTypeNeedle');
         const movementLegendStill = document.getElementById('movementLegendStill');
@@ -2926,6 +2936,101 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         };
 
+        const mapStageForMovement = function (value) {
+            const safe = Math.max(0, Math.min(100, Number(value) || 0));
+            if (safe <= 20) {
+                return 'deep';
+            }
+            if (safe <= 60) {
+                return 'light';
+            }
+            return 'awake';
+        };
+
+        const buildStageSegments = function (points) {
+            const segments = [];
+            if (!Array.isArray(points) || !points.length) {
+                return segments;
+            }
+
+            let currentStage = mapStageForMovement(points[0]);
+            let currentLength = 1;
+
+            for (let i = 1; i < points.length; i += 1) {
+                const stage = mapStageForMovement(points[i]);
+                if (stage === currentStage) {
+                    currentLength += 1;
+                    continue;
+                }
+
+                segments.push({ stage: currentStage, length: currentLength });
+                currentStage = stage;
+                currentLength = 1;
+            }
+
+            segments.push({ stage: currentStage, length: currentLength });
+            return segments;
+        };
+
+        const formatStageName = function (stage) {
+            if (stage === 'deep') {
+                return 'Deep Sleep';
+            }
+            if (stage === 'light') {
+                return 'Light Sleep';
+            }
+            return 'Awake';
+        };
+
+        const detectDisturbances = function (points, labels) {
+            const disturbances = [];
+            if (!Array.isArray(points) || points.length < 2) {
+                return disturbances;
+            }
+
+            for (let i = 1; i < points.length; i += 1) {
+                const current = Number(points[i]);
+                const previous = Number(points[i - 1]);
+                const rise = current - previous;
+                if (rise >= 24 && current >= 60) {
+                    disturbances.push({
+                        index: i,
+                        value: current,
+                        time: labels && labels[i] ? labels[i] : 'Unknown time'
+                    });
+                }
+            }
+
+            return disturbances;
+        };
+
+        const stdDeviation = function (points) {
+            if (!Array.isArray(points) || points.length === 0) {
+                return 0;
+            }
+
+            const mean = points.reduce(function (sum, value) {
+                return sum + value;
+            }, 0) / points.length;
+
+            const variance = points.reduce(function (sum, value) {
+                const delta = value - mean;
+                return sum + (delta * delta);
+            }, 0) / points.length;
+
+            return Math.sqrt(variance);
+        };
+
+        const movementScoreBand = function (score) {
+            if (score <= 20) {
+                return 'Very still';
+            }
+            if (score <= 60) {
+                return 'Normal';
+            }
+            return 'Restless';
+        };
+
         const updateTelemetryRangeText = function (labels, points, tipOffIndex) {
             if (!movementTelemetryRange) {
                 return;
@@ -3054,6 +3159,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const movement = mapMovementSeries(records || []);
             latestMovement = movement;
             const profile = classifySleeper(movement.points, records || []);
+            const disturbances = detectDisturbances(movement.points, movement.labels);
+            const score = movement.points.length ? Math.round(profile.avg) : 0;
+            const scoreLabel = movementScoreBand(score);
+            const stageSegments = buildStageSegments(movement.points);
+            const stageSummary = stageSegments.length ? formatStageName(stageSegments[stageSegments.length - 1].stage) : 'No stage estimate';
+            const volatilityStdDev = stdDeviation(movement.points);
 
             sleepQualityState.movementProfile = profile;
             updateSleepQualityUi();
@@ -3112,10 +3223,79 @@ document.addEventListener('DOMContentLoaded', function () {
                     : profile.insight;
             }
 
+            if (movementStageTimeline) {
+                movementStageTimeline.innerHTML = '';
+                if (stageSegments.length) {
+                    stageSegments.forEach(function (segment) {
+                        const item = document.createElement('span');
+                        item.className = 'movement-stage-segment stage-' + segment.stage;
+                        item.style.flexGrow = String(segment.length);
+                        item.title = formatStageName(segment.stage) + ' (' + segment.length + ' points)';
+                        movementStageTimeline.appendChild(item);
+                    });
+                }
+            }
+
+            if (movementStageSummary) {
+                movementStageSummary.textContent = stageSegments.length ? ('Current stage: ' + stageSummary) : 'Waiting for data...';
+            }
+
+            if (movementScoreValue) {
+                movementScoreValue.textContent = movement.points.length ? (String(score) + '/100') : '--/100';
+            }
+
+            if (movementScoreLabel) {
+                movementScoreLabel.textContent = movement.points.length ? scoreLabel : 'Waiting for data...';
+            }
+
+            if (movementScoreMeterFill) {
+                movementScoreMeterFill.style.width = String(Math.max(0, Math.min(100, score))) + '%';
+            }
+
+            if (tossTurnCount) {
+                tossTurnCount.textContent = String(disturbances.length);
+            }
+
+            if (disturbanceCountText) {
+                disturbanceCountText.textContent = disturbances.length
+                    ? (disturbances.length + ' disturbance marker' + (disturbances.length === 1 ? '' : 's') + ' detected')
+                    : 'No significant disturbances detected.';
+            }
+
+            if (movementStabilityLabel) {
+                if (!movement.points.length) {
+                    movementStabilityLabel.textContent = '--';
+                } else if (volatilityStdDev < 12) {
+                    movementStabilityLabel.textContent = 'Stable Sleep';
+                } else if (volatilityStdDev < 24) {
+                    movementStabilityLabel.textContent = 'Moderately Restless';
+                } else {
+                    movementStabilityLabel.textContent = 'Restless Sleep';
+                }
+            }
+
+            if (movementStabilityHint) {
+                movementStabilityHint.textContent = movement.points.length
+                    ? ('Stability index: ' + Math.round(volatilityStdDev) + ' points')
+                    : 'Waiting for telemetry...';
+            }
+
+            if (movementDisturbanceDetail) {
+                if (!disturbances.length) {
+                    movementDisturbanceDetail.textContent = 'No disturbance markers for this range.';
+                }
+            }
+
             if (typeof Chart !== 'undefined' && movementPatternChart) {
+                const markerData = movement.points.map(function (_, index) {
+                    const marker = disturbances.find(function (item) { return item.index === index; });
+                    return marker ? marker.value : null;
+                });
+
                 if (patternChartInstance) {
                     patternChartInstance.data.labels = movement.labels;
                     patternChartInstance.data.datasets[0].data = movement.points;
+                    patternChartInstance.data.datasets[1].data = markerData;
                     patternChartInstance.update();
                 } else {
                     patternChartInstance = new Chart(movementPatternChart, {
@@ -3131,18 +3311,47 @@ document.addEventListener('DOMContentLoaded', function () {
                                 tension: 0.45,
                                 cubicInterpolationMode: 'monotone',
                                 pointRadius: 0
+                            }, {
+                                label: 'Disturbances',
+                                data: markerData,
+                                showLine: false,
+                                pointRadius: 4,
+                                pointHoverRadius: 5,
+                                pointBackgroundColor: '#ff9f43',
+                                pointBorderColor: '#fff3d6',
+                                pointBorderWidth: 1.5
                             }]
                         },
                         options: {
                             responsive: true,
                             animation: { duration: 350, easing: 'linear' },
+                            onClick: function (event, activeElements, chart) {
+                                if (!activeElements || !activeElements.length || !movementDisturbanceDetail) {
+                                    return;
+                                }
+
+                                const hit = activeElements[0];
+                                if (!hit || hit.datasetIndex !== 1) {
+                                    return;
+                                }
+
+                                const point = disturbances.find(function (item) {
+                                    return item.index === hit.index;
+                                });
+
+                                if (!point) {
+                                    return;
+                                }
+
+                                movementDisturbanceDetail.textContent = 'Disturbance at ' + point.time + ' (movement ' + point.value + ').';
+                            },
                             plugins: { legend: { display: false } },
                             scales: {
                                 y: {
                                     min: 0,
-                                    max: 50,
+                                    max: 100,
                                     grid: { color: 'rgba(214, 165, 72, 0.16)' },
-                                    ticks: { color: '#ffffff', stepSize: 25 }
+                                    ticks: { color: '#ffffff', stepSize: 20 }
                                 },
                                 x: {
                                     grid: { display: false },
@@ -3320,6 +3529,33 @@ document.addEventListener('DOMContentLoaded', function () {
         tickColor: 'rgba(110, 148, 192, 0.16)'
     };
 
+    const arduinoLatestUrl = 'data/arduino-latest.json';
+
+    const fetchArduinoLatest = function () {
+        return fetch(arduinoLatestUrl + '?t=' + Date.now(), { cache: 'no-store' })
+            .then(function (response) {
+                return response.json();
+            });
+    };
+
+    const fetchArduinoTelemetry = function () {
+        return fetchArduinoLatest().then(function (payload) {
+            if (payload && payload.ok !== false && (payload.heartRate !== undefined || payload.device || payload.timestamp)) {
+                return payload;
+            }
+
+            return fetch('api/live-metrics.php', { cache: 'no-store' })
+                .then(function (response) {
+                    return response.json();
+                });
+        }).catch(function () {
+            return fetch('api/live-metrics.php', { cache: 'no-store' })
+                .then(function (response) {
+                    return response.json();
+                });
+        });
+    };
+
     const revenueCanvas = document.getElementById('revenueChart');
     if (revenueCanvas) {
         new Chart(revenueCanvas, {
@@ -3469,12 +3705,11 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const fetchLiveMetrics = function () {
-            fetch('api/live-metrics.php', { cache: 'no-store' })
-                .then(function (response) { return response.json(); })
+            fetchArduinoTelemetry()
                 .then(function (payload) { renderLiveMetrics(payload || {}); })
                 .catch(function () {
                     if (liveDeviceStatus) {
-                        liveDeviceStatus.textContent = 'Unable to reach live API. Start Apache and the serial bridge.';
+                        liveDeviceStatus.textContent = 'Unable to reach Arduino JSON feed. Start Apache and the serial bridge.';
                     }
                 });
         };
@@ -3581,8 +3816,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const fetchSnoreGraphMetrics = function () {
-            fetch('api/live-metrics.php', { cache: 'no-store' })
-                .then(function (response) { return response.json(); })
+            fetchArduinoTelemetry()
                 .then(function (payload) {
                     if (!payload || payload.ok === false) {
                         renderSnoreGraph({});
@@ -3592,7 +3826,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(function () {
                     if (snoreGraphStatus) {
-                        snoreGraphStatus.textContent = 'Unable to reach live API.';
+                        snoreGraphStatus.textContent = 'Unable to reach Arduino JSON feed.';
                     }
                 });
         };
@@ -3605,10 +3839,23 @@ document.addEventListener('DOMContentLoaded', function () {
     if (heartRateGraphPanel) {
         const heartRateTrendChart = document.getElementById('heartRateTrendChart');
         const heartRateGraphStatus = document.getElementById('heartRateGraphStatus');
+        const heartRateNoDataOverlay = document.createElement('div');
         const maxPoints = 120;
         const labels = [];
         const points = [];
         let chartInstance = null;
+        let hasHeartRateData = false;
+
+        heartRateNoDataOverlay.className = 'heart-rate-no-data-overlay';
+        heartRateNoDataOverlay.textContent = 'No Data Loading';
+        heartRateGraphPanel.appendChild(heartRateNoDataOverlay);
+
+        const setHeartRateNoDataState = function (noData) {
+            heartRateNoDataOverlay.hidden = !noData;
+            heartRateGraphPanel.classList.toggle('is-no-data', noData);
+        };
+
+        setHeartRateNoDataState(true);
 
         if (typeof Chart !== 'undefined' && heartRateTrendChart) {
             chartInstance = new Chart(heartRateTrendChart, {
@@ -3685,67 +3932,272 @@ document.addEventListener('DOMContentLoaded', function () {
             const stamp = payload && (payload.timestamp || payload.receivedAt) ? (payload.timestamp || payload.receivedAt) : null;
 
             if (heartRateSafe !== null && stamp) {
+                hasHeartRateData = true;
                 pushPoint(stamp, heartRateSafe);
+                setHeartRateNoDataState(false);
+
+                if (heartRateGraphStatus) {
+                    heartRateGraphStatus.textContent = 'Current: ' + heartRateSafe + ' BPM';
+                }
+                return;
             }
+
+            hasHeartRateData = false;
+            labels.length = 0;
+            points.length = 0;
+
+            if (chartInstance) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = points;
+                chartInstance.update('none');
+            }
+
+            setHeartRateNoDataState(true);
 
             if (heartRateGraphStatus) {
-                heartRateGraphStatus.textContent = heartRateSafe === null ? 'Waiting for live metrics...' : ('Current: ' + heartRateSafe + ' BPM');
+                heartRateGraphStatus.textContent = 'No Data Loading';
             }
         };
 
-        const fetchHeartRateGraphMetrics = function () {
-            fetch('api/live-metrics.php', { cache: 'no-store' })
-                .then(function (response) { return response.json(); })
-                .then(function (payload) {
-                    if (!payload || payload.ok === false) {
-                        renderHeartRateGraph({});
-                        return;
-                    }
-                    renderHeartRateGraph(payload);
-                })
-                .catch(function () {
-                    if (heartRateGraphStatus) {
-                        heartRateGraphStatus.textContent = 'Unable to reach live API.';
-                    }
-                });
-        };
-
-        fetchHeartRateGraphMetrics();
-        setInterval(fetchHeartRateGraphMetrics, 1000);
+        renderHeartRateGraph({});
+        if (heartRateGraphStatus) {
+            heartRateGraphStatus.textContent = 'Heart-rate sensor not connected';
+        }
     }
 
     const deviceLivePanel = document.getElementById('deviceLivePanel');
     const sharedDeviceConnectionStateLabel = document.getElementById('deviceConnectionStateLabel');
     if (deviceLivePanel || sharedDeviceConnectionStateLabel) {
-        const connectDeviceBtn = document.getElementById('connectDeviceBtn');
-        const connectDeviceModalEl = document.getElementById('connectDeviceModal');
-        const connectDeviceContinueBtn = document.getElementById('connectDeviceContinueBtn');
-        const deviceConnectedDetails = document.getElementById('deviceConnectedDetails');
+        const deviceBatteryDot = document.getElementById('deviceBatteryDot');
+        const deviceChargingStatus = document.getElementById('deviceChargingStatus');
+        const deviceConnectionStrength = document.getElementById('deviceConnectionStrength');
+        const deviceSignalBars = document.getElementById('deviceSignalBars');
+        const deviceSessionStatus = document.getElementById('deviceSessionStatus');
+        const deviceHeartRate = document.getElementById('deviceHeartRate');
+        const deviceMovement = document.getElementById('deviceMovement');
+        const deviceSnoreStatus = document.getElementById('deviceSnoreStatus');
+        const deviceLedBrightness = document.getElementById('deviceLedBrightness');
+        const deviceLedBrightnessValue = document.getElementById('deviceLedBrightnessValue');
+        const deviceWakeBlinkSpeed = document.getElementById('deviceWakeBlinkSpeed');
+        const deviceWakeBlinkSpeedValue = document.getElementById('deviceWakeBlinkSpeedValue');
+        const deviceLedModeStatic = document.getElementById('deviceLedModeStatic');
+        const deviceLedModeValue = document.getElementById('deviceLedModeValue');
+        const deviceSyncNowBtn = document.getElementById('deviceSyncNowBtn');
+        const deviceDisconnectBtn = document.getElementById('deviceDisconnectBtn');
         const deviceBatteryPercent = document.getElementById('deviceBatteryPercent');
         const deviceConnectionStateLabel = sharedDeviceConnectionStateLabel;
         const deviceLastUpdate = document.getElementById('deviceLastUpdate');
         const connectionFreshMs = 10000;
+        const ledStorageKey = 'deviceLedBrightness';
+        const wakeBlinkSpeedStorageKey = 'deviceWakeBlinkSpeed';
+        const ledModeStorageKey = 'deviceLedMode';
+        let ledSyncTimer = null;
+        let activeLedMode = 'static';
+        let activeWakeBlinkSpeed = 500;
+        let lastWakeAlertActive = null;
+        let isDeviceDisconnected = false;
 
-        let connectDeviceModal = null;
-        if (connectDeviceModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            connectDeviceModal = new bootstrap.Modal(connectDeviceModalEl);
-        }
+        const postLedSettings = function (brightness, mode, blinkSpeed, wakeAlertActive) {
+            fetch('api/device-led.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    brightness: brightness,
+                    mode: mode,
+                    blinkSpeed: blinkSpeed,
+                    wakeAlertActive: wakeAlertActive
+                })
+            }).catch(function () {
+                // Keep UI responsive even when endpoint is unavailable.
+            });
+        };
 
-        if (connectDeviceBtn) {
-            connectDeviceBtn.addEventListener('click', function () {
-                if (connectDeviceModal) {
-                    connectDeviceModal.show();
+        const queueLedSettingsSync = function (brightness, mode, blinkSpeed, wakeAlertActive) {
+            if (ledSyncTimer) {
+                clearTimeout(ledSyncTimer);
+            }
+
+            ledSyncTimer = setTimeout(function () {
+                postLedSettings(brightness, mode, blinkSpeed, wakeAlertActive);
+                ledSyncTimer = null;
+            }, 120);
+        };
+
+        const minutesFromHm = function (value) {
+            const text = String(value || '');
+            const parts = text.split(':');
+            if (parts.length < 2) {
+                return null;
+            }
+
+            const h = Number(parts[0]);
+            const m = Number(parts[1]);
+            if (!Number.isFinite(h) || !Number.isFinite(m)) {
+                return null;
+            }
+
+            return (Math.max(0, Math.min(23, h)) * 60) + Math.max(0, Math.min(59, m));
+        };
+
+        const isNowInWakeWindow = function () {
+            try {
+                const raw = localStorage.getItem('sleepTrackerWindow');
+                if (!raw) {
+                    return false;
                 }
+
+                const parsed = JSON.parse(raw);
+                const startMinutes = minutesFromHm(parsed && parsed.alarmStart);
+                const endMinutes = minutesFromHm(parsed && parsed.alarmEnd);
+                if (startMinutes === null || endMinutes === null) {
+                    return false;
+                }
+
+                const now = new Date();
+                const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+
+                if (startMinutes <= endMinutes) {
+                    return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+                }
+
+                return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+            } catch (error) {
+                return false;
+            }
+        };
+
+        const syncWakeAlertState = function (force) {
+            const wakeAlertActive = isNowInWakeWindow();
+            const shouldSync = force || wakeAlertActive !== lastWakeAlertActive;
+            lastWakeAlertActive = wakeAlertActive;
+
+            if (!shouldSync) {
+                return;
+            }
+
+            const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
+            queueLedSettingsSync(brightnessNow, activeLedMode, activeWakeBlinkSpeed, wakeAlertActive);
+        };
+
+        const applyLedMode = function (mode) {
+            const normalized = String(mode || 'static').toLowerCase();
+            activeLedMode = normalized === 'auto' ? 'auto' : 'static';
+
+            if (deviceLedModeValue) {
+                deviceLedModeValue.textContent = activeLedMode === 'auto' ? 'Auto' : 'Static';
+            }
+
+            if (deviceLedModeStatic) {
+                deviceLedModeStatic.classList.toggle('is-active', activeLedMode === 'static');
+            }
+        };
+
+        const setSignalStrengthUi = function (bars, text) {
+            if (deviceSignalBars) {
+                deviceSignalBars.dataset.level = String(bars);
+            }
+            if (deviceConnectionStrength) {
+                deviceConnectionStrength.textContent = text;
+            }
+        };
+
+        const applyLedValue = function (value) {
+            const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
+            if (deviceLedBrightness) {
+                deviceLedBrightness.value = String(safeValue);
+            }
+            if (deviceLedBrightnessValue) {
+                deviceLedBrightnessValue.textContent = String(safeValue) + '%';
+            }
+        };
+
+        const applyWakeBlinkSpeed = function (value) {
+            const safeValue = Math.max(100, Math.min(1500, Number(value) || 500));
+            activeWakeBlinkSpeed = Math.round(safeValue);
+            if (deviceWakeBlinkSpeed) {
+                deviceWakeBlinkSpeed.value = String(activeWakeBlinkSpeed);
+            }
+            if (deviceWakeBlinkSpeedValue) {
+                deviceWakeBlinkSpeedValue.textContent = String(activeWakeBlinkSpeed) + ' ms';
+            }
+        };
+
+        if (deviceLedBrightness) {
+            const storedBrightness = localStorage.getItem(ledStorageKey);
+            applyLedValue(storedBrightness !== null ? Number(storedBrightness) : Number(deviceLedBrightness.value || 50));
+            const storedWakeBlinkSpeed = localStorage.getItem(wakeBlinkSpeedStorageKey);
+            applyWakeBlinkSpeed(storedWakeBlinkSpeed !== null ? Number(storedWakeBlinkSpeed) : Number(deviceWakeBlinkSpeed ? deviceWakeBlinkSpeed.value : 500));
+            applyLedMode(localStorage.getItem(ledModeStorageKey) || 'static');
+
+            fetch('api/device-led.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        return;
+                    }
+
+                    const serverBrightness = Number(payload.brightness);
+                    if (!Number.isFinite(serverBrightness)) {
+                        return;
+                    }
+
+                    applyLedValue(serverBrightness);
+                    localStorage.setItem(ledStorageKey, String(Math.max(0, Math.min(100, Math.round(serverBrightness)))));
+
+                    if (Number.isFinite(Number(payload.blinkSpeed))) {
+                        applyWakeBlinkSpeed(Number(payload.blinkSpeed));
+                        localStorage.setItem(wakeBlinkSpeedStorageKey, String(activeWakeBlinkSpeed));
+                    }
+
+                    if (payload.mode) {
+                        applyLedMode(payload.mode);
+                        localStorage.setItem(ledModeStorageKey, activeLedMode);
+                    }
+
+                    if (typeof payload.wakeAlertActive === 'boolean') {
+                        lastWakeAlertActive = payload.wakeAlertActive;
+                    }
+                })
+                .catch(function () {
+                    // Ignore if LED endpoint is unavailable.
+                });
+
+            deviceLedBrightness.addEventListener('input', function () {
+                applyLedValue(deviceLedBrightness.value);
+                localStorage.setItem(ledStorageKey, String(deviceLedBrightness.value));
+                queueLedSettingsSync(
+                    Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness.value) || 0))),
+                    activeLedMode,
+                    activeWakeBlinkSpeed,
+                    isNowInWakeWindow()
+                );
             });
         }
 
-        if (connectDeviceContinueBtn) {
-            connectDeviceContinueBtn.addEventListener('click', function () {
-                if (connectDeviceModal) {
-                    connectDeviceModal.hide();
-                }
+        if (deviceWakeBlinkSpeed) {
+            deviceWakeBlinkSpeed.addEventListener('input', function () {
+                applyWakeBlinkSpeed(deviceWakeBlinkSpeed.value);
+                localStorage.setItem(wakeBlinkSpeedStorageKey, String(activeWakeBlinkSpeed));
+                const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
+                queueLedSettingsSync(brightnessNow, activeLedMode, activeWakeBlinkSpeed, isNowInWakeWindow());
             });
         }
+
+        if (deviceLedModeStatic) {
+            deviceLedModeStatic.addEventListener('click', function () {
+                applyLedMode('static');
+                localStorage.setItem(ledModeStorageKey, activeLedMode);
+                const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
+                queueLedSettingsSync(brightnessNow, activeLedMode, activeWakeBlinkSpeed, isNowInWakeWindow());
+            });
+        }
+
+        setInterval(function () {
+            syncWakeAlertState(false);
+        }, 30000);
+        syncWakeAlertState(true);
 
         const isTelemetryFresh = function (payload) {
             if (!payload || payload.ok === false) {
@@ -3766,7 +4218,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const getDeviceConnectionState = function (payload) {
-            if (!payload || payload.ok === false) {
+            if (isDeviceDisconnected || !payload || payload.ok === false) {
                 return 'not-connected';
             }
 
@@ -3781,25 +4233,76 @@ document.addEventListener('DOMContentLoaded', function () {
         const renderDeviceLiveMetrics = function (payload) {
             const battery = Number(payload && payload.battery);
             const batterySafe = Number.isFinite(battery) ? Math.max(0, Math.min(100, Math.round(battery))) : null;
+            const heartRate = Number(payload && payload.heartRate);
+            const movement = Number(payload && payload.movement);
+            const snore = Number(payload && payload.snoreLevel);
             const stamp = payload && (payload.timestamp || payload.receivedAt) ? (payload.timestamp || payload.receivedAt) : null;
             const connectionState = getDeviceConnectionState(payload);
             const isConnected = connectionState === 'connected';
-
-            if (deviceConnectedDetails) {
-                deviceConnectedDetails.hidden = !isConnected;
-            }
 
             if (deviceBatteryPercent) {
                 deviceBatteryPercent.textContent = batterySafe === null ? '--%' : (String(batterySafe) + '%');
             }
 
+            if (deviceBatteryDot) {
+                const batteryLevel = batterySafe === null ? 'low' : (batterySafe >= 50 ? 'high' : (batterySafe >= 20 ? 'medium' : 'low'));
+                deviceBatteryDot.dataset.level = batteryLevel;
+            }
+
+            if (deviceChargingStatus) {
+                const chargingValue = payload && payload.charging;
+                const isCharging = chargingValue === true || chargingValue === 1 || chargingValue === '1' || chargingValue === 'true';
+                deviceChargingStatus.textContent = isCharging ? 'Charging' : 'Not Charging';
+            }
+
+            if (stamp) {
+                const ageMs = Date.now() - Date.parse(stamp);
+                if (Number.isFinite(ageMs) && ageMs <= 3000) {
+                    setSignalStrengthUi(4, 'Strong');
+                } else if (Number.isFinite(ageMs) && ageMs <= connectionFreshMs) {
+                    setSignalStrengthUi(3, 'Medium');
+                } else {
+                    setSignalStrengthUi(1, 'Weak');
+                }
+            } else {
+                setSignalStrengthUi(0, 'No Signal');
+            }
+
+            if (deviceSessionStatus) {
+                deviceSessionStatus.textContent = isConnected ? 'Sleep Session Active' : 'Sleep Session Idle';
+            }
+
+            if (deviceHeartRate) {
+                if (Number.isFinite(heartRate) && heartRate > 0) {
+                    deviceHeartRate.textContent = String(Math.round(heartRate)) + ' BPM';
+                } else {
+                    deviceHeartRate.textContent = '-- BPM';
+                }
+            }
+
+            if (deviceMovement) {
+                deviceMovement.textContent = Number.isFinite(movement) ? String(Math.round(movement)) : '--';
+            }
+
+            if (deviceSnoreStatus) {
+                if (!Number.isFinite(snore)) {
+                    deviceSnoreStatus.textContent = '--';
+                } else if (snore < 35) {
+                    deviceSnoreStatus.textContent = 'Quiet';
+                } else if (snore < 70) {
+                    deviceSnoreStatus.textContent = 'Moderate';
+                } else {
+                    deviceSnoreStatus.textContent = 'Loud';
+                }
+            }
+
             if (deviceConnectionStateLabel) {
                 if (connectionState === 'connected') {
-                    deviceConnectionStateLabel.textContent = '🟢 Connected';
+                    deviceConnectionStateLabel.textContent = 'Connected';
                 } else if (connectionState === 'disconnected') {
-                    deviceConnectionStateLabel.textContent = '⚪ Disconnected';
+                    deviceConnectionStateLabel.textContent = 'Disconnected';
                 } else {
-                    deviceConnectionStateLabel.textContent = '🔴 Not Connected';
+                    deviceConnectionStateLabel.textContent = 'Not Connected';
                 }
 
                 deviceConnectionStateLabel.classList.toggle('state-connected', connectionState === 'connected');
@@ -3813,17 +4316,31 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const fetchDeviceLiveMetrics = function () {
-            fetch('api/live-metrics.php', { cache: 'no-store' })
-                .then(function (response) { return response.json(); })
+            fetchArduinoTelemetry()
                 .then(function (payload) {
                     if (!payload || payload.ok === false) {
                         renderDeviceLiveMetrics({});
                         return;
                     }
+                    isDeviceDisconnected = false;
                     renderDeviceLiveMetrics(payload);
                 })
                 .catch(function () { renderDeviceLiveMetrics({}); });
         };
+
+        if (deviceSyncNowBtn) {
+            deviceSyncNowBtn.addEventListener('click', function () {
+                fetchDeviceLiveMetrics();
+            });
+        }
+
+        if (deviceDisconnectBtn) {
+            deviceDisconnectBtn.addEventListener('click', function () {
+                isDeviceDisconnected = true;
+                setSignalStrengthUi(0, 'No Signal');
+                renderDeviceLiveMetrics({});
+            });
+        }
 
         fetchDeviceLiveMetrics();
         setInterval(fetchDeviceLiveMetrics, 2000);

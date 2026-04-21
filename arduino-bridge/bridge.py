@@ -1,175 +1,334 @@
 """
-PowerShell quick start (copy/paste):
+RUN THIS IN POWERSHELL:
 
 cd C:\\xampp\\htdocs\\EyeSleepMask\\EyeSleepMask\\arduino-bridge
-$env:ARDUINO_PORT="COM6"
+
+$env:ARDUINO_PORT="COM10"
 $env:ARDUINO_BAUD="115200"
-$env:INGEST_URL="http://localhost:8000/api/arduino-ingest.php"
-$env:MOTION_URL="http://localhost:8000/api/motion-data.php"
+$env:LIVE_SERVER_URL="http://localhost:8080/EyeSleepMask/EyeSleepMask"
+
 python .\\bridge.py
 """
-
-
-
-Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'bridge.py' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
 import json
 import os
 import sys
 import time
+from collections import deque
 from datetime import datetime, timezone
+from pathlib import Path
 
+import numpy as np
 import requests
 import serial
 from serial import SerialException
 
-PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM6')
+# =====================
+# CONFIG
+# =====================
+PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM10')
 BAUD_RATE = int(os.environ.get('ARDUINO_BAUD', '115200'))
-INGEST_URL = os.environ.get('INGEST_URL', 'http://localhost:8000/api/arduino-ingest.php')
-MOTION_URL = os.environ.get('MOTION_URL', 'http://localhost:8000/api/motion-data.php')
+
+LIVE_SERVER_URL = os.environ.get(
+    'LIVE_SERVER_URL',
+    'http://localhost:8080/EyeSleepMask/EyeSleepMask'
+).rstrip('/')
+
+INGEST_URL = f"{LIVE_SERVER_URL}/api/arduino-ingest.php"
+MOTION_URL = f"{LIVE_SERVER_URL}/api/motion-data.php"
+
 DEVICE_NAME = os.environ.get('ARDUINO_DEVICE', 'seeed-xiao-nrf52840')
-READ_TIMEOUT = float(os.environ.get('ARDUINO_TIMEOUT', '1'))
+READ_TIMEOUT = 1
 
-KNOWN_STATUS_LINES = {
-    'IMU not detected!': 'IMU not detected on device. Check wiring/board support and restart.',
-}
-_seen_status_lines = set()
+DATA_FILE = Path(__file__).resolve().parent.parent / 'data' / 'arduino-latest.json'
+LED_COMMAND_FILE = Path(__file__).resolve().parent.parent / 'data' / 'led-command.json'
+_last_led_command_fingerprint = None
+_last_led_sent = None
+_last_led_mode_sent = None
+_last_blink_speed_sent = None
+_last_wake_alert_sent = None
+
+# =====================
+# SNORE DETECTOR (FIXED)
+# =====================
+class SnoreDetector:
+    def __init__(self):
+        self.window = deque(maxlen=30)
+
+    def update(self, mic, motion):
+        self.window.append(mic)
+
+        if len(self.window) < 10:
+            return 0
+
+        arr = np.array(self.window)
+
+        # 🔥 FEATURES
+        energy = np.mean(arr)
+        variability = np.std(arr)
+
+        # detect pulse changes (snore pattern)
+        diff = np.abs(np.diff(arr))
+        burstiness = np.mean(diff)
+
+        # low movement = more likely snore
+        motion_factor = max(0, 50 - motion)
+
+        # 🔥 FINAL SCORE
+        score = (
+            energy * 0.3 +
+            variability * 0.3 +
+            burstiness * 0.3 +
+            motion_factor * 0.1
+        )
+
+        return max(0, min(100, score))
 
 
-def now_iso() -> str:
+snore_engine = SnoreDetector()
+
+# =====================
+# HELPERS
+# =====================
+def now_iso():
     return datetime.now(timezone.utc).isoformat()
-
-
-def coerce_int(value, fallback=0):
-    try:
-        return int(float(value))
-    except (TypeError, ValueError):
-        return fallback
 
 
 def clamp(value, low=0, high=100):
     return max(low, min(high, value))
 
 
-def coerce_percent(value, fallback=0):
+def scale_to_percent(value):
     try:
-        numeric = float(value)
+        v = float(value)
+    except:
+        return 0
+
+    if 0 <= v <= 1:
+        v *= 100
+
+    return round(clamp(v), 2)
+
+
+def first_present(data: dict, keys, fallback=0):
+    for key in keys:
+        if key in data and data.get(key) is not None:
+            return data.get(key)
+    return fallback
+
+
+def read_led_command():
+    global _last_led_command_fingerprint
+
+    if not LED_COMMAND_FILE.exists():
+        return None
+
+    try:
+        stat = LED_COMMAND_FILE.stat()
+        fingerprint = f"{int(stat.st_mtime_ns)}:{stat.st_size}"
+    except OSError:
+        return None
+
+    if fingerprint == _last_led_command_fingerprint:
+        return None
+
+    _last_led_command_fingerprint = fingerprint
+
+    try:
+        data = json.loads(LED_COMMAND_FILE.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    if not isinstance(data, dict):
+        return None
+
+    brightness = data.get('brightness')
+    try:
+        brightness_value = int(round(float(brightness)))
     except (TypeError, ValueError):
-        return fallback
+        brightness_value = None
 
-    # Scale only normalized fractions (0.0..1.0) into percentage.
-    if 0 <= numeric and numeric <= 1.0:
-        numeric = numeric * 100
+    mode = str(data.get('mode') or 'static').strip().lower()
+    if mode not in ('static', 'auto'):
+        mode = 'static'
 
-    return clamp(int(round(numeric)))
+    blink_speed = data.get('blinkSpeed')
+    try:
+        blink_speed_value = int(round(float(blink_speed)))
+    except (TypeError, ValueError):
+        blink_speed_value = None
+
+    wake_alert_active = bool(data.get('wakeAlertActive', False))
+
+    return {
+        'brightness': None if brightness_value is None else max(0, min(100, brightness_value)),
+        'mode': mode,
+        'blinkSpeed': None if blink_speed_value is None else max(100, min(1500, blink_speed_value)),
+        'wakeAlertActive': wake_alert_active,
+    }
 
 
+def sync_led_brightness(ser):
+    global _last_led_sent, _last_led_mode_sent, _last_blink_speed_sent, _last_wake_alert_sent
+
+    command_data = read_led_command()
+    if command_data is None:
+        return
+
+    brightness = command_data.get('brightness')
+    mode = str(command_data.get('mode') or 'static').upper()
+    blink_speed = command_data.get('blinkSpeed')
+    wake_alert_active = bool(command_data.get('wakeAlertActive'))
+
+    if brightness is not None and brightness != _last_led_sent:
+        command = f"LED:{brightness}\n"
+
+        try:
+            ser.write(command.encode('utf-8'))
+            _last_led_sent = brightness
+            print(f"[bridge] led brightness synced: {brightness}%")
+        except SerialException as e:
+            print("[bridge] led sync failed:", e)
+
+    if mode != _last_led_mode_sent:
+        try:
+            ser.write(f"MODE:{mode}\n".encode('utf-8'))
+            _last_led_mode_sent = mode
+            print(f"[bridge] led mode synced: {mode}")
+        except SerialException as e:
+            print("[bridge] led mode sync failed:", e)
+
+    if blink_speed is not None and blink_speed != _last_blink_speed_sent:
+        try:
+            ser.write(f"BLINK:{blink_speed}\n".encode('utf-8'))
+            _last_blink_speed_sent = blink_speed
+            print(f"[bridge] wake blink speed synced: {blink_speed}ms")
+        except SerialException as e:
+            print("[bridge] blink speed sync failed:", e)
+
+    if wake_alert_active != _last_wake_alert_sent:
+        try:
+            ser.write(f"WAKE:{1 if wake_alert_active else 0}\n".encode('utf-8'))
+            _last_wake_alert_sent = wake_alert_active
+            print(f"[bridge] wake alert synced: {'ON' if wake_alert_active else 'OFF'}")
+        except SerialException as e:
+            print("[bridge] wake alert sync failed:", e)
+
+
+# =====================
+# PARSE SERIAL DATA
+# =====================
 def parse_payload(line: str):
     text = line.strip()
     if not text:
         return None
 
-    if text in KNOWN_STATUS_LINES:
-        if text not in _seen_status_lines:
-            print(f"[bridge] device status: {KNOWN_STATUS_LINES[text]}")
-            _seen_status_lines.add(text)
-        return None
-
     try:
         data = json.loads(text)
-    except json.JSONDecodeError:
-        print(f'[bridge] ignored non-JSON line: {text}')
+    except:
         return None
 
-    if isinstance(data, dict):
-        return {
-            'device': str(data.get('device') or DEVICE_NAME),
-            'snoreLevel': coerce_percent(data.get('snoreLevel')),
-            'movement': coerce_percent(data.get('movement')),
-            'battery': coerce_percent(data.get('battery')),
-            'timestamp': str(data.get('timestamp') or now_iso()),
-        }
+    if not isinstance(data, dict):
+        return None
 
-    if isinstance(data, (int, float, str)):
-        value = coerce_percent(data)
-        return {
-            'device': DEVICE_NAME,
-            'snoreLevel': value,
-            'movement': value,
-            'battery': 0,
-            'timestamp': now_iso(),
-        }
+    # -------------------------
+    # RAW VALUES (IMPORTANT)
+    # -------------------------
+    mic_raw = float(first_present(data, ['mic', 'micLevel', 'snoreLevel'], 0))
+    motion_raw = float(first_present(data, ['movement', 'motion'], 0))
+    battery_raw = float(first_present(data, ['battery'], 0))
 
-    print(f'[bridge] ignored unsupported payload: {text}')
-    return None
+    # -------------------------
+    # SNORE DETECTION (RAW)
+    # -------------------------
+    snore_value = snore_engine.update(mic_raw, motion_raw)
 
+    # -------------------------
+    # DISPLAY VALUES
+    # -------------------------
+    movement_display = scale_to_percent(motion_raw)
+    battery_display = scale_to_percent(battery_raw)
 
-def post_payload(payload: dict) -> None:
-    response = requests.post(INGEST_URL, json=payload, timeout=4)
-    response.raise_for_status()
-
-    requests.post(
-        MOTION_URL,
-        json={'motion': payload['movement'], 'time': payload['timestamp']},
-        timeout=4,
-    )
-
-    print(
-        '[bridge] sent '
-        f"device={payload['device']} "
-        f"snore={payload['snoreLevel']} "
-        f"movement={payload['movement']} "
-        f"battery={payload['battery']}"
-    )
+    return {
+        "device": DEVICE_NAME,
+        "snoreLevel": round(snore_value, 2),
+        "movement": movement_display,
+        "battery": battery_display,
+        "timestamp": now_iso()
+    }
 
 
-def open_serial_port():
-    return serial.Serial(PORT_NAME, BAUD_RATE, timeout=READ_TIMEOUT)
+# =====================
+# SAVE + SEND
+# =====================
+def post_payload(payload):
+    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+    # SAVE LOCAL (for dashboard)
+    with DATA_FILE.open("w", encoding="utf-8") as f:
+        json.dump({
+            "snoreLevel": payload["snoreLevel"],
+            "movement": payload["movement"],
+            "battery": payload["battery"]
+        }, f, indent=2)
+        f.write("\n")
 
-def main() -> int:
-    print(f'[bridge] listening on {PORT_NAME} @ {BAUD_RATE}')
-    print(f'[bridge] posting to {INGEST_URL}')
-    print(f'[bridge] movement history to {MOTION_URL}')
-    print('[bridge] expected line JSON: {"snoreLevel":42,"movement":18,"battery":97}')
+    # SEND TO PHP
+    try:
+        requests.post(INGEST_URL, json=payload, timeout=4)
+    except Exception as e:
+        print("[bridge] ingest failed:", e)
 
     try:
-        with open_serial_port() as ser:
+        requests.post(
+            MOTION_URL,
+            json={
+                "motion": payload["movement"],
+                "time": payload["timestamp"]
+            },
+            timeout=4,
+        )
+    except:
+        pass
+
+    # DEBUG OUTPUT (clean)
+    print(
+        f"Snore: {payload['snoreLevel']} | "
+        f"Movement: {payload['movement']}"
+    )
+
+
+# =====================
+# MAIN LOOP
+# =====================
+def main():
+    print(f"[bridge] listening on {PORT_NAME} @ {BAUD_RATE}")
+    print(f"[bridge] posting to {INGEST_URL}")
+
+    try:
+        with serial.Serial(PORT_NAME, BAUD_RATE, timeout=READ_TIMEOUT) as ser:
             while True:
-                try:
-                    raw = ser.readline()
-                except SerialException as exc:
-                    print(f'[bridge] serial read error: {exc}')
-                    time.sleep(1)
-                    continue
+                sync_led_brightness(ser)
 
-                if not raw:
-                    continue
+                line = ser.readline().decode("utf-8", errors="ignore")
 
-                try:
-                    line = raw.decode('utf-8', errors='ignore')
-                except Exception as exc:
-                    print(f'[bridge] decode error: {exc}')
+                if not line:
                     continue
 
                 payload = parse_payload(line)
                 if payload is None:
                     continue
 
-                try:
-                    post_payload(payload)
-                except requests.RequestException as exc:
-                    print(f'[bridge] POST failed: {exc}')
+                post_payload(payload)
 
-    except SerialException as exc:
-        print(f'[bridge] serial port error: {exc}')
+    except SerialException as e:
+        print("[bridge] serial error:", e)
         return 1
+
     except KeyboardInterrupt:
-        print('\n[bridge] stopped')
+        print("\n[bridge] stopped")
         return 0
 
-    return 0
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

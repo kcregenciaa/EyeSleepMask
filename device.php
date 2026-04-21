@@ -38,54 +38,89 @@ include __DIR__ . '/includes/bootstrap-head.php';
             <div class="row g-4">
                 <section class="col-12">
                     <div class="row g-3 g-lg-4 justify-content-center" id="deviceLivePanel">
-                        <div class="col-12 col-md-10 col-lg-8 col-xl-5 mx-auto device-module-center">
-                            <div class="device-connection-block mb-3">
-                                <div class="device-connection-status-row">
-                                    <img src="assets/images/bluetooth.png" alt="Bluetooth" class="device-bluetooth-icon" loading="lazy">
-                                    <div class="device-connection-text">
-                                        <p class="movement-muted mb-1">Your Device is</p>
-                                        <p class="device-connection-state mb-0" id="deviceConnectionStateLabel">⚪ Disconnected</p>
+                        <div class="col-12 col-lg-9 col-xl-8">
+                            <article class="device-hub-card p-3 p-lg-4">
+                                <div class="device-hub-top-grid">
+                                    <div class="device-top-item">
+                                        <span class="device-top-label">Battery</span>
+                                        <div class="device-battery-row">
+                                            <i class="bi bi-battery-half"></i>
+                                            <strong id="deviceBatteryPercent">--%</strong>
+                                            <span class="device-dot" id="deviceBatteryDot"></span>
+                                        </div>
+                                    </div>
+                                    <div class="device-top-item">
+                                        <span class="device-top-label">Charging</span>
+                                        <strong class="device-top-value" id="deviceChargingStatus">Not Charging</strong>
+                                    </div>
+                                    <div class="device-top-item">
+                                        <span class="device-top-label">Connection</span>
+                                        <div class="device-signal-row">
+                                            <span class="device-signal-bars" id="deviceSignalBars">
+                                                <i></i><i></i><i></i><i></i>
+                                            </span>
+                                            <strong class="device-top-value" id="deviceConnectionStrength">No Signal</strong>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <article class="panel-card device-status-card p-3 p-lg-4">
-                                <div class="device-image-wrap mb-3">
-                                    <img src="assets/images/whitemask.png" alt="EyeSleepMask device" class="device-image" loading="lazy">
-                                </div>
-                                <p class="text-light text-center fw-normal mb-3">Connect Your Sleep Mask Device</p>
-                                <button type="button" class="device-connect-btn mb-3" id="connectDeviceBtn">Connect Device</button>
-                                <div id="deviceConnectedDetails">
-                                    <div class="d-flex align-items-center justify-content-between gap-2">
-                                        <span class="movement-muted mb-0">Battery</span>
-                                        <strong class="h5 mb-0 text-light" id="deviceBatteryPercent">--%</strong>
+
+                                <div class="device-hub-middle mt-3">
+                                    <div class="device-image-wrap mb-2">
+                                        <img src="assets/images/whitemask.png" alt="EyeSleepMask device" class="device-image" loading="lazy">
                                     </div>
-                                    <p class="movement-insight device-last-update mt-3 mb-0" id="deviceLastUpdate">Last update: --</p>
+                                    <p class="device-session-label mb-0" id="deviceSessionStatus">Sleep Session Idle</p>
+                                    <p class="device-connection-state mb-0 mt-1" id="deviceConnectionStateLabel">Disconnected</p>
                                 </div>
+
+                                <div class="device-controls-wrap mt-3">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                        <span class="device-top-label">LED Brightness</span>
+                                        <strong class="device-top-value" id="deviceLedBrightnessValue">50%</strong>
+                                    </div>
+                                    <input type="range" min="0" max="100" step="1" value="50" id="deviceLedBrightness" class="device-brightness-slider" aria-label="LED brightness">
+
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mt-3 mb-2">
+                                        <span class="device-top-label">Wake Blink Speed</span>
+                                        <strong class="device-top-value" id="deviceWakeBlinkSpeedValue">500 ms</strong>
+                                    </div>
+                                    <input type="range" min="100" max="1500" step="50" value="500" id="deviceWakeBlinkSpeed" class="device-brightness-slider" aria-label="Wake blink speed">
+                                    <small class="device-wake-hint mt-2 d-block">Used during your alarm wake-up window.</small>
+
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mt-3 mb-2">
+                                        <span class="device-top-label">LED Mode</span>
+                                        <strong class="device-top-value" id="deviceLedModeValue">Static</strong>
+                                    </div>
+                                    <div class="device-mode-segment" role="group" aria-label="LED mode">
+                                        <button type="button" class="device-mode-btn is-active" id="deviceLedModeStatic" data-led-mode="static">Static</button>
+                                    </div>
+                                </div>
+
+                                <div class="device-live-data-grid mt-3">
+                                    <div class="device-live-data-item">
+                                        <span>Heart Rate</span>
+                                        <strong id="deviceHeartRate">-- BPM</strong>
+                                    </div>
+                                    <div class="device-live-data-item">
+                                        <span>Movement</span>
+                                        <strong id="deviceMovement">--</strong>
+                                    </div>
+                                    <div class="device-live-data-item">
+                                        <span>Snore Status</span>
+                                        <strong id="deviceSnoreStatus">--</strong>
+                                    </div>
+                                </div>
+
+                                <div class="device-hub-actions mt-3">
+                                    <a href="sleep-tracker.php" class="device-action-btn device-action-primary">Sleep Now</a>
+                                    <button type="button" class="device-action-btn" id="deviceSyncNowBtn">Sync Now</button>
+                                    <button type="button" class="device-action-btn" id="deviceDisconnectBtn">Disconnect</button>
+                                </div>
+
+                                <p class="movement-insight device-last-update mt-3 mb-0" id="deviceLastUpdate">Last update: --</p>
                             </article>
                         </div>
                     </div>
                 </section>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="connectDeviceModal" tabindex="-1" aria-labelledby="connectDeviceModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content device-connect-modal">
-                <div class="modal-header border-0 pb-0">
-                    <h2 class="modal-title h5 text-light" id="connectDeviceModalLabel">Device Pairing</h2>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body pt-2">
-                    <div class="device-connect-visual" aria-hidden="true">
-                        <i class="bi bi-phone"></i>
-                    </div>
-                    <p class="movement-insight mb-3">Place your device near your phone.</p>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-primary" id="connectDeviceContinueBtn">Continue</button>
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                </div>
             </div>
         </div>
     </div>
