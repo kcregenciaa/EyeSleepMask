@@ -1,5 +1,7 @@
 {
-    "brightness": 99,
+    "brightness": 50,
     "mode": "static",
-    "updatedAt": "2026-04-21T19:39:28+00:00"
+    "blinkSpeed": 500,
+    "wakeAlertActive": false,
+    "updatedAt": "2026-04-23T01:31:59+00:00"
 }

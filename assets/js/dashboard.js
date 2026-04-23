@@ -1988,7 +1988,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const sleepSessionPeriod = document.getElementById('sleepSessionPeriod');
         const sleepSessionAlarm = document.getElementById('sleepSessionAlarm');
         const sleepSessionCountdown = document.getElementById('sleepSessionCountdown');
+        const sleepSessionGreeting = document.getElementById('sleepSessionGreeting');
         const sleepSessionNoise = document.getElementById('sleepSessionNoise');
+        const sleepUserName = (document.body && document.body.dataset && document.body.dataset.sleepUser)
+            ? document.body.dataset.sleepUser
+            : 'Sleeper';
 
         let notesByDate = {};
 
@@ -2321,12 +2325,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const remainingMs = Math.max(activeSleepSession.endAt - now, 0);
-            const remainingMinutes = Math.ceil(remainingMs / 60000);
-            const remainingHours = Math.floor(remainingMinutes / 60);
-            const remainingMins = remainingMinutes % 60;
 
             if (sleepSessionCountdown) {
-                sleepSessionCountdown.textContent = 'Session ends in ' + remainingHours + ' h ' + remainingMins + ' m';
+                sleepSessionCountdown.textContent = 'Monitoring for ' + formatDuration(Number(activeSleepSession.durationMinutes || 0));
+            }
+
+            if (sleepSessionGreeting) {
+                sleepSessionGreeting.textContent = 'Sleep well, ' + sleepUserName + '!';
             }
 
             if (remainingMs <= 0) {
@@ -2396,6 +2401,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 durationMinutes: durationMinutes,
                 alarmRange: formatTime(interval.alarmStart) + '-' + formatTime(interval.alarmEnd)
             };
+
+            if (sleepSessionGreeting) {
+                sleepSessionGreeting.textContent = 'Sleep well, ' + sleepUserName + '!';
+            }
+
+            if (sleepSessionCountdown) {
+                sleepSessionCountdown.textContent = 'Monitoring for ' + formatDuration(durationMinutes);
+            }
 
             saveSessionState();
             showFinalSession();
@@ -2616,6 +2629,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             triggerBtn.addEventListener('click', function () {
+                fetch('api/device-led.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        wakeAlertActive: false
+                    })
+                }).catch(function () {
+                    // Ignore transient network issues and continue sleep flow.
+                });
+
                 openSleepNowFlow();
             });
         });
@@ -3968,6 +3993,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const deviceLivePanel = document.getElementById('deviceLivePanel');
     const sharedDeviceConnectionStateLabel = document.getElementById('deviceConnectionStateLabel');
     if (deviceLivePanel || sharedDeviceConnectionStateLabel) {
+        const deviceConnectedView = document.getElementById('deviceConnectedView');
+        const deviceDisconnectedView = document.getElementById('deviceDisconnectedView');
+        const connectDeviceBtn = document.getElementById('connectDeviceBtn');
         const deviceBatteryDot = document.getElementById('deviceBatteryDot');
         const deviceChargingStatus = document.getElementById('deviceChargingStatus');
         const deviceConnectionStrength = document.getElementById('deviceConnectionStrength');
@@ -3980,9 +4008,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const deviceLedBrightnessValue = document.getElementById('deviceLedBrightnessValue');
         const deviceWakeBlinkSpeed = document.getElementById('deviceWakeBlinkSpeed');
         const deviceWakeBlinkSpeedValue = document.getElementById('deviceWakeBlinkSpeedValue');
-        const deviceLedModeStatic = document.getElementById('deviceLedModeStatic');
-        const deviceLedModeValue = document.getElementById('deviceLedModeValue');
-        const deviceSyncNowBtn = document.getElementById('deviceSyncNowBtn');
+        const deviceSleepNowBtn = document.getElementById('deviceSleepNowBtn');
         const deviceDisconnectBtn = document.getElementById('deviceDisconnectBtn');
         const deviceBatteryPercent = document.getElementById('deviceBatteryPercent');
         const deviceConnectionStateLabel = sharedDeviceConnectionStateLabel;
@@ -3990,14 +4016,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const connectionFreshMs = 10000;
         const ledStorageKey = 'deviceLedBrightness';
         const wakeBlinkSpeedStorageKey = 'deviceWakeBlinkSpeed';
-        const ledModeStorageKey = 'deviceLedMode';
         let ledSyncTimer = null;
-        let activeLedMode = 'static';
         let activeWakeBlinkSpeed = 500;
         let lastWakeAlertActive = null;
-        let isDeviceDisconnected = false;
+        let wakeStartMinutes = null;
+        let wakeEndMinutes = null;
+        let wakeAlarmEnabled = true;
+        let wakeAlarmDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-        const postLedSettings = function (brightness, mode, blinkSpeed, wakeAlertActive) {
+        const postLedSettings = function (brightness, blinkSpeed, wakeAlertActive) {
             fetch('api/device-led.php', {
                 method: 'POST',
                 headers: {
@@ -4005,7 +4032,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify({
                     brightness: brightness,
-                    mode: mode,
+                    mode: 'static',
                     blinkSpeed: blinkSpeed,
                     wakeAlertActive: wakeAlertActive
                 })
@@ -4014,13 +4041,13 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         };
 
-        const queueLedSettingsSync = function (brightness, mode, blinkSpeed, wakeAlertActive) {
+        const queueLedSettingsSync = function (brightness, blinkSpeed, wakeAlertActive) {
             if (ledSyncTimer) {
                 clearTimeout(ledSyncTimer);
             }
 
             ledSyncTimer = setTimeout(function () {
-                postLedSettings(brightness, mode, blinkSpeed, wakeAlertActive);
+                postLedSettings(brightness, blinkSpeed, wakeAlertActive);
                 ledSyncTimer = null;
             }, 120);
         };
@@ -4042,30 +4069,97 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const isNowInWakeWindow = function () {
-            try {
-                const raw = localStorage.getItem('sleepTrackerWindow');
-                if (!raw) {
-                    return false;
-                }
-
-                const parsed = JSON.parse(raw);
-                const startMinutes = minutesFromHm(parsed && parsed.alarmStart);
-                const endMinutes = minutesFromHm(parsed && parsed.alarmEnd);
-                if (startMinutes === null || endMinutes === null) {
-                    return false;
-                }
-
-                const now = new Date();
-                const nowMinutes = (now.getHours() * 60) + now.getMinutes();
-
-                if (startMinutes <= endMinutes) {
-                    return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
-                }
-
-                return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
-            } catch (error) {
+            if (wakeStartMinutes === null || wakeEndMinutes === null) {
                 return false;
             }
+
+            if (!wakeAlarmEnabled) {
+                return false;
+            }
+
+            const now = new Date();
+            const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+            const todayKey = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][now.getDay()];
+
+            if (!wakeAlarmDays.includes(todayKey)) {
+                return false;
+            }
+
+            if (wakeStartMinutes <= wakeEndMinutes) {
+                return nowMinutes >= wakeStartMinutes && nowMinutes <= wakeEndMinutes;
+            }
+
+            return nowMinutes >= wakeStartMinutes || nowMinutes <= wakeEndMinutes;
+        };
+
+        const applyWakeWindow = function (startValue, endValue) {
+            const start = minutesFromHm(startValue);
+            const end = minutesFromHm(endValue);
+            if (start === null || end === null) {
+                return false;
+            }
+
+            wakeStartMinutes = start;
+            wakeEndMinutes = end;
+            return true;
+        };
+
+        const applyWakeScheduleSettings = function (settings) {
+            const payload = settings && typeof settings === 'object' ? settings : {};
+            const alarmEnd = typeof payload.alarmEnd === 'string' ? payload.alarmEnd : null;
+            const wakeupMinutesRaw = Number(payload.wakeupMinutes);
+            const wakeupMinutes = Number.isFinite(wakeupMinutesRaw) ? Math.max(5, Math.min(60, Math.round(wakeupMinutesRaw))) : 30;
+
+            if (alarmEnd && alarmEnd.includes(':')) {
+                const endMinutes = minutesFromHm(alarmEnd);
+                if (endMinutes !== null) {
+                    const startMinutes = (endMinutes - wakeupMinutes + 1440) % 1440;
+                    applyWakeWindow(minutesToTimeValue(startMinutes), alarmEnd);
+                }
+            }
+
+            if (typeof payload.alarmEnabled !== 'undefined') {
+                wakeAlarmEnabled = !!payload.alarmEnabled;
+            }
+
+            if (Array.isArray(payload.alarmDays)) {
+                const filteredDays = payload.alarmDays.filter(function (day) {
+                    return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].includes(String(day));
+                });
+                wakeAlarmDays = filteredDays.length ? filteredDays : ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            }
+        };
+
+        const hydrateWakeWindow = function () {
+            try {
+                const raw = localStorage.getItem('sleepTrackerWindow');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.alarmStart && parsed.alarmEnd) {
+                            applyWakeWindow(parsed.alarmStart, parsed.alarmEnd);
+                        }
+
+                        applyWakeScheduleSettings(parsed);
+                    }
+                }
+            } catch (error) {
+                // Ignore malformed local state.
+            }
+
+            fetch('api/sleep-settings.php', { cache: 'no-store' })
+                .then(function (response) { return response.json(); })
+                .then(function (payload) {
+                    if (!payload || payload.ok === false) {
+                        return;
+                    }
+
+                    applyWakeScheduleSettings(payload.data || payload);
+                    syncWakeAlertState(true);
+                })
+                .catch(function () {
+                    // Keep existing wake window state.
+                });
         };
 
         const syncWakeAlertState = function (force) {
@@ -4078,20 +4172,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
-            queueLedSettingsSync(brightnessNow, activeLedMode, activeWakeBlinkSpeed, wakeAlertActive);
-        };
-
-        const applyLedMode = function (mode) {
-            const normalized = String(mode || 'static').toLowerCase();
-            activeLedMode = normalized === 'auto' ? 'auto' : 'static';
-
-            if (deviceLedModeValue) {
-                deviceLedModeValue.textContent = activeLedMode === 'auto' ? 'Auto' : 'Static';
-            }
-
-            if (deviceLedModeStatic) {
-                deviceLedModeStatic.classList.toggle('is-active', activeLedMode === 'static');
-            }
+            queueLedSettingsSync(brightnessNow, activeWakeBlinkSpeed, wakeAlertActive);
         };
 
         const setSignalStrengthUi = function (bars, text) {
@@ -4101,6 +4182,22 @@ document.addEventListener('DOMContentLoaded', function () {
             if (deviceConnectionStrength) {
                 deviceConnectionStrength.textContent = text;
             }
+        };
+
+        const formatDeviceDateTime = function (stamp) {
+            const parsed = new Date(stamp);
+            if (Number.isNaN(parsed.getTime())) {
+                return '--';
+            }
+
+            const yyyy = parsed.getFullYear();
+            const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+            const dd = String(parsed.getDate()).padStart(2, '0');
+            const hh = String(parsed.getHours()).padStart(2, '0');
+            const mi = String(parsed.getMinutes()).padStart(2, '0');
+            const ss = String(parsed.getSeconds()).padStart(2, '0');
+
+            return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + mi + ':' + ss;
         };
 
         const applyLedValue = function (value) {
@@ -4129,7 +4226,7 @@ document.addEventListener('DOMContentLoaded', function () {
             applyLedValue(storedBrightness !== null ? Number(storedBrightness) : Number(deviceLedBrightness.value || 50));
             const storedWakeBlinkSpeed = localStorage.getItem(wakeBlinkSpeedStorageKey);
             applyWakeBlinkSpeed(storedWakeBlinkSpeed !== null ? Number(storedWakeBlinkSpeed) : Number(deviceWakeBlinkSpeed ? deviceWakeBlinkSpeed.value : 500));
-            applyLedMode(localStorage.getItem(ledModeStorageKey) || 'static');
+            hydrateWakeWindow();
 
             fetch('api/device-led.php', { cache: 'no-store' })
                 .then(function (response) { return response.json(); })
@@ -4151,11 +4248,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         localStorage.setItem(wakeBlinkSpeedStorageKey, String(activeWakeBlinkSpeed));
                     }
 
-                    if (payload.mode) {
-                        applyLedMode(payload.mode);
-                        localStorage.setItem(ledModeStorageKey, activeLedMode);
-                    }
-
                     if (typeof payload.wakeAlertActive === 'boolean') {
                         lastWakeAlertActive = payload.wakeAlertActive;
                     }
@@ -4169,7 +4261,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 localStorage.setItem(ledStorageKey, String(deviceLedBrightness.value));
                 queueLedSettingsSync(
                     Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness.value) || 0))),
-                    activeLedMode,
                     activeWakeBlinkSpeed,
                     isNowInWakeWindow()
                 );
@@ -4181,22 +4272,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 applyWakeBlinkSpeed(deviceWakeBlinkSpeed.value);
                 localStorage.setItem(wakeBlinkSpeedStorageKey, String(activeWakeBlinkSpeed));
                 const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
-                queueLedSettingsSync(brightnessNow, activeLedMode, activeWakeBlinkSpeed, isNowInWakeWindow());
-            });
-        }
-
-        if (deviceLedModeStatic) {
-            deviceLedModeStatic.addEventListener('click', function () {
-                applyLedMode('static');
-                localStorage.setItem(ledModeStorageKey, activeLedMode);
-                const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
-                queueLedSettingsSync(brightnessNow, activeLedMode, activeWakeBlinkSpeed, isNowInWakeWindow());
+                queueLedSettingsSync(brightnessNow, activeWakeBlinkSpeed, isNowInWakeWindow());
             });
         }
 
         setInterval(function () {
             syncWakeAlertState(false);
-        }, 30000);
+        }, 5000);
         syncWakeAlertState(true);
 
         const isTelemetryFresh = function (payload) {
@@ -4218,13 +4300,17 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         const getDeviceConnectionState = function (payload) {
-            if (isDeviceDisconnected || !payload || payload.ok === false) {
-                return 'not-connected';
+            if (!payload || payload.ok === false) {
+                return 'disconnected';
+            }
+
+            if (typeof payload.connected === 'boolean') {
+                return payload.connected ? 'connected' : 'disconnected';
             }
 
             const stamp = payload.timestamp || payload.receivedAt;
             if (!stamp) {
-                return 'not-connected';
+                return 'disconnected';
             }
 
             return isTelemetryFresh(payload) ? 'connected' : 'disconnected';
@@ -4272,6 +4358,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 deviceSessionStatus.textContent = isConnected ? 'Sleep Session Active' : 'Sleep Session Idle';
             }
 
+            if (deviceConnectedView) {
+                deviceConnectedView.hidden = !isConnected;
+            }
+
+            if (deviceDisconnectedView) {
+                deviceDisconnectedView.hidden = isConnected;
+            }
+
             if (deviceHeartRate) {
                 if (Number.isFinite(heartRate) && heartRate > 0) {
                     deviceHeartRate.textContent = String(Math.round(heartRate)) + ' BPM';
@@ -4299,10 +4393,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (deviceConnectionStateLabel) {
                 if (connectionState === 'connected') {
                     deviceConnectionStateLabel.textContent = 'Connected';
-                } else if (connectionState === 'disconnected') {
-                    deviceConnectionStateLabel.textContent = 'Disconnected';
                 } else {
-                    deviceConnectionStateLabel.textContent = 'Not Connected';
+                    deviceConnectionStateLabel.textContent = 'Disconnected';
                 }
 
                 deviceConnectionStateLabel.classList.toggle('state-connected', connectionState === 'connected');
@@ -4311,7 +4403,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (deviceLastUpdate) {
-                deviceLastUpdate.textContent = 'Last update: ' + (stamp || '--');
+                deviceLastUpdate.textContent = 'Last update: ' + (stamp ? formatDeviceDateTime(stamp) : '--');
             }
         };
 
@@ -4322,23 +4414,32 @@ document.addEventListener('DOMContentLoaded', function () {
                         renderDeviceLiveMetrics({});
                         return;
                     }
-                    isDeviceDisconnected = false;
                     renderDeviceLiveMetrics(payload);
                 })
                 .catch(function () { renderDeviceLiveMetrics({}); });
         };
 
-        if (deviceSyncNowBtn) {
-            deviceSyncNowBtn.addEventListener('click', function () {
+        if (deviceDisconnectBtn) {
+            deviceDisconnectBtn.addEventListener('click', function () {
                 fetchDeviceLiveMetrics();
             });
         }
 
-        if (deviceDisconnectBtn) {
-            deviceDisconnectBtn.addEventListener('click', function () {
-                isDeviceDisconnected = true;
-                setSignalStrengthUi(0, 'No Signal');
-                renderDeviceLiveMetrics({});
+        if (connectDeviceBtn) {
+            connectDeviceBtn.addEventListener('click', function () {
+                fetchDeviceLiveMetrics();
+            });
+        }
+
+        if (deviceSleepNowBtn) {
+            deviceSleepNowBtn.addEventListener('click', function () {
+                const brightnessNow = Math.max(0, Math.min(100, Math.round(Number(deviceLedBrightness ? deviceLedBrightness.value : 50) || 0)));
+
+                queueLedSettingsSync(brightnessNow, activeWakeBlinkSpeed, false);
+
+                if (deviceSessionStatus) {
+                    deviceSessionStatus.textContent = 'Sleep Session Active';
+                }
             });
         }
 

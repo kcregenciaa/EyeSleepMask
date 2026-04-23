@@ -8,6 +8,39 @@ require __DIR__ . '/../backend/db.php';
 
 $dataFile = __DIR__ . '/../data/arduino-latest.json';
 $userId = !empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+$connectionFreshMs = 10000;
+
+$toTimestampMs = static function (?string $stamp): ?int {
+    if (!$stamp) {
+        return null;
+    }
+
+    $parsed = strtotime($stamp);
+    if ($parsed === false) {
+        return null;
+    }
+
+    return ((int) $parsed) * 1000;
+};
+
+$withConnectionState = static function (array $payload) use ($toTimestampMs, $connectionFreshMs): array {
+    $stamp = isset($payload['timestamp']) && is_string($payload['timestamp']) ? $payload['timestamp'] : null;
+    if (!$stamp && isset($payload['receivedAt']) && is_string($payload['receivedAt'])) {
+        $stamp = $payload['receivedAt'];
+    }
+
+    $ageMs = null;
+    $stampMs = $toTimestampMs($stamp);
+    if ($stampMs !== null) {
+        $ageMs = max(0, ((int) round(microtime(true) * 1000)) - $stampMs);
+    }
+
+    $payload['connectionAgeMs'] = $ageMs;
+    $payload['connectionFreshMs'] = $connectionFreshMs;
+    $payload['connected'] = $ageMs !== null && $ageMs <= $connectionFreshMs;
+
+    return $payload;
+};
 
 $loadFilePayload = function () use ($dataFile): ?array {
     if (!file_exists($dataFile)) {
@@ -21,20 +54,23 @@ $loadFilePayload = function () use ($dataFile): ?array {
 
 $payload = null;
 
-$normalizeSnapshot = function (array $snapshot): array {
-    return [
+$normalizeSnapshot = function (array $snapshot) use ($dataFile, $withConnectionState): array {
+    $fileStamp = @filemtime($dataFile);
+    $fallbackStamp = $fileStamp ? gmdate('c', (int) $fileStamp) : gmdate('c');
+
+    return $withConnectionState([
         'ok' => true,
         'device' => (string) ($snapshot['device'] ?? 'seeed-xiao-nrf52840'),
         'snoreLevel' => (int) round((float) ($snapshot['snoreLevel'] ?? 0)),
         'movement' => (int) round((float) ($snapshot['movement'] ?? 0)),
         'battery' => (int) round((float) ($snapshot['battery'] ?? 0)),
         'heartRate' => isset($snapshot['heartRate']) ? (int) round((float) $snapshot['heartRate']) : null,
-        'timestamp' => (string) ($snapshot['timestamp'] ?? gmdate('c')),
-        'receivedAt' => (string) ($snapshot['receivedAt'] ?? gmdate('c'))
-    ];
+        'timestamp' => (string) ($snapshot['timestamp'] ?? $fallbackStamp),
+        'receivedAt' => (string) ($snapshot['receivedAt'] ?? $fallbackStamp)
+    ]);
 };
 
-function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId): ?array
+function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId, callable $withConnectionState): ?array
 {
     if ($filterUserId === null) {
         $query = $mysqli->prepare(
@@ -76,7 +112,7 @@ function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId): ?array
 
     $timestamp = !empty($row['recorded_at']) ? (string) $row['recorded_at'] : (string) $row['received_at'];
 
-    return [
+    return $withConnectionState([
         'ok' => true,
         'device' => (string) ($row['device'] ?? 'xiao-nrf52840'),
         'snoreLevel' => (int) ($row['snore_level'] ?? 0),
@@ -85,18 +121,18 @@ function fetchLatestTelemetrySample(mysqli $mysqli, ?int $filterUserId): ?array
         'heartRate' => isset($row['heart_rate']) ? (int) $row['heart_rate'] : null,
         'timestamp' => $timestamp,
         'receivedAt' => (string) ($row['received_at'] ?? gmdate('c'))
-    ];
+    ]);
 }
 
 if (!$payload) {
     $filePayload = $loadFilePayload();
     if (!$filePayload) {
         if ($userId !== null) {
-            $payload = fetchLatestTelemetrySample($mysqli, $userId);
+            $payload = fetchLatestTelemetrySample($mysqli, $userId, $withConnectionState);
         }
 
         if (!$payload) {
-            $payload = fetchLatestTelemetrySample($mysqli, null);
+            $payload = fetchLatestTelemetrySample($mysqli, null, $withConnectionState);
         }
 
         if (!$payload) {

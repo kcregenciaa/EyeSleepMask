@@ -39,7 +39,26 @@ include __DIR__ . '/includes/bootstrap-head.php';
                 <section class="col-12">
                     <div class="row g-3 g-lg-4 justify-content-center" id="deviceLivePanel">
                         <div class="col-12 col-lg-9 col-xl-8">
-                            <article class="device-hub-card p-3 p-lg-4">
+                            <div class="device-module-center">
+                                <div class="device-connection-block mb-3">
+                                    <div class="device-connection-status-row">
+                                        <img src="assets/images/bluetooth.png" alt="Bluetooth" class="device-bluetooth-icon" loading="lazy">
+                                        <div class="device-connection-text">
+                                            <p class="movement-muted mb-1">Your Device is</p>
+                                            <p class="device-connection-state mb-0" id="deviceConnectionStateLabel">Disconnected</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <article class="device-status-card p-3 p-lg-4" id="deviceDisconnectedView">
+                                    <div class="device-image-wrap mb-3">
+                                        <img src="assets/images/whitemask.png" alt="EyeSleepMask device" class="device-image" loading="lazy">
+                                    </div>
+                                    <p class="text-light text-center fw-normal mb-3">Connect Your Sleep Mask Device</p>
+                                    <button type="button" class="device-connect-btn mb-0" id="connectDeviceBtn">Connect Device</button>
+                                </article>
+
+                                <article class="device-hub-card p-3 p-lg-4" id="deviceConnectedView" hidden>
                                 <div class="device-hub-top-grid">
                                     <div class="device-top-item">
                                         <span class="device-top-label">Battery</span>
@@ -69,7 +88,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                         <img src="assets/images/whitemask.png" alt="EyeSleepMask device" class="device-image" loading="lazy">
                                     </div>
                                     <p class="device-session-label mb-0" id="deviceSessionStatus">Sleep Session Idle</p>
-                                    <p class="device-connection-state mb-0 mt-1" id="deviceConnectionStateLabel">Disconnected</p>
                                 </div>
 
                                 <div class="device-controls-wrap mt-3">
@@ -85,14 +103,6 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     </div>
                                     <input type="range" min="100" max="1500" step="50" value="500" id="deviceWakeBlinkSpeed" class="device-brightness-slider" aria-label="Wake blink speed">
                                     <small class="device-wake-hint mt-2 d-block">Used during your alarm wake-up window.</small>
-
-                                    <div class="d-flex justify-content-between align-items-center gap-2 mt-3 mb-2">
-                                        <span class="device-top-label">LED Mode</span>
-                                        <strong class="device-top-value" id="deviceLedModeValue">Static</strong>
-                                    </div>
-                                    <div class="device-mode-segment" role="group" aria-label="LED mode">
-                                        <button type="button" class="device-mode-btn is-active" id="deviceLedModeStatic" data-led-mode="static">Static</button>
-                                    </div>
                                 </div>
 
                                 <div class="device-live-data-grid mt-3">
@@ -111,13 +121,13 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 </div>
 
                                 <div class="device-hub-actions mt-3">
-                                    <a href="sleep-tracker.php" class="device-action-btn device-action-primary">Sleep Now</a>
-                                    <button type="button" class="device-action-btn" id="deviceSyncNowBtn">Sync Now</button>
+                                    <button type="button" class="device-action-btn device-action-primary" id="deviceSleepNowBtn">Sleep Now</button>
                                     <button type="button" class="device-action-btn" id="deviceDisconnectBtn">Disconnect</button>
                                 </div>
 
                                 <p class="movement-insight device-last-update mt-3 mb-0" id="deviceLastUpdate">Last update: --</p>
                             </article>
+                            </div>
                         </div>
                     </div>
                 </section>

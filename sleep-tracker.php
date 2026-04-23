@@ -36,7 +36,7 @@ $pageStyles = ['assets/css/tracker-ui.css'];
 $pageScripts = ['assets/js/dashboard.js'];
 include __DIR__ . '/includes/bootstrap-head.php';
 ?>
-<body class="deep-bg dashboard-page sleep-tracker-page<?php echo is_array($dashboardLoader) ? ' dashboard-loading' : ''; ?>">
+<body class="deep-bg dashboard-page sleep-tracker-page<?php echo is_array($dashboardLoader) ? ' dashboard-loading' : ''; ?>" data-sleep-user="<?php echo htmlspecialchars($userName, ENT_QUOTES, 'UTF-8'); ?>">
     <?php if (is_array($dashboardLoader) && !empty($dashboardLoader['message'])): ?>
         <div id="dashboardLoader" class="dashboard-loader" aria-live="polite" aria-label="Loading dashboard">
             <img class="dashboard-loader-logo" src="assets/images/logo.png" alt="Eye Sleep Mask logo">
@@ -77,7 +77,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
 
                                 <p class="sleep-total-hours mt-3 mb-0">Total sleep: <strong data-display="total-sleep">5 h</strong></p>
 
-                                <div class="sleep-times mt-3 mt-lg-4">
+                                <div class="sleep-times">
                                     <div class="sleep-time-row sleep-time-pill sleep-time-row-bedtime">
                                         <span class="sleep-time-pill-dot" aria-hidden="true"><i class="bi bi-moon-stars-fill"></i></span>
                                         <span class="sleep-time-name">Bedtime</span>
@@ -416,10 +416,11 @@ include __DIR__ . '/includes/bootstrap-head.php';
                 </div>
             </div>
             <div class="sleep-session-center">
+                <p class="sleep-session-countdown" id="sleepSessionGreeting">Sleep well, Sleeper!</p>
                 <h2 class="sleep-session-time" id="sleepSessionTime">02:24</h2>
                 <span class="sleep-session-period" id="sleepSessionPeriod">PM</span>
                 <p class="sleep-session-alarm" id="sleepSessionAlarm">04:50 AM-05:20 AM</p>
-                <p class="sleep-session-countdown" id="sleepSessionCountdown">Session ends in 5 h 0 m</p>
+                <p class="sleep-session-countdown" id="sleepSessionCountdown">Monitoring for 5 h 0 m</p>
             </div>
             <div class="sleep-session-actions">
                 <button type="button" class="sleep-wake-btn" id="sleepWakeBtn">Long press to wake up</button>

@@ -267,9 +267,11 @@ def post_payload(payload):
     # SAVE LOCAL (for dashboard)
     with DATA_FILE.open("w", encoding="utf-8") as f:
         json.dump({
+            "device": payload.get("device", DEVICE_NAME),
             "snoreLevel": payload["snoreLevel"],
             "movement": payload["movement"],
-            "battery": payload["battery"]
+            "battery": payload["battery"],
+            "timestamp": payload.get("timestamp", now_iso())
         }, f, indent=2)
         f.write("\n")
 

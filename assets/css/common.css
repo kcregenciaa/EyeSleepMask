@@ -215,7 +215,7 @@ button:focus-visible {
     border: 1px solid var(--border-soft);
     background: rgba(16, 24, 40, 0.95);
     backdrop-filter: blur(12px);
-    padding: 0.35rem 0.6rem;
+    padding: 0.2rem 0.45rem;
     border-radius: 999px;
     width: min(90vw, 500px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -236,7 +236,7 @@ button:focus-visible {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.32rem 0.65rem;
+    padding: 0.24rem 0.56rem;
     color: var(--accent);
     text-decoration: none;
     transition: all 0.2s ease;
@@ -248,16 +248,16 @@ button:focus-visible {
 }
 
 .footbar-item i {
-    font-size: 1.25rem;
-    margin-bottom: 0.15rem;
+    font-size: 1.1rem;
+    margin-bottom: 0;
     display: block;
 }
 
-.footbar-label {
-    font-size: 0.56rem;
-    text-transform: uppercase;
-    letter-spacing: 0.45px;
-    font-weight: 600;
+.footbar-icon-image {
+    width: 1.2rem;
+    height: 1.2rem;
+    object-fit: contain;
+    display: block;
 }
 
 .footbar-item:hover {
@@ -287,27 +287,28 @@ body.profile-page {
 
 @media (max-width: 767.98px) {
     :root {
-        --footbar-safe-space: 5.7rem;
+        --footbar-safe-space: 4.9rem;
         --side-margin: 7rem;
     }
 
     .mobile-footbar {
         bottom: 0.85rem;
         width: min(92vw, 540px);
-        padding: 0.32rem 0.48rem;
+        padding: 0.18rem 0.4rem;
     }
 
     .footbar-item {
-        padding: 0.28rem 0.52rem;
+        padding: 0.22rem 0.5rem;
         font-size: 0.64rem;
     }
 
     .footbar-item i {
-        font-size: 1.12rem;
-        margin-bottom: 0.12rem;
+        font-size: 1rem;
+        margin-bottom: 0;
     }
 
-    .footbar-label {
-        font-size: 0.52rem;
+    .footbar-icon-image {
+        width: 1.08rem;
+        height: 1.08rem;
     }
 }

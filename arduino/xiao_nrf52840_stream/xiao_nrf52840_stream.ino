@@ -212,7 +212,7 @@ void loop()
 {
   readLedCommands();
 
-  if (millis() - lastUpdate < 120)
+  if (millis() - lastUpdate < 1000)
     return;
   lastUpdate = millis();
 
