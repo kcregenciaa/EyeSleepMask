@@ -1,23 +1,25 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
 require __DIR__ . '/../backend/db.php';
 
-/* ---------------------------
-   ONLY ALLOW POST
-----------------------------*/
+// Ensure DB connection exists
+if (!isset($mysqli) || $mysqli->connect_error) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Database connection failed']);
+    exit;
+}
+
+// Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['ok' => false, 'error' => 'Method not allowed']);
     exit;
 }
 
-/* ---------------------------
-   READ INPUT JSON
-----------------------------*/
+// Read input JSON
 $raw = file_get_contents('php://input');
 $payload = json_decode($raw, true);
 
@@ -27,104 +29,61 @@ if (!is_array($payload)) {
     exit;
 }
 
-/* ---------------------------
-   SANITIZE INPUT
-----------------------------*/
+// Sanitize input
 $device = trim((string)($payload['device'] ?? 'xiao-nrf52840'));
 $snoreLevel = (int)($payload['snoreLevel'] ?? 0);
 $movement = (int)($payload['movement'] ?? 0);
 $battery = (int)($payload['battery'] ?? 0);
-$heartRate = isset($payload['heartRate']) ? (int)$payload['heartRate'] : null;
+
+$heartRate = $payload['heartRate'] ?? null;
+$heartRate = is_numeric($heartRate) ? (int)$heartRate : null;
+
 $timestamp = $payload['timestamp'] ?? null;
-$userId = (isset($payload['userId']) && is_numeric($payload['userId']))
-    ? (int)$payload['userId']
-    : null;
+$userId = (isset($payload['userId']) && is_numeric($payload['userId'])) ? (int)$payload['userId'] : null;
 
-/* ---------------------------
-   CLAMP VALUES (0–100)
-----------------------------*/
-$snoreLevel = max(0, min(100, $snoreLevel));
-$movement   = max(0, min(100, $movement));
-$battery    = max(0, min(100, $battery));
+$recordedAt = $timestamp ? date('Y-m-d H:i:s', strtotime($timestamp)) : gmdate('Y-m-d H:i:s');
 
-/* ---------------------------
-   TIMESTAMP HANDLING
-----------------------------*/
-$recordedAt = gmdate('Y-m-d H:i:s');
-
-if (is_string($timestamp) && $timestamp !== '') {
-    $parsed = date_create($timestamp);
-    if ($parsed) {
-        $recordedAt = $parsed->format('Y-m-d H:i:s');
-    }
-}
-
-/* ---------------------------
-   INSERT INTO MYSQL
-----------------------------*/
-if ($userId === null && $heartRate === null) {
+// ===================== DATABASE INSERT =====================
+if ($heartRate === null) {
     $stmt = $mysqli->prepare(
-        "INSERT INTO telemetry_samples 
-        (device, snore_level, movement, battery, recorded_at)
-        VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO telemetry_samples (device, snore_level, movement, battery, recorded_at)
+         VALUES (?, ?, ?, ?, ?)"
     );
 
-    if ($stmt) {
-        $stmt->bind_param('siiis', $device, $snoreLevel, $movement, $battery, $recordedAt);
-        $stmt->execute();
-        $stmt->close();
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => 'Prepare failed: ' . $mysqli->error]);
+        exit;
     }
 
-} elseif ($heartRate === null) {
-    $stmt = $mysqli->prepare(
-        "INSERT INTO telemetry_samples 
-        (device, snore_level, movement, battery, recorded_at)
-        VALUES (?, ?, ?, ?, ?)"
-    );
-
-    if ($stmt) {
-        $stmt->bind_param('siiis', $device, $snoreLevel, $movement, $battery, $recordedAt);
-        $stmt->execute();
-        $stmt->close();
-    }
-
+    $stmt->bind_param('siiis', $device, $snoreLevel, $movement, $battery, $recordedAt);
 } else {
     $stmt = $mysqli->prepare(
-        "INSERT INTO telemetry_samples 
-        (device, snore_level, movement, battery, heart_rate, recorded_at)
-        VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO telemetry_samples (device, snore_level, movement, battery, heart_rate, recorded_at)
+         VALUES (?, ?, ?, ?, ?, ?)"
     );
 
-    if ($stmt) {
-        $stmt->bind_param('siiiis', $device, $snoreLevel, $movement, $battery, $heartRate, $recordedAt);
-        $stmt->execute();
-        $stmt->close();
+    if (!$stmt) {
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => 'Prepare failed: ' . $mysqli->error]);
+        exit;
     }
+
+    $stmt->bind_param('siiiis', $device, $snoreLevel, $movement, $battery, $heartRate, $recordedAt);
 }
 
-/* ---------------------------
-   BUILD RESPONSE OBJECT
-----------------------------*/
-$response = [
-    'ok' => true,
-    'device' => $device,
-    'snoreLevel' => $snoreLevel,
-    'movement' => $movement,
-    'battery' => $battery,
-    'heartRate' => $heartRate,
-    'timestamp' => $recordedAt,
-    'receivedAt' => gmdate('c')
-];
+$stmt->execute();
+$stmt->close();
 
-/* ---------------------------
-   SAVE CLEAN LATEST JSON FILE
-   (THIS FIXES YOUR DASHBOARD)
-----------------------------*/
+// ===================== SAVE LATEST JSON =====================
 $dataFile = __DIR__ . '/../data/arduino-latest.json';
+
 $cleanSnapshot = [
     'movement' => $movement,
     'snoreLevel' => $snoreLevel,
-    'battery' => $battery
+    'battery' => $battery,
+    'heartRate' => $heartRate,
+    'timestamp' => $recordedAt
 ];
 
 if (!is_dir(dirname($dataFile))) {
@@ -137,10 +96,16 @@ file_put_contents(
     LOCK_EX
 );
 
-/* ---------------------------
-   RETURN RESPONSE
-----------------------------*/
-echo json_encode([
+// ===================== RESPONSE =====================
+$response = [
     'ok' => true,
-    'saved' => $response
-]);
+    'device' => $device,
+    'snoreLevel' => $snoreLevel,
+    'movement' => $movement,
+    'battery' => $battery,
+    'heartRate' => $heartRate,
+    'timestamp' => $recordedAt,
+    'receivedAt' => gmdate('c')
+];
+
+echo json_encode($response);

@@ -3,7 +3,7 @@ RUN THIS IN POWERSHELL:
 
 cd C:\\xampp\\htdocs\\EyeSleepMask\\EyeSleepMask\\arduino-bridge
 
-$env:ARDUINO_PORT="COM10"
+$env:ARDUINO_PORT="COM14"
 $env:ARDUINO_BAUD="115200"
 $env:LIVE_SERVER_URL="http://localhost:8080/EyeSleepMask/EyeSleepMask"
 
@@ -26,7 +26,7 @@ from serial import SerialException
 # =====================
 # CONFIG
 # =====================
-PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM10')
+PORT_NAME = os.environ.get('ARDUINO_PORT', 'COM14')
 BAUD_RATE = int(os.environ.get('ARDUINO_BAUD', '115200'))
 
 LIVE_SERVER_URL = os.environ.get(
@@ -234,14 +234,16 @@ def parse_payload(line: str):
     # -------------------------
     # RAW VALUES (IMPORTANT)
     # -------------------------
-    mic_raw = float(first_present(data, ['mic', 'micLevel', 'snoreLevel'], 0))
-    motion_raw = float(first_present(data, ['movement', 'motion'], 0))
-    battery_raw = float(first_present(data, ['battery'], 0))
+    snore_raw = float(first_present(data, ['snoreLevel', 'mic', 'micLevel'], 0))
+    motion_raw = float(first_present(data, ['motion', 'movement'], 0))
+    battery_raw = float(first_present(data, ['battery'], 100))
+    position = data.get('position', 'UNKNOWN')
+    alert_active = data.get('alertActive', False)
 
     # -------------------------
-    # SNORE DETECTION (RAW)
+    # SNORE DETECTION (already computed on Arduino)
     # -------------------------
-    snore_value = snore_engine.update(mic_raw, motion_raw)
+    snore_value = snore_raw  # Use value from Arduino directly
 
     # -------------------------
     # DISPLAY VALUES
@@ -254,6 +256,8 @@ def parse_payload(line: str):
         "snoreLevel": round(snore_value, 2),
         "movement": movement_display,
         "battery": battery_display,
+        "position": position,
+        "alertActive": alert_active,
         "timestamp": now_iso()
     }
 
@@ -271,6 +275,8 @@ def post_payload(payload):
             "snoreLevel": payload["snoreLevel"],
             "movement": payload["movement"],
             "battery": payload["battery"],
+            "position": payload.get("position", "UNKNOWN"),
+            "alertActive": payload.get("alertActive", False),
             "timestamp": payload.get("timestamp", now_iso())
         }, f, indent=2)
         f.write("\n")
@@ -286,6 +292,8 @@ def post_payload(payload):
             MOTION_URL,
             json={
                 "motion": payload["movement"],
+                "position": payload.get("position", "UNKNOWN"),
+                "alertActive": payload.get("alertActive", False),
                 "time": payload["timestamp"]
             },
             timeout=4,
@@ -296,7 +304,9 @@ def post_payload(payload):
     # DEBUG OUTPUT (clean)
     print(
         f"Snore: {payload['snoreLevel']} | "
-        f"Movement: {payload['movement']}"
+        f"Movement: {payload['movement']} | "
+        f"Position: {payload.get('position', 'N/A')} | "
+        f"Alert: {payload.get('alertActive', False)}"
     )
 
 

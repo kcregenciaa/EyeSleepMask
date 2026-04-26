@@ -215,7 +215,7 @@ button:focus-visible {
     border: 1px solid var(--border-soft);
     background: rgba(16, 24, 40, 0.95);
     backdrop-filter: blur(12px);
-    padding: 0.2rem 0.45rem;
+    padding: 0.5rem 0.9rem;
     border-radius: 999px;
     width: min(90vw, 500px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -236,7 +236,7 @@ button:focus-visible {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.24rem 0.56rem;
+    padding: 0.38rem 0.85rem;
     color: var(--accent);
     text-decoration: none;
     transition: all 0.2s ease;
@@ -254,10 +254,14 @@ button:focus-visible {
 }
 
 .footbar-icon-image {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 3.2rem;
+    height: 3.2rem;
     object-fit: contain;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -0.6rem;
+    margin-bottom: -0.6rem;
 }
 
 .footbar-item:hover {
@@ -287,18 +291,18 @@ body.profile-page {
 
 @media (max-width: 767.98px) {
     :root {
-        --footbar-safe-space: 4.9rem;
+        --footbar-safe-space: 5.7rem;
         --side-margin: 7rem;
     }
 
     .mobile-footbar {
         bottom: 0.85rem;
         width: min(92vw, 540px);
-        padding: 0.18rem 0.4rem;
+        padding: 0.38rem 0.7rem;
     }
 
     .footbar-item {
-        padding: 0.22rem 0.5rem;
+        padding: 0.34rem 0.7rem;
         font-size: 0.64rem;
     }
 
@@ -308,7 +312,9 @@ body.profile-page {
     }
 
     .footbar-icon-image {
-        width: 1.08rem;
-        height: 1.08rem;
+           width: 2.7rem;
+           height: 2.7rem;
+           margin-top: -0.4rem;
+           margin-bottom: -0.4rem;
     }
 }

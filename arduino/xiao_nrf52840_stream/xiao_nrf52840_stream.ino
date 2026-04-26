@@ -2,6 +2,7 @@
 #include <MPU6050.h>
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
+#include <math.h>
 
 // =====================
 // MPU6050
@@ -9,82 +10,103 @@
 MPU6050 mpu;
 
 // =====================
-// MIC (A1 FIXED)
+// MIC
 // =====================
 const int micPin = A1;
 
-// =====================
-// LED
-// =====================
-#define LED_PIN D6
-#define NUM_LEDS 12
-Adafruit_NeoPixel strip(NUM_LEDS * 2, LED_PIN, NEO_GRB + NEO_KHZ800);
-int ledBrightnessPercent = 100;
-String ledMode = "STATIC";
-int wakeBlinkIntervalMs = 500;
-bool wakeAlertActive = false;
-bool wakeBlinkOn = true;
-unsigned long wakeBlinkLastToggle = 0;
+const int windowSize = 20;
+int samples[20];
+int sampleIndex = 0;
+bool windowFull = false;
 
 // =====================
-// FILTER STATE
+// MIC CALIBRATION
 // =====================
-float micFiltered = 0;
 float micBaseline = 0;
-float micEnvelope = 0;
-
-float motionFiltered = 0;
-
-// stronger stability tuning
-float micAlpha = 0.08;
-float motionAlpha = 0.12;
-float baselineAlpha = 0.0008;
-float envelopeAlpha = 0.2;
+float baselineRMS = 0;
 
 // =====================
 // TIMING
 // =====================
-unsigned long lastUpdate = 0;
+unsigned long lastMicCheck = 0;
+const unsigned long micInterval = 50;
 
 // =====================
-// CALIBRATION
+// LED
 // =====================
-void calibrateMic()
+#define LED_PIN 6
+#define NUM_LEDS 12
+Adafruit_NeoPixel strip(NUM_LEDS * 2, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+// =====================
+// MOTION
+// =====================
+float smoothMotion = 0;
+float motionAlpha = 0.15;
+
+// =====================
+// STATE
+// =====================
+bool alertActive = false;
+int flashBrightness = 20;
+float baselineMotion = 0;
+String baselinePosition = "";
+
+// =====================
+// ALERT TIMING
+// =====================
+unsigned long lastAlertCheck = 0;
+
+// =====================
+// SETUP
+// =====================
+void setup()
 {
-  Serial.println("Calibrating mic... stay quiet");
+  Serial.begin(115200);
+  delay(2000);
+
+  Wire.begin();
+  mpu.initialize();
+
+  strip.begin();
+  strip.setBrightness(0);
+  strip.show();
+
+  Serial.println("SYSTEM STARTING...");
+
+  // ======================
+  // MIC CALIBRATION
+  // ======================
+  Serial.println("Calibrating mic... keep quiet");
 
   long sum = 0;
-
-  for (int i = 0; i < 300; i++)
+  for (int i = 0; i < 100; i++)
   {
     sum += analogRead(micPin);
+    delay(10);
+  }
+  micBaseline = sum / 100.0;
+
+  long energy = 0;
+  for (int i = 0; i < windowSize; i++)
+  {
+    int val = analogRead(micPin);
+    int diff = val - (int)micBaseline;
+    energy += diff * diff;
     delay(5);
   }
+  baselineRMS = sqrt((float)energy / windowSize);
 
-  micBaseline = sum / 300.0;
-
-  Serial.print("Mic baseline: ");
+  Serial.print("Mic DC baseline: ");
   Serial.println(micBaseline);
+  Serial.print("Mic RMS noise floor: ");
+  Serial.println(baselineRMS);
+
+  Serial.println("SYSTEM READY");
 }
 
 // =====================
-// MIC READ
-// =====================
-float readMic()
-{
-  long sum = 0;
-
-  for (int i = 0; i < 24; i++)
-  {
-    sum += analogRead(micPin);
-    delayMicroseconds(100);
-  }
-
-  return sum / 24.0;
-}
-
-// =====================
-// MOTION READ (STABLE)
+// MOTION READ
 // =====================
 float readMotion()
 {
@@ -96,14 +118,35 @@ float readMotion()
   float az_g = az / 16384.0;
 
   float mag = sqrt(ax_g * ax_g + ay_g * ay_g + az_g * az_g);
+  return abs(mag - 1.0) * 100.0;
+}
 
-  float diff = abs(mag - 1.0);
+// =====================
+// SLEEPING POSITION
+// =====================
+String getSleepPosition()
+{
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
 
-  // DEADZONE (VERY IMPORTANT)
-  if (diff < 0.02)
-    diff = 0;
+  float ax_g = ax / 16384.0;
+  float ay_g = ay / 16384.0;
+  float az_g = az / 16384.0;
 
-  return diff * 60.0;
+  if (az_g > 0.8)
+    return "FACE UP (supine)";
+  if (az_g < -0.8)
+    return "FACE DOWN (prone)";
+  if (ax_g > 0.8)
+    return "LEFT SIDE";
+  if (ax_g < -0.8)
+    return "RIGHT SIDE";
+  if (ay_g > 0.8)
+    return "HEAD DOWN";
+  if (ay_g < -0.8)
+    return "HEAD UP";
+
+  return "TRANSITIONING";
 }
 
 // =====================
@@ -111,98 +154,37 @@ float readMotion()
 // =====================
 void setLED(uint8_t r, uint8_t g, uint8_t b)
 {
-  uint8_t scaledR = (uint8_t)((r * ledBrightnessPercent) / 100);
-  uint8_t scaledG = (uint8_t)((g * ledBrightnessPercent) / 100);
-  uint8_t scaledB = (uint8_t)((b * ledBrightnessPercent) / 100);
-
   for (int i = 0; i < NUM_LEDS * 2; i++)
   {
-    strip.setPixelColor(i, strip.Color(scaledR, scaledG, scaledB));
+    strip.setPixelColor(i, strip.Color(r, g, b));
   }
   strip.show();
 }
 
-void readLedCommands()
+// =====================
+// FLASH
+// =====================
+void flashTwice(int brightnessPercent)
 {
-  while (Serial.available() > 0)
+  int brightnessValue = map(brightnessPercent, 0, 100, 0, 255);
+  strip.setBrightness(brightnessValue);
+
+  Serial.print("[FLASH] Level: ");
+  Serial.print(brightnessPercent);
+  Serial.println("%");
+
+  for (int i = 0; i < 2; i++)
   {
-    String line = Serial.readStringUntil('\n');
-    line.trim();
-
-    if (line.startsWith("LED:"))
-    {
-      int parsed = line.substring(4).toInt();
-      ledBrightnessPercent = constrain(parsed, 0, 100);
-
-      Serial.print("{\"status\":\"led\",\"brightness\":");
-      Serial.print(ledBrightnessPercent);
-      Serial.println("}");
-      continue;
-    }
-
-    if (line.startsWith("BLINK:"))
-    {
-      int parsed = line.substring(6).toInt();
-      wakeBlinkIntervalMs = constrain(parsed, 100, 1500);
-
-      Serial.print("{\"status\":\"blink\",\"speed\":");
-      Serial.print(wakeBlinkIntervalMs);
-      Serial.println("}");
-      continue;
-    }
-
-    if (line.startsWith("WAKE:"))
-    {
-      int parsed = line.substring(5).toInt();
-      wakeAlertActive = parsed > 0;
-      wakeBlinkOn = true;
-      wakeBlinkLastToggle = millis();
-
-      Serial.print("{\"status\":\"wake\",\"active\":");
-      Serial.print(wakeAlertActive ? 1 : 0);
-      Serial.println("}");
-      continue;
-    }
-
-    if (!line.startsWith("MODE:"))
-    {
-      continue;
-    }
-
-    String mode = line.substring(5);
-    mode.trim();
-    mode.toUpperCase();
-    if (mode != "STATIC" && mode != "AUTO")
-    {
-      mode = "STATIC";
-    }
-
-    ledMode = mode;
-    Serial.print("{\"status\":\"mode\",\"value\":\"");
-    Serial.print(ledMode);
-    Serial.println("\"}");
+    setLED(255, 255, 255);
+    Serial.println("[FLASH] ON");
+    delay(200);
+    setLED(0, 0, 0);
+    Serial.println("[FLASH] OFF");
+    delay(200);
   }
-}
 
-// =====================
-// SETUP
-// =====================
-void setup()
-{
-  Serial.begin(115200);
-  delay(2000);
-
-  Wire.begin();
-  Wire.setClock(400000);
-
-  mpu.initialize();
-
-  strip.begin();
-  strip.show();
-
-  calibrateMic();
-
-  Serial.println("SLEEP MASK STABLE MODE READY");
+  Serial.println("[SYSTEM] PAUSING 5 SECONDS...");
+  delay(5000);
 }
 
 // =====================
@@ -210,108 +192,147 @@ void setup()
 // =====================
 void loop()
 {
-  readLedCommands();
 
-  if (millis() - lastUpdate < 1000)
-    return;
-  lastUpdate = millis();
-
-  // =====================
-  // RAW INPUT
-  // =====================
-  float micRaw = readMic();
-  float motionRaw = readMotion();
-
-  // =====================
-  // MIC FILTER
-  // =====================
-  micFiltered = micAlpha * micRaw + (1 - micAlpha) * micFiltered;
-
-  // =====================
-  // STABLE BASELINE (VERY SLOW)
-  // =====================
-  micBaseline = micBaseline + baselineAlpha * (micFiltered - micBaseline);
-
-  float micSignal = micFiltered - micBaseline;
-
-  if (micSignal < 0)
-    micSignal = 0;
-
-  // =====================
-  // ENVELOPE (STABLE SLEEP DETECTION CORE)
-  // =====================
-  micEnvelope = envelopeAlpha * micSignal + (1 - envelopeAlpha) * micEnvelope;
-
-  // HARD NOISE CUT
-  if (micEnvelope < 1.5)
-    micEnvelope = 0;
-
-  // =====================
-  // SNORE SCALING (NO CLIPPING SPIKES)
-  // =====================
-  float snoreLevel = micEnvelope * 5.0;
-  snoreLevel = sqrt(snoreLevel) * 20.0;
-  snoreLevel = constrain(snoreLevel, 0, 100);
-
-  // =====================
-  // MOTION FILTER
-  // =====================
-  motionFiltered = motionAlpha * motionRaw + (1 - motionAlpha) * motionFiltered;
-
-  float movementLevel = constrain(motionFiltered, 0, 100);
-
-  // =====================
-  // OUTPUT
-  // =====================
-  Serial.print("{\"snoreLevel\":");
-  Serial.print(snoreLevel, 1);
-  Serial.print(",\"movement\":");
-  Serial.print(movementLevel, 1);
-  Serial.println(",\"battery\":90}");
-
-  // =====================
-  // STATE LOGIC
-  // =====================
-  bool lowMotion = movementLevel < 6;
-  bool noise = snoreLevel > 12;
-
-  if (wakeAlertActive)
+  // ======================
+  // FAST MIC SAMPLING (50ms)
+  // ======================
+  if (millis() - lastMicCheck >= micInterval)
   {
-    unsigned long now = millis();
-    if (now - wakeBlinkLastToggle >= (unsigned long)wakeBlinkIntervalMs)
+    lastMicCheck = millis();
+
+    int val = analogRead(micPin);
+    samples[sampleIndex] = val;
+    sampleIndex = (sampleIndex + 1) % windowSize;
+    if (sampleIndex == 0)
+      windowFull = true;
+  }
+
+  // ======================
+  // 1 SECOND ALERT CYCLE
+  // ======================
+  if (millis() - lastAlertCheck >= 1000)
+  {
+    lastAlertCheck = millis();
+
+    int count = windowFull ? windowSize : sampleIndex;
+    if (count == 0)
+      return;
+
+    // Compute mean
+    long sum = 0;
+    for (int i = 0; i < count; i++)
+      sum += samples[i];
+    int avg = sum / count;
+
+    // Compute RMS
+    long energy = 0;
+    for (int i = 0; i < count; i++)
     {
-      wakeBlinkOn = !wakeBlinkOn;
-      wakeBlinkLastToggle = now;
+      int diff = samples[i] - avg;
+      energy += diff * diff;
+    }
+    float rms = sqrt((float)energy / count);
+
+    // Scale to level
+    float normalized = rms - baselineRMS;
+    if (normalized < 0)
+      normalized = 0;
+
+    float snoreLevel = (normalized / 50.0f) * 100.0f; // <-- TUNE THIS
+    if (snoreLevel > 100.0f)
+      snoreLevel = 100.0f;
+
+    Serial.print("[MIC] RMS: ");
+    Serial.print(rms);
+    Serial.print("  Level: ");
+    Serial.println(snoreLevel);
+
+    // ======================
+    // MOTION UPDATE
+    // ======================
+    float motion = readMotion();
+    smoothMotion = motionAlpha * motion + (1 - motionAlpha) * smoothMotion;
+
+    // ======================
+    // GYRO READ
+    // ======================
+    int16_t gx, gy, gz;
+    mpu.getRotation(&gx, &gy, &gz);
+    Serial.print("[GYRO] X: ");
+    Serial.print(gx);
+    Serial.print("  Y: ");
+    Serial.print(gy);
+    Serial.print("  Z: ");
+    Serial.println(gz);
+
+    Serial.print("[MOTION] Smooth: ");
+    Serial.println(smoothMotion);
+
+    // ======================
+    // SLEEPING POSITION
+    // ======================
+    String currentPosition = getSleepPosition();
+    Serial.print("[POSITION] ");
+    Serial.println(currentPosition);
+
+    // ======================
+    // SEND JSON TO PYTHON BRIDGE
+    // ======================
+    String jsonPayload = "{\"snoreLevel\":" + String(snoreLevel, 1) +
+                         ",\"motion\":" + String(smoothMotion, 1) +
+                         ",\"position\":\"" + currentPosition + "\"" +
+                         ",\"alertActive\":" + String(alertActive ? "true" : "false") +
+                         "}";
+    Serial.println(jsonPayload);
+
+    // ======================
+    // TRIGGER
+    // ======================
+    if (!alertActive && snoreLevel > 9)
+    { // <-- TUNE THIS
+      alertActive = true;
+      baselineMotion = smoothMotion;
+      baselinePosition = currentPosition;
+      flashBrightness = 20;
+      flashTwice(flashBrightness);
     }
 
-    if (wakeBlinkOn)
+    // ======================
+    // ALERT MODE
+    // ======================
+    if (alertActive)
     {
-      setLED(255, 255, 255);
+      bool positionChanged = (currentPosition != baselinePosition) &&
+                             (currentPosition != "TRANSITIONING");
+
+      if (positionChanged)
+      {
+        alertActive = false;
+        smoothMotion = 0;
+        flashBrightness = 20;
+        baselinePosition = "";
+        setLED(0, 0, 0);
+        strip.setBrightness(0);
+        Serial.print("[SYSTEM] POSITION CHANGED TO: ");
+        Serial.println(currentPosition);
+        Serial.println("[SYSTEM] USER MOVED - RESET");
+      }
+      else
+      {
+        flashBrightness += 20;
+        if (flashBrightness > 100)
+          flashBrightness = 100;
+        flashTwice(flashBrightness);
+      }
     }
-    else
+
+    // ======================
+    // IDLE
+    // ======================
+    if (!alertActive && snoreLevel <= 9)
     {
       setLED(0, 0, 0);
+      strip.setBrightness(0);
     }
-
-    return;
-  }
-
-  if (ledMode == "STATIC")
-  {
-    setLED(40, 80, 255);
-    return;
-  }
-
-  if (lowMotion && !noise)
-  {
-    setLED(255, 255, 0); // deep sleep
-  }
-  else if (lowMotion || noise)
-  {
-    setLED(80, 80, 0); // light sleep
-  }
-  else
-  {
-    setLED(0, 0, 0); // awake
   }
 }

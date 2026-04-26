@@ -1,5 +1,7 @@
 {
-    "movement": 10,
-    "snoreLevel": 28,
-    "battery": 90
+    "movement": 0,
+    "snoreLevel": 26,
+    "battery": 0,
+    "heartRate": null,
+    "timestamp": "2026-04-24 07:49:04"
 }

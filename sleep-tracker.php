@@ -65,9 +65,9 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                     <span class="sleep-dial-label label-6am">6 AM</span>
                                     <span class="sleep-dial-label label-12pm">12 PM</span>
                                     <span class="sleep-dial-label label-6pm">6 PM</span>
-                                    <span class="sleep-dial-total" aria-live="polite">
-                                        <span class="sleep-dial-total-top"><strong data-display="sleep-hours-number">05</strong><span class="sleep-dial-total-unit">hr</span></span>
-                                        <span class="sleep-dial-total-minutes" data-display="sleep-minutes-number">30 min</span>
+                                    <span class="sleep-dial-clock" aria-live="polite">
+                                        <strong class="sleep-dial-clock-time" data-display="current-time">10:30</strong>
+                                        <span class="sleep-dial-clock-period" data-display="current-period">PM</span>
                                     </span>
                                     <span class="sleep-dial-no-alarm" aria-live="polite">
                                         <strong>No alarm</strong>
@@ -78,7 +78,20 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                 <p class="sleep-total-hours mt-3 mb-0">Total sleep: <strong data-display="total-sleep">5 h</strong></p>
 
                                 <div class="sleep-times">
-                                    <div class="sleep-time-row sleep-time-pill sleep-time-row-bedtime">
+                                    <div class="sleep-times-close-wrap" id="sleepTimesCloseWrap" hidden>
+                                        <button type="button" class="sleep-times-close-btn" id="sleepTimesCloseBtn" aria-label="Hide sleep schedule cards">
+                                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="sleep-times-launch" id="sleepTimesLaunchWrap">
+                                        <button type="button" class="sleep-times-add-btn" id="sleepTimesAddBtn" aria-label="Add sleep schedule cards">
+                                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                                            <span>Add</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="sleep-time-row sleep-time-pill sleep-time-row-bedtime" id="bedtimeCard" hidden>
                                         <span class="sleep-time-pill-dot" aria-hidden="true"><i class="bi bi-moon-stars-fill"></i></span>
                                         <span class="sleep-time-name">Bedtime</span>
                                         <span class="sleep-time-value"><span class="sleep-time-text" data-display="bedtime">12:20 AM</span></span>
@@ -107,13 +120,14 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                             </div>
                                         </div>
                                         <input id="bedtimeInput" name="bedtime" class="sleep-time-input-hidden" type="time" value="00:20">
+                                        <p class="sleep-inline-warning" data-sleep-warning="bedtime" hidden>Alarm must be later than bedtime (minimum 1 minute).</p>
                                         <div class="sleep-edit-actions">
                                             <button type="button" class="sleep-edit-cancel" data-cancel="bedtime">Cancel</button>
                                             <button type="submit" class="sleep-edit-save">Save</button>
                                         </div>
                                     </form>
 
-                                    <div class="sleep-time-row sleep-time-pill sleep-time-row-alarm">
+                                    <div class="sleep-time-row sleep-time-pill sleep-time-row-alarm" id="alarmCard" hidden>
                                         <span class="sleep-time-pill-dot" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
                                         <span class="sleep-time-name">Alarm</span>
                                         <span class="sleep-time-value"><span class="sleep-time-text" data-display="alarm">05:20 AM</span></span>
@@ -142,6 +156,7 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                             </div>
                                         </div>
                                         <input id="alarmEndInput" name="alarmEnd" class="sleep-time-input-hidden" type="time" value="05:20">
+                                        <p class="sleep-inline-warning" data-sleep-warning="alarm" hidden>Alarm must be later than bedtime (minimum 1 minute).</p>
 
                                         <div class="sleep-settings-section">
                                             <div class="sleep-setting-row">
@@ -361,12 +376,37 @@ include __DIR__ . '/includes/bootstrap-head.php';
                                             </div>
                                         </div>
 
-                                        <div class="sleep-edit-actions">
+                                        <div class="sleep-edit-actions" id="alarmActionControls" hidden>
                                             <button type="button" class="sleep-edit-cancel" data-cancel="alarm">Cancel</button>
-                                            <button type="submit" class="sleep-edit-save">Save</button>
+                                            <button type="button" class="sleep-edit-delete" id="alarmDeleteBtn" aria-label="Delete alarm">
+                                                <i class="bi bi-trash3-fill" aria-hidden="true"></i>
+                                            </button>
+                                            <button type="submit" class="sleep-edit-save">Set Alarm</button>
                                         </div>
                                     </form>
                                 </div>
+
+                                <section class="sleep-schedule-card" aria-labelledby="sleepScheduleTitle" aria-live="polite">
+                                    <div class="sleep-schedule-head">
+                                        <h2 id="sleepScheduleTitle">Time Schedule</h2>
+                                        <span class="sleep-schedule-note">Today</span>
+                                    </div>
+                                    <div class="sleep-schedule-grid">
+                                        <div class="sleep-schedule-item">
+                                            <span>Bedtime</span>
+                                            <strong data-display="schedule-bedtime">12:20 AM</strong>
+                                        </div>
+                                        <div class="sleep-schedule-item">
+                                            <span>Alarm</span>
+                                            <strong data-display="schedule-alarm">05:20 AM</strong>
+                                        </div>
+                                        <div class="sleep-schedule-item">
+                                            <span>Duration</span>
+                                            <strong data-display="schedule-duration">5 h</strong>
+                                        </div>
+                                    </div>
+                                    <div class="sleep-schedule-list" id="sleepScheduleList" hidden></div>
+                                </section>
 
                             </article>
                         </div>
